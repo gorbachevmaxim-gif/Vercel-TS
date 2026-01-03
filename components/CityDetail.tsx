@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CityAnalysisResult, WeatherDayStats } from '../types';
+import { CITIES } from '../constants';
 
 interface CityDetailProps {
   data: CityAnalysisResult;
@@ -69,8 +70,15 @@ const WeatherCard: React.FC<{ stats: WeatherDayStats | null }> = ({ stats }) => 
                 </div>
             )}
             
+            {/* Short morning ride annotation (only if not fully dry, but morning is fine) */}
+            {!stats.isDry && stats.isMorningRideSuitable && (
+                 <div className="bg-slate-50 border-t border-slate-100 p-3 text-xs text-slate-600 text-center font-medium">
+                    Небольшой райд до дождя
+                 </div>
+            )}
+            
             {stats.clothingHints.length === 0 && parseInt(stats.tempRange.split('..')[0]) < 5 && (
-                 <div className="bg-slate-50 border-t border-slate-100 p-3 text-xs text-slate-400 text-center italic">
+                 <div className="bg-slate-50 border-t border-slate-100 p-3 text-xs text-slate-600 text-center font-medium">
                     Слишком холодно для комфортного заезда (&lt; 5°C)
                  </div>
             )}
@@ -80,6 +88,16 @@ const WeatherCard: React.FC<{ stats: WeatherDayStats | null }> = ({ stats }) => 
 
 const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClose }) => {
   const [activeTab, setActiveTab] = useState<'w1' | 'w2'>(initialTab);
+  
+  const cityCoords = CITIES[data.cityName];
+
+  // Calculate bounding box for OpenStreetMap
+  // roughly +/- 0.05 degrees lat/lon for city view
+  const deltaLat = 0.04;
+  const deltaLon = 0.08;
+  const bbox = cityCoords 
+    ? `${cityCoords.lon - deltaLon},${cityCoords.lat - deltaLat},${cityCoords.lon + deltaLon},${cityCoords.lat + deltaLat}`
+    : '';
 
   return (
     <div className="space-y-4">
@@ -111,6 +129,43 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
       <div className="space-y-6">
           <WeatherCard stats={activeTab === 'w1' ? data.weekend1.saturday : data.weekend2.saturday} />
           <WeatherCard stats={activeTab === 'w1' ? data.weekend1.sunday : data.weekend2.sunday} />
+          
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+            <h3 className="text-lg font-bold text-slate-800 mb-4">
+                Карта местности
+            </h3>
+            
+            {cityCoords ? (
+                <div className="relative w-full h-[350px] bg-slate-100 rounded-lg overflow-hidden border border-slate-100">
+                    <iframe 
+                        width="100%" 
+                        height="100%" 
+                        frameBorder="0" 
+                        scrolling="no" 
+                        marginHeight={0} 
+                        marginWidth={0} 
+                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${cityCoords.lat},${cityCoords.lon}`} 
+                        className="w-full h-full"
+                        title="OSM Map"
+                    ></iframe>
+                </div>
+            ) : (
+                <div className="text-center p-6 bg-slate-50 rounded-lg border border-slate-100 text-slate-500 text-sm mb-2">
+                    Координаты города не найдены
+                </div>
+            )}
+            
+            <div className="mt-4 flex justify-center">
+                <a 
+                    href="https://www.komoot.com/collection/2674102/-lechappe-belle?ref=collection" 
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center w-full sm:w-auto text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl transition-colors shadow-sm"
+                >
+                    Маршруты Gastrodinamica
+                </a>
+            </div>
+          </div>
       </div>
     </div>
   );

@@ -99,36 +99,43 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, weekendLabel, isSecondW
         </div>
       </div>
 
-      {/* Sun Ranking - Horizontal Scroll on Mobile */}
+      {/* Sun Ranking - Horizontal Scroll on Mobile with fixed label */}
       <div className="pt-2">
         <div className="text-xs font-semibold uppercase tracking-wider text-amber-600 mb-3">☀️ Самые солнечные (09:00 - 18:00)</div>
         
         <div className="space-y-3">
-            <div className="flex items-start gap-2 overflow-x-auto no-scrollbar pb-1">
-                <span className="shrink-0 text-sm font-bold text-slate-400 w-8 pt-2">Сб:</span>
-                {topSat.length ? topSat.map((item, i) => (
-                    <button 
-                        key={i} 
-                        onClick={() => onCityClick(item.name)}
-                        className="shrink-0 flex items-center bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100 hover:bg-amber-100 hover:border-amber-300 active:scale-95 transition-all touch-manipulation"
-                    >
-                        <span className="text-sm font-medium text-slate-800 mr-1">{item.name}</span>
-                        <span className="text-xs text-amber-600 font-bold">{item.str}</span>
-                    </button>
-                )) : <span className="text-sm text-slate-400 pt-1">Нет солнца</span>}
+            {/* Saturday Row */}
+            <div className="flex items-center gap-2">
+                <span className="shrink-0 text-sm font-bold text-slate-400 w-8">Сб:</span>
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 flex-1">
+                    {topSat.length ? topSat.map((item, i) => (
+                        <button 
+                            key={i} 
+                            onClick={() => onCityClick(item.name)}
+                            className="shrink-0 flex items-center bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100 hover:bg-amber-100 hover:border-amber-300 active:scale-95 transition-all touch-manipulation"
+                        >
+                            <span className="text-sm font-medium text-slate-800 mr-1">{item.name}</span>
+                            <span className="text-xs text-amber-600 font-bold">{item.str}</span>
+                        </button>
+                    )) : <span className="text-sm text-slate-400 pt-1">Нет солнца</span>}
+                </div>
             </div>
-            <div className="flex items-start gap-2 overflow-x-auto no-scrollbar pb-1">
-                <span className="shrink-0 text-sm font-bold text-slate-400 w-8 pt-2">Вс:</span>
-                {topSun.length ? topSun.map((item, i) => (
-                    <button 
-                        key={i} 
-                        onClick={() => onCityClick(item.name)}
-                        className="shrink-0 flex items-center bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100 hover:bg-amber-100 hover:border-amber-300 active:scale-95 transition-all touch-manipulation"
-                    >
-                        <span className="text-sm font-medium text-slate-800 mr-1">{item.name}</span>
-                        <span className="text-xs text-amber-600 font-bold">{item.str}</span>
-                    </button>
-                )) : <span className="text-sm text-slate-400 pt-1">Нет солнца</span>}
+
+            {/* Sunday Row */}
+            <div className="flex items-center gap-2">
+                <span className="shrink-0 text-sm font-bold text-slate-400 w-8">Вс:</span>
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 flex-1">
+                    {topSun.length ? topSun.map((item, i) => (
+                        <button 
+                            key={i} 
+                            onClick={() => onCityClick(item.name)}
+                            className="shrink-0 flex items-center bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100 hover:bg-amber-100 hover:border-amber-300 active:scale-95 transition-all touch-manipulation"
+                        >
+                            <span className="text-sm font-medium text-slate-800 mr-1">{item.name}</span>
+                            <span className="text-xs text-amber-600 font-bold">{item.str}</span>
+                        </button>
+                    )) : <span className="text-sm text-slate-400 pt-1">Нет солнца</span>}
+                </div>
             </div>
         </div>
       </div>

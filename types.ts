@@ -12,6 +12,7 @@ export interface WeatherDayStats {
   dateStr: string;
   dayName: string;
   isDry: boolean;
+  isMorningRideSuitable: boolean;
   precipSum: number;
   rainHours: string | null;
   tempRange: string;

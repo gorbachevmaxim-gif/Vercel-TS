@@ -76,16 +76,21 @@ function getClothingRecommendations(
     temps11_18: number[],
     temps09_12: number[],
     temps12_18: number[],
-    cityName: string
+    cityName: string,
+    isMorningRideSuitable: boolean
 ): string[] {
     const hints: string[] = [];
     const isMountain = MOUNTAIN_CITIES.includes(cityName);
 
-    // 1. Temperature Check: Do not recommend if min temp < 5 during active hours
-    if (tMin < 5) return [];
+    // 1. Temperature Check: 
+    // Previously blocked if tMin < 5. 
+    // Now we allow if tMax >= 5. Even if it starts at 3-4 degrees, if it warms up, we can ride.
+    if (tMax < 5) return [];
 
-    // 2. Precipitation Check: Do not recommend if rain > 0.5mm during active hours (09:00 - 18:00)
-    if (activeRainSum > 0.5) return [];
+    // 2. Precipitation Check: 
+    // Do not recommend if rain > 0.5mm during active hours (09:00 - 18:00), 
+    // UNLESS it's a suitable morning ride (dry 09-12).
+    if (activeRainSum > 0.5 && !isMorningRideSuitable) return [];
 
     // Check Arm Warmers condition early (Temp rises from <16 to >19)
     let useArmWarmers = false;
@@ -235,7 +240,7 @@ export async function analyzeCity(
 
             // Active hours indices (09:00 - 18:00)
             const actStart = sIdx + 9;
-            const actEnd = sIdx + 19;
+            const actEnd = sIdx + 18; 
 
             const sunSlice = hourly.sunshine_duration.slice(actStart, actEnd) as number[];
             const sunVal = sunSlice.reduce((a, b) => a + (b || 0), 0);
@@ -245,9 +250,14 @@ export async function analyzeCity(
             const windSlice = hourly.wind_speed_10m.slice(actStart, actEnd) as number[];
             const windDirSlice = hourly.wind_direction_10m.slice(actStart, actEnd) as number[];
             
-            // Calculate Rain during Active Hours (09:00 - 18:00) for Clothing Logic
+            // Calculate Rain during Active Hours (09:00 - 18:00)
             const pActiveSlice = hourly.precipitation.slice(actStart, actEnd) as number[];
             const activeRainSum = pActiveSlice.reduce((a, b) => a + (b || 0), 0);
+
+            // Calculate Rain during Morning Hours (09:00 - 12:00)
+            const pMorningSlice = hourly.precipitation.slice(sIdx + 9, sIdx + 12) as number[];
+            const morningRainSum = pMorningSlice.reduce((a, b) => a + (b || 0), 0);
+            const isMorningRideSuitable = morningRainSum <= 0.1;
 
             const tMin = tempSlice.length ? Math.min(...tempSlice) : 0;
             const tMax = tempSlice.length ? Math.max(...tempSlice) : 0;
@@ -271,14 +281,16 @@ export async function analyzeCity(
             const clothingHints = getClothingRecommendations(
                 tMin, tMax, wMax, activeRainSum,
                 temps09_11, temps11_18, temps09_12, temps12_18,
-                cityName
+                cityName,
+                isMorningRideSuitable
             );
 
             const dayStats: WeatherDayStats = {
                 dateObj: targetDate,
                 dateStr: tStr,
                 dayName: targetDate.getDay() === 6 ? "Суббота" : "Воскресенье",
-                isDry: totalRain <= 0.2,
+                isDry: activeRainSum <= 0.5, // Dry if active hours (09-18) have <= 0.5mm rain
+                isMorningRideSuitable: isMorningRideSuitable,
                 precipSum: totalRain,
                 rainHours: formatRainHours(wetHours),
                 tempRange: `${Math.round(tMin)}..${Math.round(tMax)}`,

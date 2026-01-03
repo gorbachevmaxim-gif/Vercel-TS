@@ -72,7 +72,10 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-10">
       {/* Header */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-10 px-4 py-3 shadow-sm">
-        <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+        <h1 
+            onClick={() => setSelectedCity(null)}
+            className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent cursor-pointer"
+        >
             Выбор места для райда (сб, вс)
         </h1>
         <p className="text-xs text-slate-500">Поиск идеальной погоды без осадков</p>

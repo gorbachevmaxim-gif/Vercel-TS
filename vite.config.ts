@@ -4,8 +4,9 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: './', // Critical for correct asset loading on static hosts
   server: {
-    host: true, // Listen on all addresses, allowing access from mobile on LAN
+    host: true, // Listen on all addresses
     port: 5173,
   }
 })

@@ -33,4 +33,11 @@ export const CITIES: CityMap = {
     "Стамбул": { lat: 41.01, lon: 28.97 }
 };
 
+// Map City Name -> Komoot Tour ID
+// You can find the ID in the URL of the planned route: https://www.komoot.com/tour/{ID}
+export const KOMOOT_ROUTE_IDS: Record<string, string> = {
+    // Пример заполнения:
+    // "Коломна": "123456789",
+};
+
 export const API_URL = "https://api.open-meteo.com/v1/forecast";
