@@ -10,6 +10,7 @@ const App: React.FC = () => {
   const [data, setData] = useState<CityAnalysisResult[]>([]);
   const [loading, setLoading] = useState<LoadingState>({ total: 0, current: 0, status: 'Starting...' });
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const [initialTab, setInitialTab] = useState<'w1' | 'w2'>('w1');
   
   // Date Logic
   const dates = useMemo(() => getWeekendDates(), []);
@@ -57,6 +58,11 @@ const App: React.FC = () => {
       return data.find(c => c.cityName === selectedCity) || null;
   }, [data, selectedCity]);
 
+  const handleCitySelect = (city: string, tab: 'w1' | 'w2') => {
+      setInitialTab(tab);
+      setSelectedCity(city);
+  };
+
   // Handle Main View
   if (loading.total > 0 && loading.current < loading.total) {
       return <LoadingScreen state={loading} />;
@@ -67,7 +73,7 @@ const App: React.FC = () => {
       {/* Header */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-10 px-4 py-3 shadow-sm">
         <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            Выходные ЦФО
+            Выбор места для райда (сб, вс)
         </h1>
         <p className="text-xs text-slate-500">Поиск идеальной погоды без осадков</p>
       </div>
@@ -86,8 +92,17 @@ const App: React.FC = () => {
                 </div>
 
                 {/* Summaries */}
-                <SummaryView data={data} weekendLabel="Ближайшие выходные" />
-                <SummaryView data={data} weekendLabel="Через неделю" isSecondWeekend={true} />
+                <SummaryView 
+                    data={data} 
+                    weekendLabel="Ближайшие выходные" 
+                    onCityClick={(city) => handleCitySelect(city, 'w1')} 
+                />
+                <SummaryView 
+                    data={data} 
+                    weekendLabel="Через неделю" 
+                    isSecondWeekend={true} 
+                    onCityClick={(city) => handleCitySelect(city, 'w2')} 
+                />
                 
                 {/* City Picker */}
                 <div className="pt-4">
@@ -96,7 +111,7 @@ const App: React.FC = () => {
                        {data.map(city => (
                            <button 
                              key={city.cityName}
-                             onClick={() => setSelectedCity(city.cityName)}
+                             onClick={() => handleCitySelect(city.cityName, 'w1')}
                              className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:border-blue-500 hover:text-blue-600 active:bg-blue-50 transition-colors text-left"
                            >
                                {city.cityName}
@@ -109,6 +124,7 @@ const App: React.FC = () => {
             selectedData && (
                 <CityDetail 
                     data={selectedData} 
+                    initialTab={initialTab}
                     onClose={() => setSelectedCity(null)} 
                 />
             )

@@ -5,9 +5,10 @@ interface SummaryViewProps {
   data: CityAnalysisResult[];
   weekendLabel: string;
   isSecondWeekend?: boolean;
+  onCityClick: (city: string) => void;
 }
 
-const SummaryView: React.FC<SummaryViewProps> = ({ data, weekendLabel, isSecondWeekend = false }) => {
+const SummaryView: React.FC<SummaryViewProps> = ({ data, weekendLabel, isSecondWeekend = false, onCityClick }) => {
   // Filter logic
   const getDry = (city: CityAnalysisResult) => {
     const w = isSecondWeekend ? city.weekend2 : city.weekend1;
@@ -50,7 +51,15 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, weekendLabel, isSecondW
           <div className="text-xs font-semibold uppercase tracking-wider text-green-700 mb-2">Весь уикенд</div>
           {fullWeekend.length > 0 ? (
              <div className="flex flex-wrap gap-2">
-                 {fullWeekend.map(c => <span key={c} className="px-2 py-1 bg-white rounded shadow-sm text-sm font-medium text-slate-700">{c}</span>)}
+                 {fullWeekend.map(c => (
+                     <button 
+                        key={c} 
+                        onClick={() => onCityClick(c)}
+                        className="px-3 py-1.5 bg-white rounded-lg shadow-sm text-sm font-medium text-slate-700 hover:text-blue-600 hover:shadow-md active:scale-95 transition-all touch-manipulation"
+                     >
+                        {c}
+                     </button>
+                 ))}
              </div>
           ) : <span className="text-sm text-slate-400 italic">Нет городов</span>}
         </div>
@@ -59,7 +68,15 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, weekendLabel, isSecondW
           <div className="text-xs font-semibold uppercase tracking-wider text-blue-700 mb-2">Только Суббота</div>
           {onlySat.length > 0 ? (
              <div className="flex flex-wrap gap-2">
-                 {onlySat.map(c => <span key={c} className="px-2 py-1 bg-white rounded shadow-sm text-sm font-medium text-slate-700">{c}</span>)}
+                 {onlySat.map(c => (
+                     <button 
+                        key={c} 
+                        onClick={() => onCityClick(c)}
+                        className="px-3 py-1.5 bg-white rounded-lg shadow-sm text-sm font-medium text-slate-700 hover:text-blue-600 hover:shadow-md active:scale-95 transition-all touch-manipulation"
+                     >
+                        {c}
+                     </button>
+                 ))}
              </div>
           ) : <span className="text-sm text-slate-400 italic">Пусто</span>}
         </div>
@@ -68,7 +85,15 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, weekendLabel, isSecondW
           <div className="text-xs font-semibold uppercase tracking-wider text-indigo-700 mb-2">Только Воскресенье</div>
           {onlySun.length > 0 ? (
              <div className="flex flex-wrap gap-2">
-                 {onlySun.map(c => <span key={c} className="px-2 py-1 bg-white rounded shadow-sm text-sm font-medium text-slate-700">{c}</span>)}
+                 {onlySun.map(c => (
+                     <button 
+                        key={c} 
+                        onClick={() => onCityClick(c)}
+                        className="px-3 py-1.5 bg-white rounded-lg shadow-sm text-sm font-medium text-slate-700 hover:text-blue-600 hover:shadow-md active:scale-95 transition-all touch-manipulation"
+                     >
+                        {c}
+                     </button>
+                 ))}
              </div>
           ) : <span className="text-sm text-slate-400 italic">Пусто</span>}
         </div>
@@ -80,22 +105,30 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, weekendLabel, isSecondW
         
         <div className="space-y-3">
             <div className="flex items-start gap-2 overflow-x-auto no-scrollbar pb-1">
-                <span className="shrink-0 text-sm font-bold text-slate-400 w-8">Сб:</span>
+                <span className="shrink-0 text-sm font-bold text-slate-400 w-8 pt-2">Сб:</span>
                 {topSat.length ? topSat.map((item, i) => (
-                    <div key={i} className="shrink-0 flex items-center bg-amber-50 px-2 py-1 rounded border border-amber-100">
+                    <button 
+                        key={i} 
+                        onClick={() => onCityClick(item.name)}
+                        className="shrink-0 flex items-center bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100 hover:bg-amber-100 hover:border-amber-300 active:scale-95 transition-all touch-manipulation"
+                    >
                         <span className="text-sm font-medium text-slate-800 mr-1">{item.name}</span>
                         <span className="text-xs text-amber-600 font-bold">{item.str}</span>
-                    </div>
-                )) : <span className="text-sm text-slate-400">Нет солнца</span>}
+                    </button>
+                )) : <span className="text-sm text-slate-400 pt-1">Нет солнца</span>}
             </div>
             <div className="flex items-start gap-2 overflow-x-auto no-scrollbar pb-1">
-                <span className="shrink-0 text-sm font-bold text-slate-400 w-8">Вс:</span>
+                <span className="shrink-0 text-sm font-bold text-slate-400 w-8 pt-2">Вс:</span>
                 {topSun.length ? topSun.map((item, i) => (
-                    <div key={i} className="shrink-0 flex items-center bg-amber-50 px-2 py-1 rounded border border-amber-100">
+                    <button 
+                        key={i} 
+                        onClick={() => onCityClick(item.name)}
+                        className="shrink-0 flex items-center bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100 hover:bg-amber-100 hover:border-amber-300 active:scale-95 transition-all touch-manipulation"
+                    >
                         <span className="text-sm font-medium text-slate-800 mr-1">{item.name}</span>
                         <span className="text-xs text-amber-600 font-bold">{item.str}</span>
-                    </div>
-                )) : <span className="text-sm text-slate-400">Нет солнца</span>}
+                    </button>
+                )) : <span className="text-sm text-slate-400 pt-1">Нет солнца</span>}
             </div>
         </div>
       </div>

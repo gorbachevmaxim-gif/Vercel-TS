@@ -1,7 +1,8 @@
 import { API_URL } from '../constants';
 import { CityCoordinates, CityAnalysisResult, WeatherDayStats } from '../types';
 
-// Helper: Get Compass Direction
+const MOUNTAIN_CITIES: string[] = [];
+
 function degToCompass(num: number | null): string {
     if (num === null) return "";
     const val = Math.floor((num / 22.5) + 0.5);
@@ -9,7 +10,6 @@ function degToCompass(num: number | null): string {
     return arr[(val % 8)];
 }
 
-// Helper: Format Seconds to Sun Time
 function formatSunTime(seconds: number): string {
     if (seconds <= 0) return "0 мин";
     const hours = Math.floor(seconds / 3600);
@@ -18,11 +18,9 @@ function formatSunTime(seconds: number): string {
     return `${minutes}мин`;
 }
 
-// Helper: Format Rain Hours (Group by consecutive hours)
 function formatRainHours(hours: number[]): string | null {
     if (!hours || hours.length === 0) return null;
     
-    // Sort just in case
     hours.sort((a, b) => a - b);
 
     const groups: number[][] = [];
@@ -41,7 +39,6 @@ function formatRainHours(hours: number[]): string | null {
     const parts = groups.map(g => {
         const start = g[0];
         const end = g[g.length - 1];
-        // Python code displayed end+1 for range readability
         if (start === end) return `${start.toString().padStart(2, '0')}:00`;
         return `${start.toString().padStart(2, '0')}:00–${(end + 1).toString().padStart(2, '0')}:00`;
     });
@@ -49,25 +46,16 @@ function formatRainHours(hours: number[]): string | null {
     return parts.join(", ");
 }
 
-// Helper: Calculate Target Dates
 export function getWeekendDates(): Date[] {
     const today = new Date();
-    const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon... 6=Sat
+    const dayOfWeek = today.getDay();
 
     let sat1: Date;
     
-    if (dayOfWeek === 6) { // It is Saturday
+    if (dayOfWeek === 6) { 
         sat1 = new Date(today);
     } else {
-        // JS getDay(): Sun=0, Mon=1...Sat=6
-        // If today is Sunday(0), days until Sat(6) is 6.
-        // If today is Friday(5), days until Sat(6) is 1.
-        // Formula: (6 - dayOfWeek + 7) % 7
-        // Correction: If today is Sunday (0), we usually look for *next* Saturday? 
-        // The python code: `days_until_sat = (5 - today.weekday() + 7) % 7` where Mon=0.
-        // Let's stick to standard logic: Next upcoming Saturday.
-        const daysUntilSat = (6 - dayOfWeek + 7) % 7 || 7; // If today is Sat, logic above might handle it, but usually we want next. Python code handled "If Sat, sat1=today".
-        
+        const daysUntilSat = (6 - dayOfWeek + 7) % 7 || 7;
         sat1 = new Date(today);
         sat1.setDate(today.getDate() + (dayOfWeek === 6 ? 0 : daysUntilSat));
     }
@@ -79,7 +67,121 @@ export function getWeekendDates(): Date[] {
     return [sat1, sun1, sat2, sun2];
 }
 
-// Core Analysis Function
+function getClothingRecommendations(
+    tMin: number,
+    tMax: number,
+    wMax: number,
+    activeRainSum: number,
+    temps09_11: number[],
+    temps11_18: number[],
+    temps09_12: number[],
+    temps12_18: number[],
+    cityName: string
+): string[] {
+    const hints: string[] = [];
+    const isMountain = MOUNTAIN_CITIES.includes(cityName);
+
+    // 1. Temperature Check: Do not recommend if min temp < 5 during active hours
+    if (tMin < 5) return [];
+
+    // 2. Precipitation Check: Do not recommend if rain > 0.5mm during active hours (09:00 - 18:00)
+    if (activeRainSum > 0.5) return [];
+
+    // Check Arm Warmers condition early (Temp rises from <16 to >19)
+    let useArmWarmers = false;
+    if (temps09_11.length && temps11_18.length) {
+        const minStart = Math.min(...temps09_11);
+        const maxEnd = Math.max(...temps11_18);
+        if (minStart < 16 && maxEnd > 19) {
+             useArmWarmers = true;
+        }
+    }
+
+    // --- НИЗ (Бибы) ---
+    // Если днем холодно (макс < 14), нужны длинные. Иначе - летние.
+    if (tMax < 14) {
+        hints.push("Длинные бибы");
+    } else {
+        hints.push("Летние бибы");
+    }
+
+    // Утепление для ног (Ногова)
+    // Если летние бибы, но еще не жара (14-19 градусов)
+    if (tMax >= 14 && tMax <= 19) {
+        hints.push("Ногова");
+    }
+    // Наколенники на переходный период
+    if (tMax > 19 && tMax <= 22) {
+        hints.push("Наколенники");
+    }
+
+    // --- ВЕРХ ---
+    let jersey = "";
+    if (tMax < 15) {
+        jersey = "Теплая джерси (лонгслив)";
+    } else if (tMax >= 15 && tMax <= 22) {
+        jersey = "Летний лонгслив";
+    } else {
+        jersey = "Летняя джерси"; // > 22
+    }
+
+    // If Arm Warmers are recommended, ensure we pair them with Summer Jersey, not Long Sleeve
+    if (useArmWarmers && jersey === "Летний лонгслив") {
+        jersey = "Летняя джерси";
+    }
+
+    // --- ВЕРХНЯЯ ОДЕЖДА (Ветровка / Жилетка) ---
+    let outerLayer = "";
+    
+    // Conditions to add an outer layer:
+    // 1. Cold start (<12)
+    // 2. Strong wind (>15)
+    // 3. Comfort range (10-20) where a vest is useful
+    const needsProtection = tMin < 12 || wMax > 15 || (tMax > 10 && tMax <= 20);
+
+    if (needsProtection) {
+        // "Ветровка рекомендуем при сильном ветре (>=15) или в городе, где рядом горы"
+        // "при ветре ниже 15 км/ч предпочтение отдаем только Жилетка"
+        if (wMax >= 15 || isMountain) {
+            outerLayer = "Ветровка";
+        } else {
+            // Calm and flat -> Vest
+            outerLayer = "Жилетка";
+        }
+    }
+
+    // --- JACKET OVERRIDE ---
+    // "Давай предлагать Куртка только в случае, если максимальная температура не превышает +8 градусов"
+    if (tMax <= 8) {
+        hints.push("Куртка");
+        // Jacket replaces Jersey and Outer Layer in very cold weather
+    } else {
+        if (jersey) hints.push(jersey);
+        if (outerLayer) hints.push(outerLayer);
+    }
+
+    // --- АКСЕССУАРЫ (Руки/Ноги/Голова) ---
+    
+    // Рукава
+    if (useArmWarmers) {
+        hints.push("Рукава");
+    }
+
+    // Ноги (обувь)
+    if (tMin <= 8) {
+        hints.push("Oversocks"); // Replaced "Бахилы"
+    } else if (tMin <= 14) {
+        hints.push("Toe covers");
+    }
+
+    // Шея (Buff) - applied only for +5...+8 (implicit via tMin < 5 return and tMin <= 8 check)
+    if (tMin <= 8) {
+        hints.push("Buff");
+    }
+
+    return [...new Set(hints)];
+}
+
 export async function analyzeCity(
     cityName: string, 
     coords: CityCoordinates, 
@@ -93,7 +195,7 @@ export async function analyzeCity(
         longitude: coords.lon.toString(),
         start_date: startStr,
         end_date: endStr,
-        hourly: ["precipitation", "temperature_2m", "wind_speed_10m", "apparent_temperature", "wind_direction_10m", "sunshine_duration"].join(','),
+        hourly: "precipitation,temperature_2m,wind_speed_10m,apparent_temperature,wind_direction_10m,sunshine_duration",
         timezone: "Europe/Moscow"
     });
 
@@ -109,11 +211,9 @@ export async function analyzeCity(
             weekend2: { saturday: null, sunday: null }
         };
 
-        const startDateObj = new Date(startStr); // Base for index calculation
+        const startDateObj = new Date(startStr); 
 
         targetDates.forEach((targetDate, index) => {
-            // Calculate day offset to find index in hourly arrays
-            // Note: We need to be careful with timezones. Best is to compare date strings.
             const tStr = targetDate.toISOString().split('T')[0];
             const baseTStr = startDateObj.toISOString().split('T')[0];
             
@@ -125,19 +225,15 @@ export async function analyzeCity(
 
             if (!hourly.precipitation || hourly.precipitation.length < eIdx) return;
 
-            // --- Logic ported from Python ---
-            
-            // Precip (From 04:00 to 24:00) -> indices sIdx+4 to eIdx
+            // Total daily rain for summary (04:00 - 24:00)
             const pSlice = hourly.precipitation.slice(sIdx + 4, eIdx) as number[];
             const totalRain = pSlice.reduce((a, b) => a + (b || 0), 0);
             
-            // Find wet hours (relative to 00:00, so adding 4 to index)
             const wetHours = pSlice
                 .map((val, i) => (val > 0.1 ? i + 4 : -1))
                 .filter(h => h !== -1);
 
-            // Active Hours (09:00 - 18:00) -> indices sIdx+9 to sIdx+19 (exclusive of 19)
-            // Python slice s_idx+9 : s_idx+19 includes 9 up to 18.
+            // Active hours indices (09:00 - 18:00)
             const actStart = sIdx + 9;
             const actEnd = sIdx + 19;
 
@@ -148,6 +244,10 @@ export async function analyzeCity(
             const feelsSlice = hourly.apparent_temperature.slice(actStart, actEnd) as number[];
             const windSlice = hourly.wind_speed_10m.slice(actStart, actEnd) as number[];
             const windDirSlice = hourly.wind_direction_10m.slice(actStart, actEnd) as number[];
+            
+            // Calculate Rain during Active Hours (09:00 - 18:00) for Clothing Logic
+            const pActiveSlice = hourly.precipitation.slice(actStart, actEnd) as number[];
+            const activeRainSum = pActiveSlice.reduce((a, b) => a + (b || 0), 0);
 
             const tMin = tempSlice.length ? Math.min(...tempSlice) : 0;
             const tMax = tempSlice.length ? Math.max(...tempSlice) : 0;
@@ -163,6 +263,17 @@ export async function analyzeCity(
                 windDirStr = degToCompass(windDirSlice[maxWindIdx]);
             }
 
+            const temps09_11 = hourly.temperature_2m.slice(sIdx + 9, sIdx + 12) as number[];
+            const temps11_18 = hourly.temperature_2m.slice(sIdx + 11, sIdx + 19) as number[];
+            const temps09_12 = hourly.temperature_2m.slice(sIdx + 9, sIdx + 13) as number[];
+            const temps12_18 = hourly.temperature_2m.slice(sIdx + 12, sIdx + 19) as number[];
+
+            const clothingHints = getClothingRecommendations(
+                tMin, tMax, wMax, activeRainSum,
+                temps09_11, temps11_18, temps09_12, temps12_18,
+                cityName
+            );
+
             const dayStats: WeatherDayStats = {
                 dateObj: targetDate,
                 dateStr: tStr,
@@ -177,10 +288,10 @@ export async function analyzeCity(
                 windDir: windDirStr,
                 sunSeconds: sunVal,
                 sunStr: formatSunTime(sunVal),
-                accuracy: 'High' // Mocking accuracy for now to save a 2nd API call per city
+                accuracy: 'High',
+                clothingHints
             };
 
-            // Assign to result structure
             if (index === 0) result.weekend1.saturday = dayStats;
             if (index === 1) result.weekend1.sunday = dayStats;
             if (index === 2) result.weekend2.saturday = dayStats;

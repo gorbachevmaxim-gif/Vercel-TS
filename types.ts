@@ -9,19 +9,20 @@ export interface CityMap {
 
 export interface WeatherDayStats {
   dateObj: Date;
-  dateStr: string; // YYYY-MM-DD
-  dayName: string; // Суббота / Воскресенье
+  dateStr: string;
+  dayName: string;
   isDry: boolean;
   precipSum: number;
   rainHours: string | null;
-  tempRange: string; // "min..max"
+  tempRange: string;
   feelsRange: string;
   windRange: string;
   windMax: number;
   windDir: string;
   sunSeconds: number;
   sunStr: string;
-  accuracy: 'High' | 'Medium' | 'Low'; // Derived from model spread (simplified here or future proofing)
+  accuracy: 'High' | 'Medium' | 'Low';
+  clothingHints: string[];
 }
 
 export interface CityAnalysisResult {

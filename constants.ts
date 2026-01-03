@@ -25,7 +25,12 @@ export const CITIES: CityMap = {
     "Одинцово": { lat: 55.67, lon: 37.28 },
     "Зеленоград": { lat: 55.99, lon: 37.21 },
     "Подольск": { lat: 55.43, lon: 37.55 },
-    "Тула": { lat: 54.19, lon: 37.61 }
+    "Тула": { lat: 54.19, lon: 37.61 },
+    "Пушкино": { lat: 56.01, lon: 37.85 },
+    "Фетхие": { lat: 36.62, lon: 29.12 },
+    "Дения": { lat: 38.84, lon: 0.11 },
+    "Кемер": { lat: 36.60, lon: 30.56 },
+    "Стамбул": { lat: 41.01, lon: 28.97 }
 };
 
 export const API_URL = "https://api.open-meteo.com/v1/forecast";

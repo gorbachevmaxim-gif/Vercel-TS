@@ -3,71 +3,93 @@ import { CityAnalysisResult, WeatherDayStats } from '../types';
 
 interface CityDetailProps {
   data: CityAnalysisResult;
+  initialTab?: 'w1' | 'w2';
   onClose: () => void;
 }
 
 const WeatherCard: React.FC<{ stats: WeatherDayStats | null }> = ({ stats }) => {
     if (!stats) return <div className="p-4 text-center text-slate-400">Нет данных</div>;
 
-    const dryColor = stats.isDry ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200';
-    const statusText = stats.isDry ? 'Без осадков' : 'Ожидаются осадки';
-
+    const dryColor = stats.isDry ? 'text-green-600' : 'text-red-500';
+    
     return (
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm relative overflow-hidden">
-            <div className="flex justify-between items-center mb-3">
+        <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="bg-slate-50 px-4 py-3 border-b border-slate-100 flex justify-between items-center">
                 <div>
-                    <div className="text-lg font-bold text-slate-800">{stats.dayName}</div>
-                    <div className="text-sm text-slate-500">{stats.dateObj.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</div>
-                </div>
-                <div className={`px-3 py-1 rounded-full text-xs font-bold border ${dryColor}`}>
-                    {statusText}
+                    <span className="font-bold text-slate-800 text-lg mr-2">{stats.dayName}</span>
+                    <span className="text-slate-500 text-sm">{stats.dateObj.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</span>
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-                <div className="bg-slate-50 p-2 rounded">
-                    <div className="text-slate-400 text-xs mb-1">Температура</div>
-                    <div className="font-semibold text-slate-700">{stats.tempRange}°</div>
-                    <div className="text-xs text-slate-500">Ощущ: {stats.feelsRange}°</div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+                <div className="p-3 flex flex-col items-center justify-center text-center">
+                    <span className="text-xs text-slate-400 uppercase font-semibold mb-1">Температура</span>
+                    <span className="text-lg font-bold text-slate-700">{stats.tempRange}°</span>
+                    <span className="text-xs text-slate-500">Ощущ: {stats.feelsRange}°</span>
                 </div>
-                <div className="bg-slate-50 p-2 rounded">
-                    <div className="text-slate-400 text-xs mb-1">Ветер</div>
-                    <div className="font-semibold text-slate-700">{stats.windRange} км/ч</div>
-                    <div className="text-xs text-slate-500">Макс: {stats.windMax} ({stats.windDir})</div>
+
+                <div className="p-3 flex flex-col items-center justify-center text-center">
+                    <span className="text-xs text-slate-400 uppercase font-semibold mb-1">Ветер</span>
+                    <span className="text-lg font-bold text-slate-700">{stats.windRange} <span className="text-sm font-normal">км/ч</span></span>
+                    <span className="text-xs text-slate-500">Макс: {stats.windMax} ({stats.windDir})</span>
+                </div>
+
+                <div className="p-3 flex flex-col items-center justify-center text-center">
+                    <span className="text-xs text-slate-400 uppercase font-semibold mb-1">Осадки</span>
+                    <span className={`text-lg font-bold ${dryColor}`}>
+                        {stats.isDry ? '0 мм' : `${stats.precipSum.toFixed(1)} мм`}
+                    </span>
+                    <span className="text-xs text-slate-500">
+                        {stats.isDry ? 'Без осадков' : (stats.rainHours || 'Весь день')}
+                    </span>
+                </div>
+
+                <div className="p-3 flex flex-col items-center justify-center text-center">
+                    <span className="text-xs text-slate-400 uppercase font-semibold mb-1">Солнце</span>
+                    <span className="text-lg font-bold text-amber-500">{stats.sunStr}</span>
+                    <span className="text-xs text-slate-500">09:00 - 18:00</span>
                 </div>
             </div>
 
-            <div className="flex items-center justify-between bg-amber-50 p-2 rounded border border-amber-100 mb-3">
-                 <span className="text-xs font-bold text-amber-700 uppercase">☀️ Солнце (09-18)</span>
-                 <span className="font-bold text-slate-700">{stats.sunStr}</span>
-            </div>
-
-            {!stats.isDry && (
-                <div className="bg-red-50 p-3 rounded text-sm border border-red-100">
-                    <div className="flex justify-between mb-1">
-                         <span className="text-red-700 font-medium">Осадки:</span>
-                         <span className="font-bold text-slate-800">{stats.precipSum.toFixed(1)} мм</span>
+            {stats.clothingHints.length > 0 && (
+                <div className="bg-slate-50 border-t border-slate-100 p-4">
+                    <div className="text-xs font-bold text-slate-400 uppercase mb-2 flex items-center gap-1">
+                        👕 Что надеть
                     </div>
-                    {stats.rainHours ? (
-                        <div className="text-xs text-slate-600 mt-1">
-                            🕒 {stats.rainHours}
-                        </div>
-                    ) : <div className="text-xs text-slate-500">Небольшие осадки</div>}
+                    <div className="flex flex-wrap gap-2">
+                        {stats.clothingHints.map((hint, idx) => (
+                            <span 
+                                key={idx} 
+                                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                            >
+                                {hint}
+                            </span>
+                        ))}
+                    </div>
                 </div>
+            )}
+            
+            {stats.clothingHints.length === 0 && parseInt(stats.tempRange.split('..')[0]) < 5 && (
+                 <div className="bg-slate-50 border-t border-slate-100 p-3 text-xs text-slate-400 text-center italic">
+                    Слишком холодно для комфортного заезда (&lt; 5°C)
+                 </div>
             )}
         </div>
     );
 };
 
-const CityDetail: React.FC<CityDetailProps> = ({ data, onClose }) => {
-  const [activeTab, setActiveTab] = useState<'w1' | 'w2'>('w1');
+const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClose }) => {
+  const [activeTab, setActiveTab] = useState<'w1' | 'w2'>(initialTab);
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800">{data.cityName}</h2>
-        <button onClick={onClose} className="text-sm font-medium text-blue-600 hover:text-blue-800">
-            ← Назад
+        <button onClick={onClose} className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Назад
         </button>
       </div>
 
@@ -86,7 +108,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, onClose }) => {
           </button>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
           <WeatherCard stats={activeTab === 'w1' ? data.weekend1.saturday : data.weekend2.saturday} />
           <WeatherCard stats={activeTab === 'w1' ? data.weekend1.sunday : data.weekend2.sunday} />
       </div>
