@@ -59,7 +59,10 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
                 <div className="p-3 flex flex-col items-center justify-center text-center">
                     <span className="text-xs text-slate-400 uppercase font-semibold mb-1">Ветер</span>
                     <span className="text-lg font-bold text-slate-700">{stats.windRange} <span className="text-sm font-normal">км/ч</span></span>
-                    <span className="text-xs text-slate-500">{stats.windDir}</span>
+                    <div className="text-xs mt-1">
+                        <span className="text-slate-500">{stats.windDir}</span>
+                        <span className="text-slate-400 ml-1">Порывы {stats.windGusts} км/ч</span>
+                    </div>
                 </div>
 
                 <div className="p-3 flex flex-col items-center justify-center text-center">
