@@ -11,14 +11,21 @@ interface CityDetailProps {
   onClose: () => void;
 }
 
-// Map degrees to 8 cardinal directions for file naming (e.g. "NW", "S")
+// Map degrees to 8 cardinal directions for file naming
+// 0/360=N, 45=NE, 90=E, 135=SE, 180=S, 225=SW, 270=W, 315=NW
 const getCardinal = (angle: number): string => {
   const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
   const index = Math.round(((angle %= 360) < 0 ? angle + 360 : angle) / 45) % 8;
   return directions[index];
 };
 
-const WeatherCard: React.FC<{ stats: WeatherDayStats | null }> = ({ stats }) => {
+interface WeatherCardProps { 
+    stats: WeatherDayStats | null; 
+    isSelected?: boolean; 
+    onClick?: () => void;
+}
+
+const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick }) => {
     if (!stats) return <div className="p-4 text-center text-slate-400">Нет данных</div>;
 
     const dryColor = stats.isDry ? 'text-green-600' : 'text-red-500';
@@ -26,12 +33,20 @@ const WeatherCard: React.FC<{ stats: WeatherDayStats | null }> = ({ stats }) => 
     const isTooCold = stats.clothingHints.length === 0 && minTemp < 5;
     
     return (
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="bg-slate-50 px-4 py-3 border-b border-slate-100 flex justify-between items-center">
+        <div 
+            onClick={onClick}
+            className={`rounded-xl border transition-all cursor-pointer bg-white shadow-sm overflow-hidden ${isSelected ? 'border-blue-500 ring-2 ring-blue-100 shadow-md' : 'border-slate-200 hover:border-blue-300'}`}
+        >
+            <div className={`px-4 py-3 border-b flex justify-between items-center ${isSelected ? 'bg-blue-50 border-blue-100' : 'bg-slate-50 border-slate-100'}`}>
                 <div>
                     <span className="font-bold text-slate-800 text-lg mr-2">{stats.dayName}</span>
                     <span className="text-slate-500 text-sm">{stats.dateObj.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</span>
                 </div>
+                {isSelected && (
+                    <span className="text-xs font-bold text-blue-700 bg-white border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
+                        Выбран
+                    </span>
+                )}
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
@@ -44,7 +59,7 @@ const WeatherCard: React.FC<{ stats: WeatherDayStats | null }> = ({ stats }) => 
                 <div className="p-3 flex flex-col items-center justify-center text-center">
                     <span className="text-xs text-slate-400 uppercase font-semibold mb-1">Ветер</span>
                     <span className="text-lg font-bold text-slate-700">{stats.windRange} <span className="text-sm font-normal">км/ч</span></span>
-                    <span className="text-xs text-slate-500">{stats.windDir} Порывы: {stats.windGusts}</span>
+                    <span className="text-xs text-slate-500">{stats.windDir}</span>
                 </div>
 
                 <div className="p-3 flex flex-col items-center justify-center text-center">
@@ -118,6 +133,9 @@ const parseGpx = (str: string): [number, number][] => {
 
 const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClose }) => {
   const [activeTab, setActiveTab] = useState<'w1' | 'w2'>(initialTab);
+  const [routeDay, setRouteDay] = useState<'saturday' | 'sunday' | null>(null);
+  const [routeStatus, setRouteStatus] = useState<string>('');
+  
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const polylineRef = useRef<L.Polyline | null>(null);
@@ -127,11 +145,20 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   }, [data.cityName]);
 
   const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
-  // Prefer saturday for route selection if it's dry, otherwise sunday, otherwise saturday
-  const activeStats = (activeWeekend.saturday?.isDry && activeWeekend.saturday) 
-                      || activeWeekend.sunday 
-                      || activeWeekend.saturday;
+  
+  // Set default route day logic: Prefer Dry Saturday -> Dry Sunday -> Saturday
+  useEffect(() => {
+      // We only set default if nothing is selected or if we switched weekends
+      if (activeWeekend.saturday?.isDry) {
+          setRouteDay('saturday');
+      } else if (activeWeekend.sunday?.isDry) {
+          setRouteDay('sunday');
+      } else {
+          setRouteDay('saturday');
+      }
+  }, [activeTab, activeWeekend]);
 
+  const activeStats = routeDay === 'saturday' ? activeWeekend.saturday : activeWeekend.sunday;
   const cityCoords = CITIES[data.cityName];
 
   // Initialize Map
@@ -146,9 +173,13 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
         }).addTo(map);
 
         mapInstanceRef.current = map;
+        
+        // Critical fix: Invalidate size after render to prevent gray tiles
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
     }
 
-    // Cleanup function
     return () => {
         if (mapInstanceRef.current) {
             mapInstanceRef.current.remove();
@@ -168,15 +199,18 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
         polylineRef.current = null;
     }
 
-    // Determine direction
+    // Determine direction code for file
     const windDirCode = getCardinal(activeStats.windDeg);
-    // Relative path for compatibility with GH Pages sub-paths (no leading slash)
+    
+    // Relative path (assumes /public/routes or root routes folder)
     const fileName = `routes/${data.cityName}_${windDirCode}.gpx`;
     
+    setRouteStatus(`Поиск: ${fileName}`);
+
     // Attempt to load GPX
     fetch(fileName)
         .then(res => {
-            if (!res.ok) throw new Error("No route found");
+            if (!res.ok) throw new Error("File not found");
             return res.text();
         })
         .then(xmlStr => {
@@ -185,16 +219,19 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                 const polyline = L.polyline(latlngs, { color: 'red', weight: 4 }).addTo(map);
                 map.fitBounds(polyline.getBounds(), { padding: [20, 20] });
                 polylineRef.current = polyline;
+                setRouteStatus(`Маршрут: ${windDirCode} (Загружен)`);
             } else {
-                // Fallback: Just center on city
+                setRouteStatus(`Ошибка GPX: ${fileName}`);
                 map.setView([cityCoords.lat, cityCoords.lon], 11);
             }
         })
         .catch(() => {
-            // No route file found for this condition
-            // Add a marker for the city at least
-             map.setView([cityCoords.lat, cityCoords.lon], 11);
+            setRouteStatus(`Файл не найден: ${fileName}`);
+            map.setView([cityCoords.lat, cityCoords.lon], 11);
         });
+        
+    // Keep map fresh
+    setTimeout(() => map.invalidateSize(), 200);
 
   }, [activeStats, cityCoords, data.cityName]);
 
@@ -227,26 +264,46 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
       </div>
 
       <div className="space-y-6">
-          <WeatherCard stats={activeTab === 'w1' ? data.weekend1.saturday : data.weekend2.saturday} />
-          <WeatherCard stats={activeTab === 'w1' ? data.weekend1.sunday : data.weekend2.sunday} />
+          <p className="text-xs text-slate-500 font-medium text-center">Нажмите на карточку дня для выбора маршрута</p>
+          
+          <WeatherCard 
+            stats={activeWeekend.saturday} 
+            isSelected={routeDay === 'saturday'} 
+            onClick={() => setRouteDay('saturday')}
+          />
+          <WeatherCard 
+            stats={activeWeekend.sunday} 
+            isSelected={routeDay === 'sunday'} 
+            onClick={() => setRouteDay('sunday')}
+          />
           
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
                 <h3 className="text-lg font-bold text-slate-800">
-                    Маршрут
+                    Маршрут ({routeDay === 'saturday' ? 'Суббота' : 'Воскресенье'})
                 </h3>
+                
                 {activeStats && (
-                    <span className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-600">
-                        Ветер: {activeStats.windDir} ({getCardinal(activeStats.windDeg)})
-                    </span>
+                    <div className="flex flex-col items-end">
+                        <span className="text-sm font-medium text-slate-700">
+                           Ветер: {activeStats.windDir} ({getCardinal(activeStats.windDeg)})
+                        </span>
+                        <span className={`text-xs px-2 py-0.5 rounded mt-1 font-mono ${routeStatus.includes('не найден') || routeStatus.includes('Ошибка') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                            {routeStatus}
+                        </span>
+                    </div>
                 )}
             </div>
             
-            <div className="relative w-full h-[350px] bg-slate-100 rounded-lg overflow-hidden border border-slate-100 z-0">
+            <div className="relative w-full h-[400px] bg-slate-100 rounded-lg overflow-hidden border border-slate-100 z-0">
                 <div ref={mapContainerRef} className="w-full h-full" />
             </div>
             
-            <div className="mt-4 flex justify-center">
+            <div className="mt-4 flex flex-col items-center text-center space-y-2">
+                <p className="text-xs text-slate-400 max-w-lg">
+                   Маршрут подбирается автоматически по направлению ветра.<br/>
+                   N=Север, E=Восток, S=Юг, W=Запад
+                </p>
                 <a 
                     href="https://www.komoot.com/collection/2674102/-lechappe-belle?ref=collection" 
                     target="_blank"
