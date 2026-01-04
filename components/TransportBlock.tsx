@@ -21,7 +21,6 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
   const day = String(date.getDate()).padStart(2, '0');
   
   const dateStrYandex = `${year}-${month}-${day}`;
-  // Aeroflot expects YYYYMMDD in the routes parameter (e.g. MOW.20260117.AYT)
   const dateStrAeroflot = `${year}${month}${day}`;
   
   // Helper to resolve city mappings (e.g. Flight destinations)
@@ -51,9 +50,8 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
   // Helper to build URLs based on provider
   const getUrl = (fromCodeOrName: string, toCodeOrName: string, provider: 'aeroflot' | 'yandex') => {
     if (provider === 'aeroflot') {
-        // Aeroflot format: routes=ORIGIN.YYYYMMDD.DESTINATION
-        // Example: routes=MOW.20260117.AYT
-        return `https://www.aeroflot.ru/sb/app/ru-ru#/search?adults=1&cabin=economy&children=0&childrenaward=0&childrenfrgn=0&infants=0&routes=${fromCodeOrName}.${dateStrAeroflot}.${toCodeOrName}`;
+        // Aeroflot format: MOW.DLM.20231025
+        return `https://www.aeroflot.ru/sb/app/ru-ru#/search?routes=${fromCodeOrName}.${toCodeOrName}.${dateStrAeroflot}&adults=1&children=0&infants=0&cabin=economy`;
     } else {
         // Yandex format
         const params = new URLSearchParams({
