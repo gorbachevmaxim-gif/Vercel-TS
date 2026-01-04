@@ -10,8 +10,8 @@ const GastrodinamikaLogo: React.FC<LogoProps> = ({ percent = 0, className = "" }
   // Файл должен находиться в папке public/ проекта.
   const logoSrc = "/gastrodinamika_ronde_novo.jpg";
 
-  // Измененный угол старта: 292 градуса
-  const startAngle = 292; 
+  // Измененный угол старта: 290 градуса
+  const startAngle = 290; 
 
   return (
     <div className={`relative ${className}`}>

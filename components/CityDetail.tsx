@@ -614,11 +614,6 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                       showTo={showTo}
                       showFrom={showFrom}
                   />
-                  {(routeStartCity !== data.cityName || routeEndCity !== data.cityName) && (
-                      <p className="text-xs text-slate-500 ml-1">
-                          * Маршрут начинается/заканчивается в другом городе, расписание скорректировано.
-                      </p>
-                  )}
               </div>
           )}
 
