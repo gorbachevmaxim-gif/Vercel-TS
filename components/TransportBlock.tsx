@@ -84,16 +84,10 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
       <div className="flex items-center border-b border-slate-100 pb-3">
-        {/* Header Icon: Yandex Logo or Flight Icon */}
+        {/* Header Icon: Yandex Logo or Aeroflot Text */}
         <div className="shrink-0">
              {isAeroflot ? (
-                 <div className="flex items-center gap-2 text-slate-400">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M2 22h20"/>
-                        <path d="M8 22v-5l-4-3 4-2 1-5 9-3-2 8 4 2 2-1 3 1-3 4-4 2-5 5"/>
-                     </svg>
-                     <span className="text-sm font-semibold tracking-wide">АЭРОФЛОТ</span>
-                 </div>
+                 <span className="text-xl font-bold tracking-wider text-slate-700">АЭРОФЛОТ</span>
              ) : (
                  <img 
                     src="/yandex_rasp_logo.png" 
