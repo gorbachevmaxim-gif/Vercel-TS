@@ -51,7 +51,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
       {/* Dry Cities Rows - Changed to always be single column (rows) */}
       <div className="grid grid-cols-1 gap-4">
         <div className="rounded-lg bg-green-50 p-3">
-          <div className="text-xs font-semibold uppercase tracking-wider text-green-700 mb-2">Здесь без дождя весь уикенд</div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-green-700 mb-2">Здесь без осадков весь уикенд</div>
           {fullWeekend.length > 0 ? (
              <div className="flex flex-wrap gap-2">
                  {fullWeekend.map(c => (
@@ -68,7 +68,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
         </div>
 
         <div className="rounded-lg bg-blue-50 p-3">
-          <div className="text-xs font-semibold uppercase tracking-wider text-blue-700 mb-2">Здесь без дождя в субботу</div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-blue-700 mb-2">Здесь без осадков только в субботу</div>
           {onlySat.length > 0 ? (
              <div className="flex flex-wrap gap-2">
                  {onlySat.map(c => (
@@ -85,7 +85,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
         </div>
 
         <div className="rounded-lg bg-indigo-50 p-3">
-          <div className="text-xs font-semibold uppercase tracking-wider text-indigo-700 mb-2">Здесь без дождя в воскресенье</div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-indigo-700 mb-2">Здесь без осадков только в воскресенье</div>
           {onlySun.length > 0 ? (
              <div className="flex flex-wrap gap-2">
                  {onlySun.map(c => (

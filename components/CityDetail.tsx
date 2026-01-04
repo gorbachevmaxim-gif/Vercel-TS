@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { CityAnalysisResult, WeatherDayStats } from '../types';
-import { CITIES } from '../constants';
+import { CITIES, KOMOOT_ROUTE_IDS } from '../constants';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -115,60 +115,53 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
     );
 };
 
-// Robust GPX Parsing Helper
+// Robust GPX Parsing Helper (Namespace Agnostic)
 const parseGpx = (str: string): [number, number][] => {
     try {
         const parser = new DOMParser();
         const xml = parser.parseFromString(str, "text/xml");
         
-        // Helper to find elements regardless of namespace (fixes issues with 'xmlns' in GPX files)
-        const getElements = (tagName: string): Element[] => {
-            // Try namespace-agnostic search first (modern browsers)
-            const nsElements = xml.getElementsByTagNameNS('*', tagName);
-            if (nsElements.length > 0) return Array.from(nsElements);
-
-            // Fallback for some environments: standard getElementsByTagName
-            const elements = xml.getElementsByTagName(tagName);
-            if (elements.length > 0) return Array.from(elements);
-
-            // Last resort: manual localName check
-            const all = xml.getElementsByTagName('*');
-            const manual: Element[] = [];
-            for (let i = 0; i < all.length; i++) {
-                if (all[i].localName === tagName) manual.push(all[i]);
-            }
-            return manual;
-        };
-
-        const extractPoints = (tagName: string): [number, number][] => {
-            const points: [number, number][] = [];
-            const elements = getElements(tagName);
-            
-            elements.forEach(pt => {
-                const latStr = pt.getAttribute('lat');
-                const lonStr = pt.getAttribute('lon');
-                if (latStr && lonStr) {
-                    const lat = parseFloat(latStr);
-                    const lon = parseFloat(lonStr);
-                    if (!isNaN(lat) && !isNaN(lon)) {
-                        points.push([lat, lon]);
-                    }
-                }
-            });
-            return points;
-        };
-
-        // 1. Try Tracks (trkpt)
-        let result = extractPoints('trkpt');
-        
-        // 2. If empty, try Routes (rtept)
-        if (result.length === 0) {
-            result = extractPoints('rtept');
+        // Check for XML parsing errors
+        const parseError = xml.querySelector('parsererror');
+        if (parseError) {
+            console.error("XML Parse Error in GPX");
+            return [];
         }
 
-        return result;
+        // Helper to safe get attribute
+        const getAttr = (el: Element, name: string) => {
+            const val = el.getAttribute(name);
+            return val ? parseFloat(val) : NaN;
+        };
+
+        // We use a flat selection strategy to avoid namespace issues (xmlns)
+        // standard getElementsByTagName('*') and checking localName is most robust in browsers
+        const allElements = Array.from(xml.getElementsByTagName('*'));
+        
+        // 1. Try to find Track Points (trkpt)
+        let pointsElements = allElements.filter(el => 
+            (el.localName === 'trkpt' || el.nodeName === 'trkpt')
+        );
+
+        // 2. Fallback to Route Points (rtept) if no track points
+        if (pointsElements.length === 0) {
+            pointsElements = allElements.filter(el => 
+                (el.localName === 'rtept' || el.nodeName === 'rtept')
+            );
+        }
+
+        const points: [number, number][] = [];
+        pointsElements.forEach(pt => {
+            const lat = getAttr(pt, 'lat');
+            const lon = getAttr(pt, 'lon');
+            if (!isNaN(lat) && !isNaN(lon)) {
+                points.push([lat, lon]);
+            }
+        });
+
+        return points;
     } catch (e) {
-        console.error("GPX Parse error", e);
+        console.error("GPX Parse Exception", e);
         return [];
     }
 };
@@ -235,6 +228,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
 
   // 2. Load GPX Files (Multiple candidates)
   useEffect(() => {
+    let isMounted = true;
     if (!activeStats || !cityCoords) return;
 
     const windDirCode = getCardinal(activeStats.windDeg);
@@ -256,6 +250,10 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
             const res = await fetch(url);
             if (!res.ok) return null;
             const txt = await res.text();
+            
+            // Basic check if it looks like XML/GPX to avoid parsing 404 HTML pages
+            if (!txt.trim().startsWith('<')) return null;
+
             const points = parseGpx(txt);
             return points.length > 0 ? points : null;
         } catch {
@@ -265,6 +263,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
 
     Promise.all(candidates.map(url => fetchRoute(url)))
         .then(results => {
+            if (!isMounted) return;
             const validRoutes = results.filter((r): r is [number, number][] => r !== null);
             
             if (validRoutes.length > 0) {
@@ -276,6 +275,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
             }
         });
 
+    return () => { isMounted = false; };
   }, [activeStats, cityCoords, data.cityName]);
 
 
@@ -295,7 +295,13 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
 
     if (currentPoints && currentPoints.length > 0) {
         const polyline = L.polyline(currentPoints, { color: 'red', weight: 4 }).addTo(map);
-        map.fitBounds(polyline.getBounds(), { padding: [20, 20] });
+        
+        // Safety check for bounds
+        const bounds = polyline.getBounds();
+        if (bounds.isValid()) {
+            map.fitBounds(bounds, { padding: [20, 20] });
+        }
+        
         polylineRef.current = polyline;
         
         // Start point is the first point of the GPX
@@ -341,6 +347,12 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
 
   }, [activeStats, cityCoords, foundRoutes, selectedRouteIdx]);
 
+  // Determine Komoot Embed URL
+  const komootTourId = KOMOOT_ROUTE_IDS[data.cityName];
+  // Default to the specific collection if no specific tour is mapped for this city
+  const komootEmbedUrl = komootTourId 
+    ? `https://www.komoot.com/embed/tour/${komootTourId}?share=1&profile=1`
+    : `https://www.komoot.com/embed/collection/2674102?share=1&profile=1`;
 
   return (
     <div className="space-y-4">
@@ -428,14 +440,38 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                 <p className="text-xs text-slate-400 max-w-lg">
                    Маршрут подбирается автоматически по направлению ветра.
                 </p>
+            </div>
+          </div>
+
+          {/* Komoot Integration Section */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 overflow-hidden">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <span className="text-green-600">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 0C5.371 0 0 5.373 0 12s5.371 12 12 12 12-5.373 12-12S18.629 0 12 0zm-1.125 18.75c-2.484 0-4.5-2.016-4.5-4.5 0-2.485 2.016-4.5 4.5-4.5 2.485 0 4.5 2.015 4.5 4.5 0 2.484-2.015 4.5-4.5 4.5zm4.875-7.5c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z"/></svg>
+                    </span>
+                    Карта Komoot
+                </h3>
                 <a 
                     href="https://www.komoot.com/collection/2674102/-lechappe-belle?ref=collection" 
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center justify-center w-full sm:w-auto text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl transition-colors shadow-sm"
+                    className="text-sm font-medium text-blue-600 hover:text-blue-800"
                 >
-                    Все маршруты Gastrodinamica
+                    Открыть коллекцию ↗
                 </a>
+            </div>
+            
+            <div className="w-full h-[600px] bg-slate-100 rounded-lg overflow-hidden border border-slate-100">
+                 <iframe 
+                    src={komootEmbedUrl} 
+                    width="100%" 
+                    height="100%" 
+                    style={{border: 0}}
+                    title="Komoot Map"
+                    allowFullScreen
+                    loading="lazy"
+                ></iframe>
             </div>
           </div>
       </div>
