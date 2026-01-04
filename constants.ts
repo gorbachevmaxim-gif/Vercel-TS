@@ -30,7 +30,39 @@ export const CITIES: CityMap = {
     "Фетхие": { lat: 36.62, lon: 29.12 },
     "Дения": { lat: 38.84, lon: 0.11 },
     "Кемер": { lat: 36.60, lon: 30.56 },
-    "Стамбул": { lat: 41.01, lon: 28.97 }
+    "Звенигород": { lat: 55.73, lon: 36.86 }
+};
+
+// Map Cyrillic City Name -> Latin Filename prefix
+// If a city is missing here, it will default to the Cyrillic name.
+export const CITY_FILENAMES: Record<string, string> = {
+    "Можайск": "Mozhaysk",
+    "Жуковский": "Zhukovskyi",
+    "Москва": "Moscow",
+    "Истра": "Istra",
+    "Кубинка": "Kubinka",
+    "Волоколамск": "Volokolamsk",
+    "Солнечногорск": "Solnechnogorsk",
+    "Завидово": "Zavidovo",
+    "Дубна": "Dubna",
+    "Яхрома": "Yakhroma",
+    "Сергиев Посад": "SergievPosad",
+    "Александров": "Alexandrov",
+    "Павловский Посад": "PavlovskyPosad",
+    "Воскресенск": "Voskresensk",
+    "Коломна": "Kolomna",
+    "Ступино": "Stupino",
+    "Серпухов": "Serpukhov",
+    "Калуга": "Kaluga",
+    "Обнинск": "Obninsk",
+    "Верея": "Vereya",
+    "Рязань": "Ryazan",
+    "Одинцово": "Odintsovo",
+    "Зеленоград": "Zelenograd",
+    "Подольск": "Podolsk",
+    "Тула": "Tula",
+    "Пушкино": "Pushkino",
+    "Звенигород": "Zvenigorod"
 };
 
 // Map City Name -> Komoot Tour ID
