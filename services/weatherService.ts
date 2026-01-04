@@ -240,7 +240,7 @@ export async function analyzeCity(
 
             // Active hours indices (09:00 - 18:00)
             const actStart = sIdx + 9;
-            const actEnd = sIdx + 18; 
+            const actEnd = sIdx + 19; // Ends at 19 to include 18:00 data point (interval 18:00-19:00 or instantaneous at 18:00)
 
             const sunSlice = hourly.sunshine_duration.slice(actStart, actEnd) as number[];
             const sunVal = sunSlice.reduce((a, b) => a + (b || 0), 0);

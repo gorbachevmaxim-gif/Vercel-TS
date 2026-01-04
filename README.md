@@ -1,20 +1,45 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Поиск идеальных выходных (Weekend Weather Planner)
 
-# Run and deploy your AI Studio app
+Веб-приложение для поиска городов с хорошей погодой для велосипедных выездов в выходные дни. Анализирует прогноз погоды, ветер и осадки, помогая выбрать лучшее место для поездки.
 
-This contains everything you need to run your app locally.
+## Функциональность
 
-View your app in AI Studio: https://ai.studio/apps/drive/1d8kUBaWHV-8x8zXt2zob9m4uZrwdixDj
+- 🌤 **Анализ погоды**: Проверка прогноза на ближайшие и следующие выходные.
+- 🚴 **Рекомендации по одежде**: Подсказки, что надеть в зависимости от температуры и ветра.
+- 🗺 **Карта**: Встроенная карта OpenStreetMap для просмотра локации.
+- 📱 **Адаптивность**: Полная поддержка мобильных устройств.
 
-## Run Locally
+## Установка и запуск
 
-**Prerequisites:**  Node.js
+1. **Установка зависимостей**
+   ```bash
+   npm install
+   ```
 
+2. **Запуск в режиме разработки**
+   ```bash
+   npm run dev
+   ```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+3. **Сборка для продакшена**
+   ```bash
+   npm run build
+   ```
+   После сборки файлы будут находиться в папке `dist`.
+
+## Деплой на GitHub Pages
+
+1. Соберите проект:
+   ```bash
+   npm run build
+   ```
+2. Загрузите содержимое папки `dist` в ваш репозиторий (или настройте GitHub Actions для автоматической сборки).
+3. В настройках репозитория (Settings -> Pages) выберите источник для GitHub Pages.
+
+## Технологии
+
+- React
+- TypeScript
+- Vite
+- Tailwind CSS (через CDN)
+- Open-Meteo API (погодные данные)

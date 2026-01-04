@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CityAnalysisResult, WeatherDayStats } from '../types';
 import { CITIES } from '../constants';
 
@@ -89,6 +89,10 @@ const WeatherCard: React.FC<{ stats: WeatherDayStats | null }> = ({ stats }) => 
 const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClose }) => {
   const [activeTab, setActiveTab] = useState<'w1' | 'w2'>(initialTab);
   
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [data.cityName]);
+
   const cityCoords = CITIES[data.cityName];
 
   // Calculate bounding box for OpenStreetMap
