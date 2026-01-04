@@ -1,7 +1,14 @@
-import { API_URL } from '../constants';
+import { API_URL, CITY_FILENAMES } from '../constants';
 import { CityCoordinates, CityAnalysisResult, WeatherDayStats } from '../types';
 
 const MOUNTAIN_CITIES: string[] = [];
+
+// Map degrees to 8 cardinal directions for file naming (0/360=N, 45=NE, etc)
+export const getCardinal = (angle: number): string => {
+  const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  const index = Math.round(((angle %= 360) < 0 ? angle + 360 : angle) / 45) % 8;
+  return directions[index];
+};
 
 function degToCompass(num: number | null): string {
     if (num === null) return "";
@@ -169,6 +176,41 @@ function getClothingRecommendations(
     return [...new Set(hints)];
 }
 
+// Checks if any route file exists for the given city and wind direction
+async function checkRouteAvailability(cityName: string, windDeg: number): Promise<boolean> {
+    const fileCityName = CITY_FILENAMES[cityName] || cityName;
+    const windDirCode = getCardinal(windDeg);
+    const baseName = `routes/${fileCityName}_${windDirCode}`;
+    
+    const candidates = [
+        `${baseName}.gpx`,
+        `${baseName}_1.gpx`,
+        `${baseName}_2.gpx`,
+        `${baseName}_3.gpx`
+    ];
+
+    // Check matches in parallel
+    // We use a simple fetch HEAD or GET. 
+    // Since we are likely on a static host, we'll try to fetch.
+    const checks = candidates.map(async (url) => {
+        try {
+            const res = await fetch(url, { method: 'GET' }); // Some static servers reject HEAD
+            // If OK and content-type looks like xml or text, valid.
+            // Just checking OK status is usually enough for static files.
+            if (res.ok) {
+                 // Optimization: Abort body download if possible, but for small GPX usually fine.
+                 return true;
+            }
+            return false;
+        } catch {
+            return false;
+        }
+    });
+
+    const results = await Promise.all(checks);
+    return results.some(r => r === true);
+}
+
 export async function analyzeCity(
     cityName: string, 
     coords: CityCoordinates, 
@@ -200,7 +242,8 @@ export async function analyzeCity(
 
         const startDateObj = new Date(startStr); 
 
-        targetDates.forEach((targetDate, index) => {
+        // Use Promise.all to handle async route checks correctly within the iteration
+        const promises = targetDates.map(async (targetDate, index) => {
             const tStr = targetDate.toISOString().split('T')[0];
             const baseTStr = startDateObj.toISOString().split('T')[0];
             
@@ -270,12 +313,21 @@ export async function analyzeCity(
                 isMorningRideSuitable
             );
 
+            const isDry = activeRainSum <= 0.5;
+
+            // Check if route exists only if the weather is good enough to ride
+            let hasRoute = false;
+            if (isDry) {
+                hasRoute = await checkRouteAvailability(cityName, windDeg);
+            }
+
             const dayStats: WeatherDayStats = {
                 dateObj: targetDate,
                 dateStr: tStr,
                 dayName: targetDate.getDay() === 6 ? "Суббота" : "Воскресенье",
-                isDry: activeRainSum <= 0.5,
+                isDry: isDry,
                 isMorningRideSuitable: isMorningRideSuitable,
+                hasRoute: hasRoute,
                 precipSum: totalRain,
                 rainHours: formatRainHours(wetHours),
                 tempRange: `${Math.round(tMin)}..${Math.round(tMax)}`,
@@ -296,6 +348,7 @@ export async function analyzeCity(
             if (index === 3) result.weekend2.sunday = dayStats;
         });
 
+        await Promise.all(promises);
         return result;
 
     } catch (e) {

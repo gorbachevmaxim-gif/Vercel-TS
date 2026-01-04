@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { CityAnalysisResult, WeatherDayStats } from '../types';
 import { CITIES, CITY_FILENAMES } from '../constants';
+import { getCardinal } from '../services/weatherService'; // Imported shared logic
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -16,14 +17,6 @@ interface RouteData {
     distanceKm: number;
     elevationM: number;
 }
-
-// Map degrees to 8 cardinal directions for file naming
-// 0/360=N, 45=NE, 90=E, 135=SE, 180=S, 225=SW, 270=W, 315=NW
-const getCardinal = (angle: number): string => {
-  const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-  const index = Math.round(((angle %= 360) < 0 ? angle + 360 : angle) / 45) % 8;
-  return directions[index];
-};
 
 interface WeatherCardProps { 
     stats: WeatherDayStats | null; 

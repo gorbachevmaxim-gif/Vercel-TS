@@ -10,24 +10,26 @@ interface SummaryViewProps {
 }
 
 const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSecondWeekend = false, onCityClick }) => {
-  // Filter logic
-  const getDry = (city: CityAnalysisResult) => {
+  // Filter logic: City must be DRY AND have a valid ROUTE for that wind direction
+  const getDryWithRoute = (city: CityAnalysisResult) => {
     const w = isSecondWeekend ? city.weekend2 : city.weekend1;
-    const sat = w.saturday?.isDry ?? false;
-    const sun = w.sunday?.isDry ?? false;
+    const sat = (w.saturday?.isDry && w.saturday?.hasRoute) ?? false;
+    const sun = (w.sunday?.isDry && w.sunday?.hasRoute) ?? false;
     return { sat, sun, name: city.cityName };
   };
 
-  const processed = data.map(getDry);
+  const processed = data.map(getDryWithRoute);
   const fullWeekend = processed.filter(x => x.sat && x.sun).map(x => x.name);
   const onlySat = processed.filter(x => x.sat && !x.sun).map(x => x.name);
   const onlySun = processed.filter(x => !x.sat && x.sun).map(x => x.name);
 
-  // Sun ranking logic (active hours 09-18)
+  // Sun ranking logic (active hours 09-18) - Also checking route availability for ranking
   const getSun = (city: CityAnalysisResult, day: 'saturday' | 'sunday') => {
     const w = isSecondWeekend ? city.weekend2 : city.weekend1;
     const d = w[day];
-    return { name: city.cityName, val: d?.sunSeconds || 0, str: d?.sunStr || '0' };
+    // Only show in sun ranking if it has a route
+    if (!d || !d.hasRoute) return { name: city.cityName, val: 0, str: '0' };
+    return { name: city.cityName, val: d.sunSeconds, str: d.sunStr };
   };
 
   const topSat = data
