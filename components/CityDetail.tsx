@@ -115,18 +115,36 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
     );
 };
 
-// Helper to parse basic GPX (trkpt only)
+// Helper to parse basic GPX (supports both trkpt and rtept)
 const parseGpx = (str: string): [number, number][] => {
     try {
         const parser = new DOMParser();
         const xml = parser.parseFromString(str, "text/xml");
-        const points: [number, number][] = [];
+        let points: [number, number][] = [];
+        
+        // Helper to extract points from NodeList
+        const extractFromNodes = (nodes: NodeListOf<Element>) => {
+            const extracted: [number, number][] = [];
+            nodes.forEach(pt => {
+                const lat = parseFloat(pt.getAttribute('lat') || '0');
+                const lon = parseFloat(pt.getAttribute('lon') || '0');
+                if (lat && lon) extracted.push([lat, lon]);
+            });
+            return extracted;
+        };
+
+        // Try 'trkpt' (Tracks) first
         const trkpts = xml.querySelectorAll('trkpt');
-        trkpts.forEach(pt => {
-            const lat = parseFloat(pt.getAttribute('lat') || '0');
-            const lon = parseFloat(pt.getAttribute('lon') || '0');
-            if (lat && lon) points.push([lat, lon]);
-        });
+        if (trkpts.length > 0) {
+            points = extractFromNodes(trkpts);
+        } else {
+            // Fallback to 'rtept' (Routes) if no tracks found
+            const rtepts = xml.querySelectorAll('rtept');
+            if (rtepts.length > 0) {
+                points = extractFromNodes(rtepts);
+            }
+        }
+        
         return points;
     } catch (e) {
         console.error("GPX Parse error", e);
