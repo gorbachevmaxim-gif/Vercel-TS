@@ -1,11 +1,12 @@
 import * as React from 'react';
 
 interface TransportBlockProps {
-  cityName: string;
+  startCity: string;
+  endCity: string;
   date: Date;
 }
 
-const TransportBlock: React.FC<TransportBlockProps> = ({ cityName, date }) => {
+const TransportBlock: React.FC<TransportBlockProps> = ({ startCity, endCity, date }) => {
   // Format date for Yandex URL (YYYY-MM-DD)
   const dateStr = date.toISOString().split('T')[0];
   
@@ -19,38 +20,28 @@ const TransportBlock: React.FC<TransportBlockProps> = ({ cityName, date }) => {
     return `https://rasp.yandex.ru/search/?${params.toString()}`;
   };
 
-  const toUrl = getScheduleUrl('Москва', cityName);
-  const fromUrl = getScheduleUrl(cityName, 'Москва');
+  const toUrl = getScheduleUrl('Москва', startCity);
+  const fromUrl = getScheduleUrl(endCity, 'Москва');
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
-      <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
-        <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
-            {/* Train Icon */}
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-600">
-                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                <line x1="8" y1="21" x2="16" y2="21"></line>
-                <line x1="12" y1="17" x2="12" y2="21"></line>
-                <path d="M2 8h20"></path>
-                <path d="M3.5 13.5l1.5-1.5 1.5 1.5"></path>
-                <path d="M17.5 13.5l1.5-1.5 1.5 1.5"></path>
-            </svg>
+      <div className="flex items-center gap-4 border-b border-slate-100 pb-3">
+        {/* Yandex Raspisaniya Logo */}
+        {/* User requested icon reduced by ~30%. We use h-8 and scale-90 or similar visual adjustment. */}
+        <div className="shrink-0">
+             <img 
+                src="/yandex_rasp_logo.png" 
+                alt="Yandex Raspisaniya" 
+                className="h-8 w-auto object-contain scale-90"
+             />
         </div>
         <div>
-            <h3 className="text-lg font-bold text-slate-800 leading-tight">Как добраться (Ж/Д)</h3>
-            <p className="text-xs text-slate-500">Электрички, МЦД, Экспрессы</p>
+            <h3 className="text-lg font-bold text-slate-800 leading-tight">Как добраться</h3>
         </div>
       </div>
 
       <div className="space-y-3">
-        <div className="bg-slate-50 rounded-lg p-3 text-sm text-slate-600 border border-slate-100 flex items-start gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
-            <span>Рекомендуемый интервал движения: <span className="font-bold text-slate-800">07:00 – 19:00</span></span>
-        </div>
-
+        {/* Buttons */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <a 
                 href={toUrl} 
@@ -60,7 +51,7 @@ const TransportBlock: React.FC<TransportBlockProps> = ({ cityName, date }) => {
             >
                 <div className="flex flex-col">
                     <span className="text-xs text-slate-400 font-medium uppercase mb-1">Туда</span>
-                    <span className="font-bold text-slate-800 group-hover:text-red-600 transition-colors">Москва → {cityName}</span>
+                    <span className="font-bold text-slate-800 group-hover:text-red-600 transition-colors">Москва → {startCity}</span>
                 </div>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300 group-hover:text-red-500">
                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
@@ -77,7 +68,7 @@ const TransportBlock: React.FC<TransportBlockProps> = ({ cityName, date }) => {
             >
                 <div className="flex flex-col">
                     <span className="text-xs text-slate-400 font-medium uppercase mb-1">Обратно</span>
-                    <span className="font-bold text-slate-800 group-hover:text-red-600 transition-colors">{cityName} → Москва</span>
+                    <span className="font-bold text-slate-800 group-hover:text-red-600 transition-colors">{endCity} → Москва</span>
                 </div>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300 group-hover:text-red-500">
                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>

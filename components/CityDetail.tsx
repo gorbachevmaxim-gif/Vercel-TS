@@ -542,7 +542,8 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
           {/* Transport Block */}
           {activeStats && (
               <TransportBlock 
-                  cityName={data.cityName} 
+                  startCity={data.cityName} 
+                  endCity={data.cityName} 
                   date={activeStats.dateObj} 
               />
           )}
