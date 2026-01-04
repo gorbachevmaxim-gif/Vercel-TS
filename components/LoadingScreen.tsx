@@ -52,17 +52,24 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ state, onComplete }) => {
 
   // Handle completion trigger
   useEffect(() => {
-    // Only trigger if we reached 100% (or very close) AND we haven't completed yet
-    if (displayPercent >= 99.5 && onComplete && !completedRef.current) {
-        completedRef.current = true;
+    // Only trigger if we reached 100% (or very close)
+    // We do NOT check !completedRef.current here to avoid issues with React Strict Mode 
+    // where the effect runs twice and the timeout gets cleared but the ref stays true.
+    if (displayPercent >= 99.5 && onComplete) {
         
         // Force display to exactly 100 just in case
-        setDisplayPercent(100);
+        if (displayPercent !== 100) {
+            setDisplayPercent(100);
+        }
 
-        // Wait 1 second so the user sees the full filled logo
+        // Wait a short moment (100ms) so the user sees the full filled logo
         const timer = setTimeout(() => {
-            onComplete();
-        }, 1000);
+            if (!completedRef.current) {
+                completedRef.current = true;
+                onComplete();
+            }
+        }, 100);
+        
         return () => clearTimeout(timer);
     }
   }, [displayPercent, onComplete]);
