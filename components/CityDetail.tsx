@@ -31,6 +31,10 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
     const minTemp = parseInt(stats.tempRange.split('..')[0]);
     const isTooCold = stats.clothingHints.length === 0 && minTemp < 5;
     
+    // Wind rotation: +180 because arrow points UP (North 0) but north wind blows South.
+    // This makes the arrow visually indicate flow direction.
+    const windRotation = (stats.windDeg + 180) % 360;
+
     return (
         <div 
             onClick={onClick}
@@ -58,9 +62,20 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
                 <div className="p-3 flex flex-col items-center justify-center text-center">
                     <span className="text-xs text-slate-400 uppercase font-semibold mb-1">Ветер</span>
                     <span className="text-lg font-bold text-slate-700">{stats.windRange} <span className="text-sm font-normal">км/ч</span></span>
-                    <div className="text-xs mt-1">
-                        <span className="text-slate-500">{stats.windDir}</span>
-                        <span className="text-slate-400 ml-1">Пор: {stats.windGusts} км/ч</span>
+                    
+                    <div className="flex flex-col items-center justify-center mt-1">
+                        <div className="flex items-center gap-1.5 text-slate-500">
+                            <span className="text-xs font-medium">{stats.windDir}</span>
+                            <svg 
+                                style={{ transform: `rotate(${windRotation}deg)` }}
+                                className="transition-transform duration-300"
+                                xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                            >
+                                <line x1="12" y1="19" x2="12" y2="5"></line>
+                                <polyline points="5 12 12 5 19 12"></polyline>
+                            </svg>
+                        </div>
+                        <span className="text-xs text-slate-500 mt-0.5">Пор: {stats.windGusts} км/ч</span>
                     </div>
                 </div>
 
