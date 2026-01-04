@@ -603,13 +603,23 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
 
           {/* Transport Block */}
           {activeStats && showTransportBlock && (
-              <TransportBlock 
-                  startCity={routeStartCity} 
-                  endCity={routeEndCity} 
-                  date={activeStats.dateObj} 
-                  showTo={showTo}
-                  showFrom={showFrom}
-              />
+              <div className="space-y-2">
+                  <h3 className="text-sm font-bold text-slate-700 ml-1">
+                      Расписание электричек
+                  </h3>
+                  <TransportBlock 
+                      startCity={routeStartCity} 
+                      endCity={routeEndCity} 
+                      date={activeStats.dateObj} 
+                      showTo={showTo}
+                      showFrom={showFrom}
+                  />
+                  {(routeStartCity !== data.cityName || routeEndCity !== data.cityName) && (
+                      <p className="text-xs text-slate-500 ml-1">
+                          * Маршрут начинается/заканчивается в другом городе, расписание скорректировано.
+                      </p>
+                  )}
+              </div>
           )}
 
           {/* Komoot Link */}
