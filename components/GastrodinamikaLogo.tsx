@@ -6,27 +6,29 @@ interface LogoProps {
 }
 
 const GastrodinamikaLogo: React.FC<LogoProps> = ({ percent = 0, className = "" }) => {
-  // Используем приложенный файл gastrodinamika_ronde_novo.png
+  // Используем JPG файл.
   // Файл должен находиться в папке public/ проекта.
-  const logoSrc = "/gastrodinamika_ronde_novo.png";
+  const logoSrc = "/gastrodinamika_ronde_novo.jpg";
 
   return (
     <div className={`relative ${className}`}>
        {/* 1. Фоновый слой (Серый) */}
-       {/* opacity-20 делает черный логотип светло-серым */}
+       {/* opacity-20 делает черный логотип светло-серым.
+           mix-blend-multiply убирает белый фон JPG (делает его прозрачным на светлом фоне),
+           оставляя только темные линии.
+       */}
        <img
          src={logoSrc}
          alt="Gastrodinamika Background"
-         className="absolute inset-0 w-full h-full object-contain grayscale opacity-20"
+         className="absolute inset-0 w-full h-full object-contain grayscale opacity-20 mix-blend-multiply"
        />
 
        {/* 2. Активный слой (Черный) */}
        {/* Сверху накладываем нормальный логотип, но обрезаем его маской */}
-       {/* conic-gradient(from 315deg...) начинает заливку с верхнего левого угла (буква Г) по часовой стрелке */}
        <img
          src={logoSrc}
          alt="Gastrodinamika Active"
-         className="absolute inset-0 w-full h-full object-contain"
+         className="absolute inset-0 w-full h-full object-contain mix-blend-multiply"
          style={{
            // Стандартное свойство
            maskImage: `conic-gradient(from 315deg, black ${percent}%, transparent ${percent}%)`,
