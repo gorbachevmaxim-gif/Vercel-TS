@@ -48,8 +48,8 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
         {title}, <span className="font-normal text-sm text-slate-500">{dateLabel}</span>
       </h3>
       
-      {/* Dry Cities Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Dry Cities Rows - Changed to always be single column (rows) */}
+      <div className="grid grid-cols-1 gap-4">
         <div className="rounded-lg bg-green-50 p-3">
           <div className="text-xs font-semibold uppercase tracking-wider text-green-700 mb-2">Здесь без дождя весь уикенд</div>
           {fullWeekend.length > 0 ? (
