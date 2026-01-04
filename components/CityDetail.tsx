@@ -11,6 +11,12 @@ interface CityDetailProps {
   onClose: () => void;
 }
 
+interface RouteData {
+    points: [number, number][];
+    distanceKm: number;
+    elevationM: number;
+}
+
 // Map degrees to 8 cardinal directions for file naming
 // 0/360=N, 45=NE, 90=E, 135=SE, 180=S, 225=SW, 270=W, 315=NW
 const getCardinal = (angle: number): string => {
@@ -115,8 +121,22 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
     );
 };
 
-// Robust GPX Parsing Helper (Namespace Agnostic)
-const parseGpx = (str: string): [number, number][] => {
+// Haversine formula to calculate distance between two points in km
+const getDistanceFromLatLonInKm = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371; // Radius of the earth in km
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c; // Distance in km
+    return d;
+};
+
+// Robust GPX Parsing Helper
+const parseGpx = (str: string): RouteData | null => {
     try {
         const parser = new DOMParser();
         const xml = parser.parseFromString(str, "text/xml");
@@ -125,7 +145,7 @@ const parseGpx = (str: string): [number, number][] => {
         const parseError = xml.querySelector('parsererror');
         if (parseError) {
             console.error("XML Parse Error in GPX");
-            return [];
+            return null;
         }
 
         // Helper to safe get attribute
@@ -134,8 +154,6 @@ const parseGpx = (str: string): [number, number][] => {
             return val ? parseFloat(val) : NaN;
         };
 
-        // We use a flat selection strategy to avoid namespace issues (xmlns)
-        // standard getElementsByTagName('*') and checking localName is most robust in browsers
         const allElements = Array.from(xml.getElementsByTagName('*'));
         
         // 1. Try to find Track Points (trkpt)
@@ -150,19 +168,62 @@ const parseGpx = (str: string): [number, number][] => {
             );
         }
 
+        if (pointsElements.length === 0) return null;
+
         const points: [number, number][] = [];
-        pointsElements.forEach(pt => {
+        let totalDist = 0;
+        let totalElev = 0;
+        let prevLat = 0;
+        let prevLon = 0;
+        let prevEle = -10000;
+
+        pointsElements.forEach((pt, index) => {
             const lat = getAttr(pt, 'lat');
             const lon = getAttr(pt, 'lon');
+            
+            // Try to find elevation tag
+            // We search through child nodes because getElementsByTagName matches all descendants
+            let ele = NaN;
+            const children = Array.from(pt.children);
+            const eleNode = children.find(c => c.localName === 'ele' || c.nodeName === 'ele');
+            if (eleNode && eleNode.textContent) {
+                ele = parseFloat(eleNode.textContent);
+            }
+
             if (!isNaN(lat) && !isNaN(lon)) {
                 points.push([lat, lon]);
+
+                if (index > 0) {
+                    // Calc Distance
+                    const dist = getDistanceFromLatLonInKm(prevLat, prevLon, lat, lon);
+                    totalDist += dist;
+
+                    // Calc Elevation Gain
+                    if (!isNaN(ele) && prevEle !== -10000) {
+                        const diff = ele - prevEle;
+                        if (diff > 0) {
+                            totalElev += diff;
+                        }
+                    }
+                }
+
+                prevLat = lat;
+                prevLon = lon;
+                if (!isNaN(ele)) prevEle = ele;
             }
         });
 
-        return points;
+        if (points.length === 0) return null;
+
+        return {
+            points,
+            distanceKm: totalDist,
+            elevationM: totalElev
+        };
+
     } catch (e) {
         console.error("GPX Parse Exception", e);
-        return [];
+        return null;
     }
 };
 
@@ -172,7 +233,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   const [routeStatus, setRouteStatus] = useState<string>('');
   
   // Routes State
-  const [foundRoutes, setFoundRoutes] = useState<[number, number][][]>([]);
+  const [foundRoutes, setFoundRoutes] = useState<RouteData[]>([]);
   const [selectedRouteIdx, setSelectedRouteIdx] = useState<number>(0);
   
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -199,6 +260,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
 
   const activeStats = routeDay === 'saturday' ? activeWeekend.saturday : activeWeekend.sunday;
   const cityCoords = CITIES[data.cityName];
+  const currentRoute = foundRoutes[selectedRouteIdx];
 
   // 1. Initialize Map
   useEffect(() => {
@@ -257,8 +319,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
             // Basic check if it looks like XML/GPX to avoid parsing 404 HTML pages
             if (!txt.trim().startsWith('<')) return null;
 
-            const points = parseGpx(txt);
-            return points.length > 0 ? points : null;
+            return parseGpx(txt);
         } catch {
             return null;
         }
@@ -267,7 +328,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
     Promise.all(candidates.map(url => fetchRoute(url)))
         .then(results => {
             if (!isMounted) return;
-            const validRoutes = results.filter((r): r is [number, number][] => r !== null);
+            const validRoutes = results.filter((r): r is RouteData => r !== null);
             
             if (validRoutes.length > 0) {
                 setFoundRoutes(validRoutes);
@@ -294,10 +355,10 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
     }
 
     let startPoint: L.LatLngExpression = [cityCoords.lat, cityCoords.lon];
-    const currentPoints = foundRoutes[selectedRouteIdx];
+    const routePoints = currentRoute?.points;
 
-    if (currentPoints && currentPoints.length > 0) {
-        const polyline = L.polyline(currentPoints, { color: 'red', weight: 4 }).addTo(map);
+    if (routePoints && routePoints.length > 0) {
+        const polyline = L.polyline(routePoints, { color: 'red', weight: 4 }).addTo(map);
         
         // Safety check for bounds
         const bounds = polyline.getBounds();
@@ -308,7 +369,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
         polylineRef.current = polyline;
         
         // Start point is the first point of the GPX
-        startPoint = currentPoints[0];
+        startPoint = routePoints[0];
     } else {
         // Fallback to city center
         map.setView([cityCoords.lat, cityCoords.lon], 11);
@@ -348,7 +409,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
 
     setTimeout(() => map.invalidateSize(), 200);
 
-  }, [activeStats, cityCoords, foundRoutes, selectedRouteIdx]);
+  }, [activeStats, cityCoords, currentRoute]);
 
 
   return (
@@ -409,6 +470,22 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                     </div>
                 )}
             </div>
+
+            {/* Route Stats Display */}
+            {currentRoute && (
+                <div className="mb-3 flex gap-4 text-sm text-slate-700 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                    <div className="flex items-center gap-1">
+                        <span className="text-lg">📏</span>
+                        <span className="font-bold">{currentRoute.distanceKm.toFixed(1)} км</span>
+                    </div>
+                    {currentRoute.elevationM > 0 && (
+                        <div className="flex items-center gap-1">
+                            <span className="text-lg">⛰️</span>
+                            <span className="font-bold">{Math.round(currentRoute.elevationM)} м</span>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Route Switcher */}
             {foundRoutes.length > 1 && (
