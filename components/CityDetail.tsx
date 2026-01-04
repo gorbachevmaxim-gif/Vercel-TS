@@ -205,7 +205,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
     // Relative path (assumes /public/routes or root routes folder)
     const fileName = `routes/${data.cityName}_${windDirCode}.gpx`;
     
-    setRouteStatus(`Поиск: ${fileName}`);
+    setRouteStatus(`Поиск...`);
 
     // Attempt to load GPX
     fetch(fileName)
@@ -219,14 +219,14 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                 const polyline = L.polyline(latlngs, { color: 'red', weight: 4 }).addTo(map);
                 map.fitBounds(polyline.getBounds(), { padding: [20, 20] });
                 polylineRef.current = polyline;
-                setRouteStatus(`Маршрут: ${windDirCode} (Загружен)`);
+                setRouteStatus(`Маршрут найден`);
             } else {
-                setRouteStatus(`Ошибка GPX: ${fileName}`);
+                setRouteStatus(`Маршрут под такое направление ветра не создавался`);
                 map.setView([cityCoords.lat, cityCoords.lon], 11);
             }
         })
         .catch(() => {
-            setRouteStatus(`Файл не найден: ${fileName}`);
+            setRouteStatus(`Маршрут под такое направление ветра не создавался`);
             map.setView([cityCoords.lat, cityCoords.lon], 11);
         });
         
@@ -284,11 +284,11 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                 </h3>
                 
                 {activeStats && (
-                    <div className="flex flex-col items-end">
+                    <div className="flex flex-col items-end text-right">
                         <span className="text-sm font-medium text-slate-700">
-                           Ветер: {activeStats.windDir} ({getCardinal(activeStats.windDeg)})
+                           Ветер: {activeStats.windDir}
                         </span>
-                        <span className={`text-xs px-2 py-0.5 rounded mt-1 font-mono ${routeStatus.includes('не найден') || routeStatus.includes('Ошибка') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded mt-1 font-mono inline-block ${routeStatus.includes('не создавался') ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-700'}`}>
                             {routeStatus}
                         </span>
                     </div>
