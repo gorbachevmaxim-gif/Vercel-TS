@@ -473,15 +473,25 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
 
             {/* Route Stats Display */}
             {currentRoute && (
-                <div className="mb-3 flex gap-4 text-sm text-slate-700 bg-slate-50 p-2 rounded-lg border border-slate-100">
-                    <div className="flex items-center gap-1">
-                        <span className="text-lg">📏</span>
-                        <span className="font-bold">{currentRoute.distanceKm.toFixed(1)} км</span>
+                <div className="mb-3 flex items-center gap-6 text-sm text-slate-700 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                    {/* Distance */}
+                    <div className="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
+                             <path d="M18 8l4 4-4 4" />
+                             <path d="M6 16l-4-4 4-4" />
+                             <path d="M2 12h20" />
+                        </svg>
+                        <span className="font-bold text-lg text-slate-800">{currentRoute.distanceKm.toFixed(1)} <span className="text-xs font-normal text-slate-500">км</span></span>
                     </div>
+                    
+                    {/* Elevation */}
                     {currentRoute.elevationM > 0 && (
-                        <div className="flex items-center gap-1">
-                            <span className="text-lg">⛰️</span>
-                            <span className="font-bold">{Math.round(currentRoute.elevationM)} м</span>
+                        <div className="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
+                                <path d="M7 17l10-10" />
+                                <path d="M7 7h10v10" />
+                            </svg>
+                            <span className="font-bold text-lg text-slate-800">{Math.round(currentRoute.elevationM)} <span className="text-xs font-normal text-slate-500">м</span></span>
                         </div>
                     )}
                 </div>
