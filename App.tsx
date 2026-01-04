@@ -15,7 +15,8 @@ const App: React.FC = () => {
   // Date Logic
   const dates = useMemo(() => getWeekendDates(), []);
   
-  const formatDate = (d: Date) => d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+  // Format: "14 окт"
+  const formatDate = (d: Date) => d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
   const w1Label = `${formatDate(dates[0])} - ${formatDate(dates[1])}`;
   const w2Label = `${formatDate(dates[2])} - ${formatDate(dates[3])}`;
 
@@ -27,8 +28,6 @@ const App: React.FC = () => {
 
       setLoading({ total, current: 0, status: 'Загрузка списка...' });
 
-      // We process in small chunks to allow UI updates if needed, though mostly React handles this.
-      // We use Promise.all to be faster than the python script, but let's do batches to be polite to API.
       const BATCH_SIZE = 5;
       
       for (let i = 0; i < total; i += BATCH_SIZE) {
@@ -85,24 +84,17 @@ const App: React.FC = () => {
         
         {!selectedCity ? (
             <>
-                {/* Introduction */}
-                <div className="bg-blue-600 text-white p-4 rounded-xl shadow-lg">
-                    <p className="text-sm opacity-90 mb-1">Ближайшие выходные</p>
-                    <div className="text-2xl font-bold">{w1Label}</div>
-                    <div className="mt-4 pt-4 border-t border-blue-500 flex justify-between items-end">
-                        <span className="text-xs opacity-75">Через неделю: {w2Label}</span>
-                    </div>
-                </div>
-
                 {/* Summaries */}
                 <SummaryView 
                     data={data} 
-                    weekendLabel="Ближайшие выходные" 
+                    title="Ближайшие выходные"
+                    dateLabel={w1Label} 
                     onCityClick={(city) => handleCitySelect(city, 'w1')} 
                 />
                 <SummaryView 
                     data={data} 
-                    weekendLabel="Через неделю" 
+                    title="Через неделю"
+                    dateLabel={w2Label} 
                     isSecondWeekend={true} 
                     onCityClick={(city) => handleCitySelect(city, 'w2')} 
                 />

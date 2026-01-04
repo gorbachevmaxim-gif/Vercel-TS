@@ -3,12 +3,13 @@ import { CityAnalysisResult } from '../types';
 
 interface SummaryViewProps {
   data: CityAnalysisResult[];
-  weekendLabel: string;
+  title: string;
+  dateLabel: string;
   isSecondWeekend?: boolean;
   onCityClick: (city: string) => void;
 }
 
-const SummaryView: React.FC<SummaryViewProps> = ({ data, weekendLabel, isSecondWeekend = false, onCityClick }) => {
+const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSecondWeekend = false, onCityClick }) => {
   // Filter logic
   const getDry = (city: CityAnalysisResult) => {
     const w = isSecondWeekend ? city.weekend2 : city.weekend1;
@@ -43,12 +44,14 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, weekendLabel, isSecondW
 
   return (
     <div className="space-y-6 rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
-      <h3 className="text-lg font-bold text-slate-800 border-b pb-2">{weekendLabel}</h3>
+      <h3 className="text-lg font-bold text-slate-800 border-b pb-2">
+        {title}, <span className="font-normal text-sm text-slate-500">{dateLabel}</span>
+      </h3>
       
       {/* Dry Cities Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="rounded-lg bg-green-50 p-3">
-          <div className="text-xs font-semibold uppercase tracking-wider text-green-700 mb-2">Весь уикенд</div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-green-700 mb-2">Здесь без дождя весь уикенд</div>
           {fullWeekend.length > 0 ? (
              <div className="flex flex-wrap gap-2">
                  {fullWeekend.map(c => (
@@ -65,7 +68,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, weekendLabel, isSecondW
         </div>
 
         <div className="rounded-lg bg-blue-50 p-3">
-          <div className="text-xs font-semibold uppercase tracking-wider text-blue-700 mb-2">Только Суббота</div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-blue-700 mb-2">Здесь без дождя в субботу</div>
           {onlySat.length > 0 ? (
              <div className="flex flex-wrap gap-2">
                  {onlySat.map(c => (
@@ -82,7 +85,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, weekendLabel, isSecondW
         </div>
 
         <div className="rounded-lg bg-indigo-50 p-3">
-          <div className="text-xs font-semibold uppercase tracking-wider text-indigo-700 mb-2">Только Воскресенье</div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-indigo-700 mb-2">Здесь без дождя в воскресенье</div>
           {onlySun.length > 0 ? (
              <div className="flex flex-wrap gap-2">
                  {onlySun.map(c => (

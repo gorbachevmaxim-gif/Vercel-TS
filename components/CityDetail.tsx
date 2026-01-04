@@ -12,6 +12,8 @@ const WeatherCard: React.FC<{ stats: WeatherDayStats | null }> = ({ stats }) => 
     if (!stats) return <div className="p-4 text-center text-slate-400">Нет данных</div>;
 
     const dryColor = stats.isDry ? 'text-green-600' : 'text-red-500';
+    const minTemp = parseInt(stats.tempRange.split('..')[0]);
+    const isTooCold = stats.clothingHints.length === 0 && minTemp < 5;
     
     return (
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
@@ -70,14 +72,14 @@ const WeatherCard: React.FC<{ stats: WeatherDayStats | null }> = ({ stats }) => 
                 </div>
             )}
             
-            {/* Short morning ride annotation (only if not fully dry, but morning is fine) */}
-            {!stats.isDry && stats.isMorningRideSuitable && (
+            {/* Short morning ride annotation (only if not fully dry, but morning is fine AND NOT too cold) */}
+            {!stats.isDry && stats.isMorningRideSuitable && !isTooCold && (
                  <div className="bg-slate-50 border-t border-slate-100 p-3 text-xs text-slate-600 text-center font-medium">
                     Небольшой райд до дождя
                  </div>
             )}
             
-            {stats.clothingHints.length === 0 && parseInt(stats.tempRange.split('..')[0]) < 5 && (
+            {isTooCold && (
                  <div className="bg-slate-50 border-t border-slate-100 p-3 text-xs text-slate-600 text-center font-medium">
                     Слишком холодно для комфортного заезда (&lt; 5°C)
                  </div>
