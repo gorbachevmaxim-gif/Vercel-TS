@@ -301,8 +301,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
             
             <div className="mt-4 flex flex-col items-center text-center space-y-2">
                 <p className="text-xs text-slate-400 max-w-lg">
-                   Маршрут подбирается автоматически по направлению ветра.<br/>
-                   N=Север, E=Восток, S=Юг, W=Запад
+                   Маршрут подбирается автоматически по направлению ветра.
                 </p>
                 <a 
                     href="https://www.komoot.com/collection/2674102/-lechappe-belle?ref=collection" 
