@@ -74,7 +74,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
                             <line x1="12" y1="19" x2="12" y2="5"></line>
                             <polyline points="5 12 12 5 19 12"></polyline>
                         </svg>
-                        <span className="text-xs">пор. {stats.windGusts}</span>
+                        <span className="text-xs">Порывы {stats.windGusts}</span>
                     </div>
                 </div>
 
@@ -268,6 +268,13 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   const activeStats = routeDay === 'saturday' ? activeWeekend.saturday : activeWeekend.sunday;
   const cityCoords = CITIES[data.cityName];
   const currentRoute = foundRoutes[selectedRouteIdx];
+
+  // Calculate distance from Moscow to determine if we should show transport
+  const moscow = CITIES['Москва'];
+  const distFromMoscow = moscow ? getDistanceFromLatLonInKm(moscow.lat, moscow.lon, cityCoords.lat, cityCoords.lon) : 0;
+  // Show transport if <= 300km AND not Moscow itself
+  const showTransport = distFromMoscow <= 300 && data.cityName !== 'Москва';
+
 
   // 1. Initialize Map
   useEffect(() => {
@@ -556,7 +563,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
           </div>
 
           {/* Transport Block */}
-          {activeStats && (
+          {activeStats && showTransport && (
               <TransportBlock 
                   startCity={data.cityName} 
                   endCity={data.cityName} 

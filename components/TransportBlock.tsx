@@ -16,6 +16,7 @@ const TransportBlock: React.FC<TransportBlockProps> = ({ startCity, endCity, dat
       fromName: from,
       toName: to,
       when: dateStr,
+      transport: 'suburban', // Only suburban trains (electrichka/express)
     });
     return `https://rasp.yandex.ru/search/?${params.toString()}`;
   };
