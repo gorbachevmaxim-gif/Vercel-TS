@@ -8,5 +8,17 @@ export default defineConfig({
   server: {
     host: true, // Listen on all addresses
     port: 5173,
+  },
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'leaflet'],
+        },
+      },
+    },
   }
 })
