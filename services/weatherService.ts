@@ -83,13 +83,9 @@ function getClothingRecommendations(
     const isMountain = MOUNTAIN_CITIES.includes(cityName);
 
     // 1. Temperature Check: 
-    // Previously blocked if tMin < 5. 
-    // Now we allow if tMax >= 5. Even if it starts at 3-4 degrees, if it warms up, we can ride.
     if (tMax < 5) return [];
 
     // 2. Precipitation Check: 
-    // Do not recommend if rain > 0.5mm during active hours (09:00 - 18:00), 
-    // UNLESS it's a suitable morning ride (dry 09-12).
     if (activeRainSum > 0.5 && !isMorningRideSuitable) return [];
 
     // Check Arm Warmers condition early (Temp rises from <16 to >19)
@@ -103,17 +99,15 @@ function getClothingRecommendations(
     }
 
     // --- НИЗ (Бибы) ---
-    // Если днем холодно (макс < 14), нужны длинные. Иначе - летние.
     if (tMax < 14) {
-        hints.push("Длинные бибы");
+        hints.push("Bib Tights");
     } else {
-        hints.push("Летние бибы");
+        hints.push("Bib Shorts");
     }
 
     // Утепление для ног (Ногова)
-    // Если летние бибы, но еще не жара (14-19 градусов)
     if (tMax >= 14 && tMax <= 19) {
-        hints.push("Ногова");
+        hints.push("Leg or Knee Warmers");
     }
     // Наколенники на переходный период
     if (tMax > 19 && tMax <= 22) {
@@ -123,63 +117,48 @@ function getClothingRecommendations(
     // --- ВЕРХ ---
     let jersey = "";
     if (tMax < 15) {
-        jersey = "Теплая джерси (лонгслив)";
+        jersey = "Long Sleeve Jersey Cold";
     } else if (tMax >= 15 && tMax <= 22) {
-        jersey = "Летний лонгслив";
+        jersey = "Long Sleeve Jersey Hot";
     } else {
         jersey = "Летняя джерси"; // > 22
     }
 
-    // If Arm Warmers are recommended, ensure we pair them with Summer Jersey, not Long Sleeve
-    if (useArmWarmers && jersey === "Летний лонгслив") {
+    if (useArmWarmers && jersey === "Long Sleeve Jersey Hot") {
         jersey = "Летняя джерси";
     }
 
     // --- ВЕРХНЯЯ ОДЕЖДА (Ветровка / Жилетка) ---
     let outerLayer = "";
-    
-    // Conditions to add an outer layer:
-    // 1. Cold start (<12)
-    // 2. Strong wind (>15)
-    // 3. Comfort range (10-20) where a vest is useful
     const needsProtection = tMin < 12 || wMax > 15 || (tMax > 10 && tMax <= 20);
 
     if (needsProtection) {
-        // "Ветровка рекомендуем при сильном ветре (>=15) или в городе, где рядом горы"
-        // "при ветре ниже 15 км/ч предпочтение отдаем только Жилетка"
         if (wMax >= 15 || isMountain) {
-            outerLayer = "Ветровка";
+            outerLayer = "Jacket";
         } else {
-            // Calm and flat -> Vest
-            outerLayer = "Жилетка";
+            outerLayer = "Vest";
         }
     }
 
     // --- JACKET OVERRIDE ---
-    // "Давай предлагать Куртка только в случае, если максимальная температура не превышает +8 градусов"
     if (tMax <= 8) {
-        hints.push("Куртка");
-        // Jacket replaces Jersey and Outer Layer in very cold weather
+        hints.push("Winter Jacket");
     } else {
         if (jersey) hints.push(jersey);
         if (outerLayer) hints.push(outerLayer);
     }
 
     // --- АКСЕССУАРЫ (Руки/Ноги/Голова) ---
-    
-    // Рукава
     if (useArmWarmers) {
-        hints.push("Рукава");
+        hints.push("Arm Warmers");
     }
 
-    // Ноги (обувь)
     if (tMin <= 8) {
-        hints.push("Oversocks"); // Replaced "Бахилы"
+        hints.push("Oversocks"); 
     } else if (tMin <= 14) {
         hints.push("Toe covers");
     }
 
-    // Шея (Buff) - applied only for +5...+8 (implicit via tMin < 5 return and tMin <= 8 check)
     if (tMin <= 8) {
         hints.push("Buff");
     }
@@ -200,7 +179,7 @@ export async function analyzeCity(
         longitude: coords.lon.toString(),
         start_date: startStr,
         end_date: endStr,
-        hourly: "precipitation,temperature_2m,wind_speed_10m,apparent_temperature,wind_direction_10m,sunshine_duration",
+        hourly: "precipitation,temperature_2m,wind_speed_10m,wind_gusts_10m,apparent_temperature,wind_direction_10m,sunshine_duration",
         timezone: "Europe/Moscow"
     });
 
@@ -240,7 +219,7 @@ export async function analyzeCity(
 
             // Active hours indices (09:00 - 18:00)
             const actStart = sIdx + 9;
-            const actEnd = sIdx + 19; // Ends at 19 to include 18:00 data point (interval 18:00-19:00 or instantaneous at 18:00)
+            const actEnd = sIdx + 19; 
 
             const sunSlice = hourly.sunshine_duration.slice(actStart, actEnd) as number[];
             const sunVal = sunSlice.reduce((a, b) => a + (b || 0), 0);
@@ -248,13 +227,13 @@ export async function analyzeCity(
             const tempSlice = hourly.temperature_2m.slice(actStart, actEnd) as number[];
             const feelsSlice = hourly.apparent_temperature.slice(actStart, actEnd) as number[];
             const windSlice = hourly.wind_speed_10m.slice(actStart, actEnd) as number[];
+            const windGustSlice = hourly.wind_gusts_10m.slice(actStart, actEnd) as number[];
             const windDirSlice = hourly.wind_direction_10m.slice(actStart, actEnd) as number[];
             
             // Calculate Rain during Active Hours (09:00 - 18:00)
             const pActiveSlice = hourly.precipitation.slice(actStart, actEnd) as number[];
             const activeRainSum = pActiveSlice.reduce((a, b) => a + (b || 0), 0);
 
-            // Calculate Rain during Morning Hours (09:00 - 12:00)
             const pMorningSlice = hourly.precipitation.slice(sIdx + 9, sIdx + 12) as number[];
             const morningRainSum = pMorningSlice.reduce((a, b) => a + (b || 0), 0);
             const isMorningRideSuitable = morningRainSum <= 0.1;
@@ -266,11 +245,14 @@ export async function analyzeCity(
 
             const wMin = windSlice.length ? Math.min(...windSlice) : 0;
             const wMax = windSlice.length ? Math.max(...windSlice) : 0;
+            const gMax = windGustSlice.length ? Math.max(...windGustSlice) : 0;
             
             let windDirStr = "";
+            let windDeg = 0;
             if (windSlice.length > 0) {
                 const maxWindIdx = windSlice.indexOf(wMax);
-                windDirStr = degToCompass(windDirSlice[maxWindIdx]);
+                windDeg = windDirSlice[maxWindIdx] || 0;
+                windDirStr = degToCompass(windDeg);
             }
 
             const temps09_11 = hourly.temperature_2m.slice(sIdx + 9, sIdx + 12) as number[];
@@ -289,15 +271,16 @@ export async function analyzeCity(
                 dateObj: targetDate,
                 dateStr: tStr,
                 dayName: targetDate.getDay() === 6 ? "Суббота" : "Воскресенье",
-                isDry: activeRainSum <= 0.5, // Dry if active hours (09-18) have <= 0.5mm rain
+                isDry: activeRainSum <= 0.5,
                 isMorningRideSuitable: isMorningRideSuitable,
                 precipSum: totalRain,
                 rainHours: formatRainHours(wetHours),
                 tempRange: `${Math.round(tMin)}..${Math.round(tMax)}`,
                 feelsRange: `${Math.round(fMin)}..${Math.round(fMax)}`,
                 windRange: `${Math.round(wMin)}..${Math.round(wMax)}`,
-                windMax: wMax,
+                windGusts: Math.round(gMax),
                 windDir: windDirStr,
+                windDeg: windDeg,
                 sunSeconds: sunVal,
                 sunStr: formatSunTime(sunVal),
                 accuracy: 'High',

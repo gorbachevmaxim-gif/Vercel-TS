@@ -1,12 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CityAnalysisResult, WeatherDayStats } from '../types';
 import { CITIES } from '../constants';
+import * as L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 interface CityDetailProps {
   data: CityAnalysisResult;
   initialTab?: 'w1' | 'w2';
   onClose: () => void;
 }
+
+// Map degrees to 8 cardinal directions for file naming (e.g. "NW", "S")
+const getCardinal = (angle: number): string => {
+  const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  const index = Math.round(((angle %= 360) < 0 ? angle + 360 : angle) / 45) % 8;
+  return directions[index];
+};
 
 const WeatherCard: React.FC<{ stats: WeatherDayStats | null }> = ({ stats }) => {
     if (!stats) return <div className="p-4 text-center text-slate-400">Нет данных</div>;
@@ -34,7 +43,7 @@ const WeatherCard: React.FC<{ stats: WeatherDayStats | null }> = ({ stats }) => 
                 <div className="p-3 flex flex-col items-center justify-center text-center">
                     <span className="text-xs text-slate-400 uppercase font-semibold mb-1">Ветер</span>
                     <span className="text-lg font-bold text-slate-700">{stats.windRange} <span className="text-sm font-normal">км/ч</span></span>
-                    <span className="text-xs text-slate-500">Макс: {stats.windMax} ({stats.windDir})</span>
+                    <span className="text-xs text-slate-500">{stats.windDir} Порывы: {stats.windGusts}</span>
                 </div>
 
                 <div className="p-3 flex flex-col items-center justify-center text-center">
@@ -72,7 +81,6 @@ const WeatherCard: React.FC<{ stats: WeatherDayStats | null }> = ({ stats }) => 
                 </div>
             )}
             
-            {/* Short morning ride annotation (only if not fully dry, but morning is fine AND NOT too cold) */}
             {!stats.isDry && stats.isMorningRideSuitable && !isTooCold && (
                  <div className="bg-slate-50 border-t border-slate-100 p-3 text-xs text-slate-600 text-center font-medium">
                     Небольшой райд до дождя
@@ -88,22 +96,107 @@ const WeatherCard: React.FC<{ stats: WeatherDayStats | null }> = ({ stats }) => 
     );
 };
 
+// Helper to parse basic GPX (trkpt only)
+const parseGpx = (str: string): [number, number][] => {
+    try {
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(str, "text/xml");
+        const points: [number, number][] = [];
+        const trkpts = xml.querySelectorAll('trkpt');
+        trkpts.forEach(pt => {
+            const lat = parseFloat(pt.getAttribute('lat') || '0');
+            const lon = parseFloat(pt.getAttribute('lon') || '0');
+            if (lat && lon) points.push([lat, lon]);
+        });
+        return points;
+    } catch (e) {
+        console.error("GPX Parse error", e);
+        return [];
+    }
+};
+
 const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClose }) => {
   const [activeTab, setActiveTab] = useState<'w1' | 'w2'>(initialTab);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const polylineRef = useRef<L.Polyline | null>(null);
   
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [data.cityName]);
 
+  const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
+  // Prefer saturday for route selection if it's dry, otherwise sunday, otherwise saturday
+  const activeStats = (activeWeekend.saturday?.isDry && activeWeekend.saturday) 
+                      || activeWeekend.sunday 
+                      || activeWeekend.saturday;
+
   const cityCoords = CITIES[data.cityName];
 
-  // Calculate bounding box for OpenStreetMap
-  // roughly +/- 0.05 degrees lat/lon for city view
-  const deltaLat = 0.04;
-  const deltaLon = 0.08;
-  const bbox = cityCoords 
-    ? `${cityCoords.lon - deltaLon},${cityCoords.lat - deltaLat},${cityCoords.lon + deltaLon},${cityCoords.lat + deltaLat}`
-    : '';
+  // Initialize Map
+  useEffect(() => {
+    if (!mapContainerRef.current || !cityCoords) return;
+
+    if (!mapInstanceRef.current) {
+        const map = L.map(mapContainerRef.current).setView([cityCoords.lat, cityCoords.lon], 10);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        mapInstanceRef.current = map;
+    }
+
+    // Cleanup function
+    return () => {
+        if (mapInstanceRef.current) {
+            mapInstanceRef.current.remove();
+            mapInstanceRef.current = null;
+        }
+    }
+  }, [cityCoords]);
+
+  // Load Route Logic
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !activeStats || !cityCoords) return;
+
+    // Reset previous layer
+    if (polylineRef.current) {
+        polylineRef.current.remove();
+        polylineRef.current = null;
+    }
+
+    // Determine direction
+    const windDirCode = getCardinal(activeStats.windDeg);
+    // Relative path for compatibility with GH Pages sub-paths
+    const fileName = `routes/${data.cityName}_${windDirCode}.gpx`;
+    
+    // Attempt to load GPX
+    fetch(fileName)
+        .then(res => {
+            if (!res.ok) throw new Error("No route found");
+            return res.text();
+        })
+        .then(xmlStr => {
+            const latlngs = parseGpx(xmlStr);
+            if (latlngs.length > 0) {
+                const polyline = L.polyline(latlngs, { color: 'red', weight: 4 }).addTo(map);
+                map.fitBounds(polyline.getBounds(), { padding: [20, 20] });
+                polylineRef.current = polyline;
+            } else {
+                // Fallback: Just center on city
+                map.setView([cityCoords.lat, cityCoords.lon], 11);
+            }
+        })
+        .catch(() => {
+            // No route file found for this condition
+            // Add a marker for the city at least
+             map.setView([cityCoords.lat, cityCoords.lon], 11);
+        });
+
+  }, [activeStats, cityCoords, data.cityName]);
+
 
   return (
     <div className="space-y-4">
@@ -137,29 +230,20 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
           <WeatherCard stats={activeTab === 'w1' ? data.weekend1.sunday : data.weekend2.sunday} />
           
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-            <h3 className="text-lg font-bold text-slate-800 mb-4">
-                Карта местности
-            </h3>
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-slate-800">
+                    Маршрут
+                </h3>
+                {activeStats && (
+                    <span className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-600">
+                        Ветер: {activeStats.windDir} ({getCardinal(activeStats.windDeg)})
+                    </span>
+                )}
+            </div>
             
-            {cityCoords ? (
-                <div className="relative w-full h-[350px] bg-slate-100 rounded-lg overflow-hidden border border-slate-100">
-                    <iframe 
-                        width="100%" 
-                        height="100%" 
-                        frameBorder="0" 
-                        scrolling="no" 
-                        marginHeight={0} 
-                        marginWidth={0} 
-                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${cityCoords.lat},${cityCoords.lon}`} 
-                        className="w-full h-full"
-                        title="OSM Map"
-                    ></iframe>
-                </div>
-            ) : (
-                <div className="text-center p-6 bg-slate-50 rounded-lg border border-slate-100 text-slate-500 text-sm mb-2">
-                    Координаты города не найдены
-                </div>
-            )}
+            <div className="relative w-full h-[350px] bg-slate-100 rounded-lg overflow-hidden border border-slate-100 z-0">
+                <div ref={mapContainerRef} className="w-full h-full" />
+            </div>
             
             <div className="mt-4 flex justify-center">
                 <a 
@@ -168,7 +252,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                     rel="noreferrer"
                     className="inline-flex items-center justify-center w-full sm:w-auto text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl transition-colors shadow-sm"
                 >
-                    Маршруты Gastrodinamica
+                    Все маршруты Gastrodinamica
                 </a>
             </div>
           </div>

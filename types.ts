@@ -18,8 +18,9 @@ export interface WeatherDayStats {
   tempRange: string;
   feelsRange: string;
   windRange: string;
-  windMax: number;
+  windGusts: number;
   windDir: string;
+  windDeg: number;
   sunSeconds: number;
   sunStr: string;
   accuracy: 'High' | 'Medium' | 'Low';
