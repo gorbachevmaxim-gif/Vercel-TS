@@ -1,77 +1,40 @@
 import * as React from 'react';
 
-interface LogoProps extends React.SVGProps<SVGSVGElement> {
+interface LogoProps {
   percent?: number;
+  className?: string;
 }
 
-const GastrodinamikaLogo: React.FC<LogoProps> = ({ percent = 0, ...props }) => {
-  // Letters paths in clockwise order starting from Г (Top Left)
-  // Total 14 letters: Г А С Т Р О Д И Н А М И К А
-  const letters = [
-    // Г (Top Left)
-    <path key="0" d="M75 80 L50 45 M50 45 L70 35" />,
-    // А
-    <path key="1" d="M85 75 L85 25 M85 25 L100 25 M85 50 L100 50" />,
-    // С
-    <path key="2" d="M100 75 L105 25 C120 25 125 40 115 50" />,
-    // Т
-    <path key="3" d="M115 80 L135 30 M120 30 L150 35" />,
-    // Р
-    <path key="4" d="M125 90 L160 55 C170 60 165 75 150 75 L135 85" />,
-    // О
-    <path key="5" d="M130 100 L180 90 C185 105 175 115 160 110 L130 105" />,
-    // Д
-    <path key="6" d="M125 115 L170 130 M170 130 L160 145 M170 130 L180 120" />,
-    // И
-    <path key="7" d="M115 125 L140 160 M140 160 L155 145 M155 145 L150 170" />,
-    // Н
-    <path key="8" d="M100 130 L100 175 M100 155 L115 155 M115 135 L115 170" />,
-    // А
-    <path key="9" d="M85 125 L70 170 M70 170 L55 160 M65 150 L80 155" />,
-    // М
-    <path key="10" d="M75 115 L40 145 L35 125 L50 110" />,
-    // И
-    <path key="11" d="M70 100 L25 105 L30 90 L65 95" />,
-    // К
-    <path key="12" d="M70 90 L30 75 M30 75 L45 60 M30 75 L40 85" />,
-    // А
-    <path key="13" d="M72 85 L45 55 M45 55 L60 50 M50 65 L65 70" />
-  ];
+const GastrodinamikaLogo: React.FC<LogoProps> = ({ percent = 0, className = "" }) => {
+  // Используем приложенный файл gastrodinamika_ronde_novo.png
+  // Файл должен находиться в папке public/ проекта.
+  const logoSrc = "/gastrodinamika_ronde_novo.png";
 
   return (
-    <svg
-      viewBox="0 0 200 200"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
-    >
-      {/* Central Hook/Circle - Always Black to act as the hub */}
-      <path
-        d="M100 115C108.284 115 115 108.284 115 100C115 91.7157 108.284 85 100 85C91.7157 85 85 91.7157 85 100C85 105 87 109 90 112"
-        stroke="black" 
-        strokeWidth="6"
-        strokeLinecap="round"
-      />
+    <div className={`relative ${className}`}>
+       {/* 1. Фоновый слой (Серый) */}
+       {/* opacity-20 делает черный логотип светло-серым */}
+       <img
+         src={logoSrc}
+         alt="Gastrodinamika Background"
+         className="absolute inset-0 w-full h-full object-contain grayscale opacity-20"
+       />
 
-      {/* Radiating Letters */}
-      <g strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
-        {letters.map((letterNode, index) => {
-          // Calculate if this letter should be black based on percentage
-          // index 0 (G) activates immediately (>0%)
-          // index 13 (last A) activates near 100%
-          const threshold = (index / letters.length) * 100;
-          const isActive = percent > threshold;
-
-          // Inactive = Gray (#d1d5db / slate-300), Active = Black
-          const color = isActive ? 'black' : '#d1d5db';
-
-          return React.cloneElement(letterNode, {
-            stroke: color,
-            className: 'transition-colors duration-200'
-          });
-        })}
-      </g>
-    </svg>
+       {/* 2. Активный слой (Черный) */}
+       {/* Сверху накладываем нормальный логотип, но обрезаем его маской */}
+       {/* conic-gradient(from 315deg...) начинает заливку с верхнего левого угла (буква Г) по часовой стрелке */}
+       <img
+         src={logoSrc}
+         alt="Gastrodinamika Active"
+         className="absolute inset-0 w-full h-full object-contain"
+         style={{
+           // Стандартное свойство
+           maskImage: `conic-gradient(from 315deg, black ${percent}%, transparent ${percent}%)`,
+           // Префикс для Safari/Chrome
+           WebkitMaskImage: `conic-gradient(from 315deg, black ${percent}%, transparent ${percent}%)`
+         }}
+       />
+    </div>
   );
 };
 
