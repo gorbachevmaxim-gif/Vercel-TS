@@ -5,7 +5,10 @@ const MOUNTAIN_CITIES: string[] = [];
 
 function degToCompass(num: number | null): string {
     if (num === null) return "";
-    const val = Math.floor((num / 22.5) + 0.5);
+    // Normalize to 0-360
+    const angle = (num % 360 + 360) % 360;
+    // Divide by 45 degrees for 8 sectors, round to nearest index
+    const val = Math.round(angle / 45);
     const arr = ["С ⬇️", "СВ ↙️", "В ⬅️", "ЮВ ↖️", "Ю ⬆️", "ЮЗ ↗️", "З ➡️", "СЗ ↘️"];
     return arr[(val % 8)];
 }
