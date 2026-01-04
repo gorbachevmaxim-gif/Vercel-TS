@@ -23,14 +23,6 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ state }) => {
         </div>
         
         <div className="w-full flex flex-col items-center space-y-3">
-            {/* Progress bar */}
-            <div className="h-1.5 w-full max-w-[200px] overflow-hidden rounded-full bg-slate-200">
-              <div 
-                className="h-full bg-slate-900 transition-all duration-300 ease-out"
-                style={{ width: `${percentage}%` }}
-              />
-            </div>
-
             {/* Percentage */}
             <span className="text-sm font-bold text-slate-900 font-mono">
                 {percentage}%
