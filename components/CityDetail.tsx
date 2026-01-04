@@ -485,9 +485,9 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
 
             {/* Route Stats Display */}
             {currentRoute && (
-                <div className="mb-3 flex items-center gap-6 text-sm text-slate-700 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                <div className="mb-3 flex items-center gap-4 sm:gap-6 text-sm text-slate-700 bg-white p-3 rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
                     {/* Distance */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
                              <path d="M18 8l4 4-4 4" />
                              <path d="M6 16l-4-4 4-4" />
@@ -498,7 +498,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                     
                     {/* Elevation */}
                     {currentRoute.elevationM > 0 && (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
                                 <path d="M7 17l10-10" />
                                 <path d="M7 7h10v10" />
@@ -506,6 +506,22 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                             <span className="font-bold text-lg text-slate-800">{Math.round(currentRoute.elevationM)} <span className="text-xs font-normal text-slate-500">м</span></span>
                         </div>
                     )}
+
+                    {/* Duration (Calculated @ 30km/h) */}
+                    <div className="flex items-center gap-2 shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
+                             <circle cx="12" cy="12" r="10"></circle>
+                             <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <span className="font-bold text-lg text-slate-800">
+                            {(() => {
+                                const totalHours = currentRoute.distanceKm / 30;
+                                const h = Math.floor(totalHours);
+                                const m = Math.round((totalHours - h) * 60);
+                                return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                            })()}
+                        </span>
+                    </div>
                 </div>
             )}
 

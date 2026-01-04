@@ -25,7 +25,7 @@ const TransportBlock: React.FC<TransportBlockProps> = ({ startCity, endCity, dat
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
-      <div className="flex items-center gap-4 border-b border-slate-100 pb-3">
+      <div className="flex items-center border-b border-slate-100 pb-3">
         {/* Yandex Raspisaniya Logo */}
         {/* User requested icon reduced by ~30%. We use h-8 and scale-90 or similar visual adjustment. */}
         <div className="shrink-0">
@@ -34,9 +34,6 @@ const TransportBlock: React.FC<TransportBlockProps> = ({ startCity, endCity, dat
                 alt="Yandex Raspisaniya" 
                 className="h-8 w-auto object-contain scale-90"
              />
-        </div>
-        <div>
-            <h3 className="text-lg font-bold text-slate-800 leading-tight">Как добраться</h3>
         </div>
       </div>
 
