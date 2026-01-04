@@ -21,6 +21,7 @@ export interface WeatherDayStats {
   windRange: string;
   windGusts: number;
   windDir: string;
+  windDirFull: string;
   windDeg: number;
   sunSeconds: number;
   sunStr: string;

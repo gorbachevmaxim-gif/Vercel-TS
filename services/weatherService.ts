@@ -21,6 +21,14 @@ function degToCompass(num: number | null): string {
     return arr[(val % 8)];
 }
 
+function degToCompassFull(num: number | null): string {
+    if (num === null) return "";
+    const angle = (num % 360 + 360) % 360;
+    const val = Math.round(angle / 45);
+    const arr = ["Северный", "Северо-Восточный", "Восточный", "Юго-Восточный", "Южный", "Юго-Западный", "Западный", "Северо-Западный"];
+    return arr[(val % 8)];
+}
+
 function formatSunTime(seconds: number): string {
     if (seconds <= 0) return "0 мин";
     const hours = Math.floor(seconds / 3600);
@@ -295,11 +303,13 @@ export async function analyzeCity(
             const gMax = windGustSlice.length ? Math.max(...windGustSlice) : 0;
             
             let windDirStr = "";
+            let windDirFullStr = "";
             let windDeg = 0;
             if (windSlice.length > 0) {
                 const maxWindIdx = windSlice.indexOf(wMax);
                 windDeg = windDirSlice[maxWindIdx] || 0;
                 windDirStr = degToCompass(windDeg);
+                windDirFullStr = degToCompassFull(windDeg);
             }
 
             const temps09_11 = hourly.temperature_2m.slice(sIdx + 9, sIdx + 12) as number[];
@@ -336,6 +346,7 @@ export async function analyzeCity(
                 windRange: `${Math.round(wMin)}..${Math.round(wMax)}`,
                 windGusts: Math.round(gMax),
                 windDir: windDirStr,
+                windDirFull: windDirFullStr,
                 windDeg: windDeg,
                 sunSeconds: sunVal,
                 sunStr: formatSunTime(sunVal),

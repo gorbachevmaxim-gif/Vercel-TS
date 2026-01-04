@@ -63,19 +63,17 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
                     <span className="text-xs text-slate-400 uppercase font-semibold mb-1">Ветер</span>
                     <span className="text-lg font-bold text-slate-700">{stats.windRange} <span className="text-sm font-normal">км/ч</span></span>
                     
-                    <div className="flex flex-col items-center justify-center mt-1">
-                        <div className="flex items-center gap-1.5 text-slate-500">
-                            <span className="text-xs font-medium">{stats.windDir}</span>
-                            <svg 
-                                style={{ transform: `rotate(${windRotation}deg)` }}
-                                className="transition-transform duration-300"
-                                xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                            >
-                                <line x1="12" y1="19" x2="12" y2="5"></line>
-                                <polyline points="5 12 12 5 19 12"></polyline>
-                            </svg>
-                        </div>
-                        <span className="text-xs text-slate-500 mt-0.5">Пор: {stats.windGusts} км/ч</span>
+                    <div className="flex items-center justify-center mt-1 text-slate-500 gap-1.5">
+                        <span className="text-xs font-medium">{stats.windDir}</span>
+                        <svg 
+                            style={{ transform: `rotate(${windRotation}deg)` }}
+                            className="transition-transform duration-300"
+                            xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                        >
+                            <line x1="12" y1="19" x2="12" y2="5"></line>
+                            <polyline points="5 12 12 5 19 12"></polyline>
+                        </svg>
+                        <span className="text-xs">пор. {stats.windGusts}</span>
                     </div>
                 </div>
 
@@ -470,7 +468,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                 {activeStats && (
                     <div className="flex flex-col items-end text-right">
                         <span className="text-sm font-medium text-slate-700">
-                           Ветер: {activeStats.windDir}
+                           Ветер: {activeStats.windDirFull}
                         </span>
                         <span className={`text-xs px-2 py-0.5 rounded mt-1 font-mono inline-block ${foundRoutes.length === 0 ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-700'}`}>
                             {routeStatus}
