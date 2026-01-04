@@ -5,10 +5,12 @@ import GastrodinamikaLogo from './GastrodinamikaLogo';
 
 interface LoadingScreenProps {
   state: LoadingState;
+  onComplete?: () => void;
 }
 
-const LoadingScreen: React.FC<LoadingScreenProps> = ({ state }) => {
+const LoadingScreen: React.FC<LoadingScreenProps> = ({ state, onComplete }) => {
   // Calculate the raw target percentage based on props
+  // Prevent division by zero
   const targetPercent = state.total > 0 ? (state.current / state.total) * 100 : 0;
   
   // Local state for the smooth visual percentage
@@ -22,24 +24,33 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ state }) => {
         const diff = targetPercent - prev;
         
         // Stop if sufficiently close to target
-        if (Math.abs(diff) < 0.1) {
+        if (Math.abs(diff) < 0.5) {
+          // If we are close to the target, snap to it
           return targetPercent;
         }
 
         // Smooth easing: move 10% of the distance per frame
-        // This creates a nice deceleration effect and smooth transition between batches
         return prev + diff * 0.1;
       });
 
       animationFrameId = requestAnimationFrame(animate);
     };
 
-    // Start the animation loop
     animationFrameId = requestAnimationFrame(animate);
 
-    // Cleanup on unmount or when targetPercent changes (restart loop with new target)
     return () => cancelAnimationFrame(animationFrameId);
   }, [targetPercent]);
+
+  // Handle completion trigger
+  useEffect(() => {
+    if (displayPercent >= 100 && onComplete) {
+        // Add a small delay so the user sees the full circle
+        const timer = setTimeout(() => {
+            onComplete();
+        }, 500);
+        return () => clearTimeout(timer);
+    }
+  }, [displayPercent, onComplete]);
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-50 p-6">
