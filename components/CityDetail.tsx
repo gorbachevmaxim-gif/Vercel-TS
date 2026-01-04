@@ -269,11 +269,50 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   const cityCoords = CITIES[data.cityName];
   const currentRoute = foundRoutes[selectedRouteIdx];
 
-  // Calculate distance from Moscow to determine if we should show transport
+  // --- Transport Logic Calculation ---
   const moscow = CITIES['Москва'];
-  const distFromMoscow = moscow ? getDistanceFromLatLonInKm(moscow.lat, moscow.lon, cityCoords.lat, cityCoords.lon) : 0;
-  // Show transport if <= 300km AND not Moscow itself
-  const showTransport = distFromMoscow <= 300 && data.cityName !== 'Москва';
+  const moscowLat = moscow ? moscow.lat : 55.75;
+  const moscowLon = moscow ? moscow.lon : 37.61;
+
+  let routeStartLat = cityCoords.lat;
+  let routeStartLon = cityCoords.lon;
+  let routeEndLat = cityCoords.lat;
+  let routeEndLon = cityCoords.lon;
+
+  if (currentRoute && currentRoute.points.length > 0) {
+      routeStartLat = currentRoute.points[0][0];
+      routeStartLon = currentRoute.points[0][1];
+      const lastIdx = currentRoute.points.length - 1;
+      routeEndLat = currentRoute.points[lastIdx][0];
+      routeEndLon = currentRoute.points[lastIdx][1];
+  }
+
+  // Find closest city name from constants for Start and End points
+  const findClosestCityName = (lat: number, lon: number) => {
+      let closestName = data.cityName;
+      let minD = Infinity;
+      for (const [name, coords] of Object.entries(CITIES)) {
+          const d = getDistanceFromLatLonInKm(lat, lon, coords.lat, coords.lon);
+          if (d < minD) {
+              minD = d;
+              closestName = name;
+          }
+      }
+      return closestName;
+  };
+
+  const routeStartCity = findClosestCityName(routeStartLat, routeStartLon);
+  const routeEndCity = findClosestCityName(routeEndLat, routeEndLon);
+
+  const distStartMsc = getDistanceFromLatLonInKm(routeStartLat, routeStartLon, moscowLat, moscowLon);
+  const distEndMsc = getDistanceFromLatLonInKm(routeEndLat, routeEndLon, moscowLat, moscowLon);
+
+  // Threshold for "In Moscow" = 20km
+  const showTo = distStartMsc > 20;
+  const showFrom = distEndMsc > 20;
+
+  // General guard: Don't show suburban schedules if the trip is very far (>300km)
+  const showTransportBlock = (showTo || showFrom) && (distStartMsc <= 300);
 
 
   // 1. Initialize Map
@@ -563,11 +602,13 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
           </div>
 
           {/* Transport Block */}
-          {activeStats && showTransport && (
+          {activeStats && showTransportBlock && (
               <TransportBlock 
-                  startCity={data.cityName} 
-                  endCity={data.cityName} 
+                  startCity={routeStartCity} 
+                  endCity={routeEndCity} 
                   date={activeStats.dateObj} 
+                  showTo={showTo}
+                  showFrom={showFrom}
               />
           )}
 
