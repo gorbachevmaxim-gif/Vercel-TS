@@ -10,8 +10,8 @@ const GastrodinamikaLogo: React.FC<LogoProps> = ({ percent = 0, className = "" }
   // Файл должен находиться в папке public/ проекта.
   const logoSrc = "/gastrodinamika_ronde_novo.jpg";
 
-  // 10 часов = 300 градусов (0/360 - это 12 часов, 270 - это 9 часов, +30 = 300)
-  const startAngle = 300; 
+  // Измененный угол старта: 290 градусов
+  const startAngle = 290; 
 
   return (
     <div className={`relative ${className}`}>
