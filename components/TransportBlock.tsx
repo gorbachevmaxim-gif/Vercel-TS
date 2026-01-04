@@ -16,48 +16,91 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
   showFrom = true
 }) => {
   // Format date for Yandex URL (YYYY-MM-DD)
-  // Use local date parts to ensure we get the date user sees, not shifted UTC date
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
-  const dateStr = `${year}-${month}-${day}`;
+  
+  const dateStrYandex = `${year}-${month}-${day}`;
+  const dateStrAeroflot = `${year}${month}${day}`;
   
   // Helper to resolve city mappings (e.g. Flight destinations)
   const getCityTransportConfig = (city: string) => {
-      if (city === 'Фетхие') return { apiName: 'Даламан', displayName: 'Даламан', transport: 'plane' };
-      if (city === 'Кемер') return { apiName: 'Анталья', displayName: 'Анталья', transport: 'plane' };
-      return { apiName: city, displayName: city, transport: 'suburban' };
+      if (city === 'Фетхие') return { 
+          apiName: 'DLM', // Aeroflot Airport Code for Dalaman
+          displayName: 'Даламан', 
+          provider: 'aeroflot' 
+      };
+      if (city === 'Кемер') return { 
+          apiName: 'AYT', // Aeroflot Airport Code for Antalya
+          displayName: 'Анталья', 
+          provider: 'aeroflot' 
+      };
+      return { 
+          apiName: city, 
+          displayName: city, 
+          provider: 'yandex' 
+      };
   };
 
   const startConfig = getCityTransportConfig(startCity);
   const endConfig = getCityTransportConfig(endCity);
 
-  // Helper to build Yandex Raspisaniya URL
-  const getScheduleUrl = (from: string, to: string, transport: string) => {
-    const params = new URLSearchParams({
-      fromName: from,
-      toName: to,
-      when: dateStr,
-      transport: transport, 
-    });
-    return `https://rasp.yandex.ru/search/?${params.toString()}`;
+  const isAeroflot = startConfig.provider === 'aeroflot' || endConfig.provider === 'aeroflot';
+
+  // Helper to build URLs based on provider
+  const getUrl = (fromCodeOrName: string, toCodeOrName: string, provider: 'aeroflot' | 'yandex') => {
+    if (provider === 'aeroflot') {
+        // Aeroflot format: MOW.DLM.20231025
+        return `https://www.aeroflot.ru/sb/app/ru-ru#/search?routes=${fromCodeOrName}.${toCodeOrName}.${dateStrAeroflot}&adults=1&children=0&infants=0&cabin=economy`;
+    } else {
+        // Yandex format
+        const params = new URLSearchParams({
+            fromName: fromCodeOrName,
+            toName: toCodeOrName,
+            when: dateStrYandex,
+            transport: 'suburban', 
+        });
+        return `https://rasp.yandex.ru/search/?${params.toString()}`;
+    }
   };
 
-  const toUrl = getScheduleUrl('Москва', startConfig.apiName, startConfig.transport);
-  const fromUrl = getScheduleUrl(endConfig.apiName, 'Москва', endConfig.transport);
+  // Logic: "To" means Moscow -> StartCity
+  // If provider is Aeroflot, use codes (MOW -> API Code). Else use names.
+  const toUrl = getUrl(
+      isAeroflot ? 'MOW' : 'Москва', 
+      startConfig.apiName, 
+      startConfig.provider as 'aeroflot' | 'yandex'
+  );
+
+  // Logic: "From" means EndCity -> Moscow
+  const fromUrl = getUrl(
+      endConfig.apiName, 
+      isAeroflot ? 'MOW' : 'Москва', 
+      endConfig.provider as 'aeroflot' | 'yandex'
+  );
 
   if (!showTo && !showFrom) return null;
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
       <div className="flex items-center border-b border-slate-100 pb-3">
-        {/* Yandex Raspisaniya Logo */}
+        {/* Header Icon: Yandex Logo or Flight Icon */}
         <div className="shrink-0">
-             <img 
-                src="/yandex_rasp_logo.png" 
-                alt="Yandex Raspisaniya" 
-                className="h-8 w-auto object-contain scale-90"
-             />
+             {isAeroflot ? (
+                 <div className="flex items-center gap-2 text-slate-400">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M2 22h20"/>
+                        <path d="M8 22v-5l-4-3 4-2 1-5 9-3-2 8 4 2 2-1 3 1-3 4-4 2-5 5"/>
+                     </svg>
+                     <span className="text-sm font-semibold tracking-wide">АЭРОФЛОТ</span>
+                 </div>
+             ) : (
+                 <img 
+                    src="/yandex_rasp_logo.png" 
+                    alt="Yandex Raspisaniya" 
+                    className="h-8 w-auto object-contain scale-90"
+                 />
+             )}
         </div>
       </div>
 
@@ -76,9 +119,15 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
                         <span className="font-bold text-slate-800 group-hover:text-red-600 transition-colors">Москва → {startConfig.displayName}</span>
                     </div>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300 group-hover:text-red-500">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                        <polyline points="15 3 21 3 21 9"></polyline>
-                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                        {isAeroflot ? (
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /> 
+                        ) : (
+                            <>
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </>
+                        )}
                     </svg>
                 </a>
             )}
@@ -95,9 +144,15 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
                         <span className="font-bold text-slate-800 group-hover:text-red-600 transition-colors">{endConfig.displayName} → Москва</span>
                     </div>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300 group-hover:text-red-500">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                        <polyline points="15 3 21 3 21 9"></polyline>
-                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                        {isAeroflot ? (
+                             <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" transform="rotate(180 12 12)" />
+                        ) : (
+                            <>
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </>
+                        )}
                     </svg>
                 </a>
             )}
