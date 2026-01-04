@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { CityAnalysisResult, WeatherDayStats } from '../types';
-import { CITIES, KOMOOT_ROUTE_IDS, CITY_FILENAMES } from '../constants';
+import { CITIES, CITY_FILENAMES } from '../constants';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -350,12 +350,6 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
 
   }, [activeStats, cityCoords, foundRoutes, selectedRouteIdx]);
 
-  // Determine Komoot Embed URL
-  const komootTourId = KOMOOT_ROUTE_IDS[data.cityName];
-  // Default to the specific collection if no specific tour is mapped for this city
-  const komootEmbedUrl = komootTourId 
-    ? `https://www.komoot.com/embed/tour/${komootTourId}?share=1&profile=1`
-    : `https://www.komoot.com/embed/collection/2674102?share=1&profile=1`;
 
   return (
     <div className="space-y-4">
@@ -446,36 +440,17 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
             </div>
           </div>
 
-          {/* Komoot Integration Section */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 overflow-hidden">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
-                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <span className="text-green-600">
-                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 0C5.371 0 0 5.373 0 12s5.371 12 12 12 12-5.373 12-12S18.629 0 12 0zm-1.125 18.75c-2.484 0-4.5-2.016-4.5-4.5 0-2.485 2.016-4.5 4.5-4.5 2.485 0 4.5 2.015 4.5 4.5 0 2.484-2.015 4.5-4.5 4.5zm4.875-7.5c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z"/></svg>
-                    </span>
-                    Карта Komoot
-                </h3>
-                <a 
-                    href="https://www.komoot.com/collection/2674102/-lechappe-belle?ref=collection" 
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-sm font-medium text-blue-600 hover:text-blue-800"
-                >
-                    Открыть коллекцию ↗
-                </a>
-            </div>
-            
-            <div className="w-full h-[600px] bg-slate-100 rounded-lg overflow-hidden border border-slate-100">
-                 <iframe 
-                    src={komootEmbedUrl} 
-                    width="100%" 
-                    height="100%" 
-                    style={{border: 0}}
-                    title="Komoot Map"
-                    allowFullScreen
-                    loading="lazy"
-                ></iframe>
-            </div>
+          {/* Komoot Link */}
+          <div className="flex justify-center pt-2">
+            <a 
+                href="https://www.komoot.com/collection/2674102/-lechappe-belle?ref=collection" 
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-2 px-6 py-3 bg-[#93bf33] text-white rounded-xl font-bold hover:bg-[#7fa82b] transition-colors shadow-md active:scale-95"
+            >
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 0C5.371 0 0 5.373 0 12s5.371 12 12 12 12-5.373 12-12S18.629 0 12 0zm-1.125 18.75c-2.484 0-4.5-2.016-4.5-4.5 0-2.485 2.016-4.5 4.5-4.5 2.485 0 4.5 2.015 4.5 4.5 0 2.484-2.015 4.5-4.5 4.5zm4.875-7.5c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z"/></svg>
+                Маршруты Gastrodinamics
+            </a>
           </div>
       </div>
     </div>
