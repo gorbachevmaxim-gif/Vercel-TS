@@ -16,21 +16,35 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
   showFrom = true
 }) => {
   // Format date for Yandex URL (YYYY-MM-DD)
-  const dateStr = date.toISOString().split('T')[0];
+  // Use local date parts to ensure we get the date user sees, not shifted UTC date
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const dateStr = `${year}-${month}-${day}`;
   
+  // Helper to resolve city mappings (e.g. Flight destinations)
+  const getCityTransportConfig = (city: string) => {
+      if (city === 'Фетхие') return { apiName: 'Даламан', displayName: 'Даламан', transport: 'plane' };
+      if (city === 'Кемер') return { apiName: 'Анталья', displayName: 'Анталья', transport: 'plane' };
+      return { apiName: city, displayName: city, transport: 'suburban' };
+  };
+
+  const startConfig = getCityTransportConfig(startCity);
+  const endConfig = getCityTransportConfig(endCity);
+
   // Helper to build Yandex Raspisaniya URL
-  const getScheduleUrl = (from: string, to: string) => {
+  const getScheduleUrl = (from: string, to: string, transport: string) => {
     const params = new URLSearchParams({
       fromName: from,
       toName: to,
       when: dateStr,
-      transport: 'suburban', // Only suburban trains (electrichka/express)
+      transport: transport, 
     });
     return `https://rasp.yandex.ru/search/?${params.toString()}`;
   };
 
-  const toUrl = getScheduleUrl('Москва', startCity);
-  const fromUrl = getScheduleUrl(endCity, 'Москва');
+  const toUrl = getScheduleUrl('Москва', startConfig.apiName, startConfig.transport);
+  const fromUrl = getScheduleUrl(endConfig.apiName, 'Москва', endConfig.transport);
 
   if (!showTo && !showFrom) return null;
 
@@ -59,7 +73,7 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
                 >
                     <div className="flex flex-col">
                         <span className="text-xs text-slate-400 font-medium uppercase mb-1">Туда</span>
-                        <span className="font-bold text-slate-800 group-hover:text-red-600 transition-colors">Москва → {startCity}</span>
+                        <span className="font-bold text-slate-800 group-hover:text-red-600 transition-colors">Москва → {startConfig.displayName}</span>
                     </div>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300 group-hover:text-red-500">
                         <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
@@ -78,7 +92,7 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
                 >
                     <div className="flex flex-col">
                         <span className="text-xs text-slate-400 font-medium uppercase mb-1">Обратно</span>
-                        <span className="font-bold text-slate-800 group-hover:text-red-600 transition-colors">{endCity} → Москва</span>
+                        <span className="font-bold text-slate-800 group-hover:text-red-600 transition-colors">{endConfig.displayName} → Москва</span>
                     </div>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300 group-hover:text-red-500">
                         <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>

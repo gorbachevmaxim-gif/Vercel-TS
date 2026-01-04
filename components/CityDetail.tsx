@@ -311,8 +311,12 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   const showTo = distStartMsc > 20;
   const showFrom = distEndMsc > 20;
 
+  // Flight destinations
+  const isFlightDestination = ['Фетхие', 'Кемер'].includes(data.cityName);
+
   // General guard: Don't show suburban schedules if the trip is very far (>300km)
-  const showTransportBlock = (showTo || showFrom) && (distStartMsc <= 300);
+  // unless it is a specific flight destination
+  const showTransportBlock = isFlightDestination || ((showTo || showFrom) && (distStartMsc <= 300));
 
 
   // 1. Initialize Map
@@ -603,18 +607,13 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
 
           {/* Transport Block */}
           {activeStats && showTransportBlock && (
-              <div className="space-y-2">
-                  <h3 className="text-sm font-bold text-slate-700 ml-1">
-                      Расписание электричек
-                  </h3>
-                  <TransportBlock 
-                      startCity={routeStartCity} 
-                      endCity={routeEndCity} 
-                      date={activeStats.dateObj} 
-                      showTo={showTo}
-                      showFrom={showFrom}
-                  />
-              </div>
+              <TransportBlock 
+                  startCity={routeStartCity} 
+                  endCity={routeEndCity} 
+                  date={activeStats.dateObj} 
+                  showTo={showTo}
+                  showFrom={showFrom}
+              />
           )}
 
           {/* Komoot Link */}

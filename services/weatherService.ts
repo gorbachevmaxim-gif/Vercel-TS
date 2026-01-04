@@ -3,6 +3,14 @@ import { CityCoordinates, CityAnalysisResult, WeatherDayStats } from '../types';
 
 const MOUNTAIN_CITIES: string[] = [];
 
+// Helper to format date as YYYY-MM-DD using local time
+function toLocalISODate(d: Date): string {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 // Map degrees to 8 cardinal directions for file naming (0/360=N, 45=NE, etc)
 export const getCardinal = (angle: number): string => {
   const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
@@ -67,6 +75,9 @@ function formatRainHours(hours: number[]): string | null {
 
 export function getWeekendDates(): Date[] {
     const today = new Date();
+    // Normalize to noon to avoid timezone shift issues (e.g. late night or early morning conversions)
+    today.setHours(12, 0, 0, 0);
+
     const dayOfWeek = today.getDay();
 
     let sat1: Date;
@@ -225,8 +236,9 @@ export async function analyzeCity(
     coords: CityCoordinates, 
     targetDates: Date[]
 ): Promise<CityAnalysisResult | null> {
-    const startStr = targetDates[0].toISOString().split('T')[0];
-    const endStr = targetDates[targetDates.length - 1].toISOString().split('T')[0];
+    // Use local ISO format to avoid timezone shifts in API params
+    const startStr = toLocalISODate(targetDates[0]);
+    const endStr = toLocalISODate(targetDates[targetDates.length - 1]);
 
     const params = new URLSearchParams({
         latitude: coords.lat.toString(),
@@ -249,15 +261,17 @@ export async function analyzeCity(
             weekend2: { saturday: null, sunday: null }
         };
 
-        const startDateObj = new Date(startStr); 
+        // Use a consistent base time (UTC parsing of the date string) for offset calculation
+        const baseTime = new Date(startStr).getTime();
 
         // Use Promise.all to handle async route checks correctly within the iteration
         const promises = targetDates.map(async (targetDate, index) => {
-            const tStr = targetDate.toISOString().split('T')[0];
-            const baseTStr = startDateObj.toISOString().split('T')[0];
+            const tStr = toLocalISODate(targetDate);
             
-            const diffTime = new Date(tStr).getTime() - new Date(baseTStr).getTime();
-            const dayOffset = diffTime / (1000 * 3600 * 24);
+            // Calculate offset days using timestamp difference of UTC-parsed YYYY-MM-DD strings
+            const targetTime = new Date(tStr).getTime();
+            const diffTime = targetTime - baseTime;
+            const dayOffset = Math.round(diffTime / (1000 * 3600 * 24));
             
             const sIdx = dayOffset * 24;
             const eIdx = sIdx + 24;
