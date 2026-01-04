@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { CityAnalysisResult, WeatherDayStats } from '../types';
 import { CITIES, CITY_FILENAMES } from '../constants';
 import { getCardinal } from '../services/weatherService'; // Imported shared logic
+import TransportBlock from './TransportBlock';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -354,6 +355,9 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
     const map = mapInstanceRef.current;
     if (!map || !activeStats || !cityCoords) return;
 
+    // Invalidate size immediately before drawing to handle tab switches
+    map.invalidateSize();
+
     // --- Draw Route ---
     if (polylineRef.current) {
         polylineRef.current.remove();
@@ -366,16 +370,20 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
     if (routePoints && routePoints.length > 0) {
         const polyline = L.polyline(routePoints, { color: 'red', weight: 4 }).addTo(map);
         
-        // Safety check for bounds
-        const bounds = polyline.getBounds();
-        if (bounds.isValid()) {
-            map.fitBounds(bounds, { padding: [20, 20] });
-        }
-        
+        // Save reference
         polylineRef.current = polyline;
-        
-        // Start point is the first point of the GPX
         startPoint = routePoints[0];
+
+        // Critical fix: Ensure fitBounds runs after a minimal delay to allow container resize to settle
+        // and force the view to contain the entire track
+        setTimeout(() => {
+            const bounds = polyline.getBounds();
+            if (bounds.isValid()) {
+                map.invalidateSize(); // Double check size
+                map.fitBounds(bounds, { padding: [40, 40] }); // Increased padding
+            }
+        }, 150);
+
     } else {
         // Fallback to city center
         map.setView([cityCoords.lat, cityCoords.lon], 11);
@@ -412,8 +420,6 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
         zIndexOffset: 1000 
     }).addTo(map);
     windMarkerRef.current = marker;
-
-    setTimeout(() => map.invalidateSize(), 200);
 
   }, [activeStats, cityCoords, currentRoute]);
 
@@ -532,6 +538,14 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                 </p>
             </div>
           </div>
+
+          {/* Transport Block */}
+          {activeStats && (
+              <TransportBlock 
+                  cityName={data.cityName} 
+                  date={activeStats.dateObj} 
+              />
+          )}
 
           {/* Komoot Link */}
           <div className="flex justify-center pt-2">
