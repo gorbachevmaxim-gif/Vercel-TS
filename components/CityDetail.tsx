@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import * as React from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { CityAnalysisResult, WeatherDayStats } from '../types';
 import { CITIES } from '../constants';
 import * as L from 'leaflet';
@@ -169,7 +170,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
 
     // Determine direction
     const windDirCode = getCardinal(activeStats.windDeg);
-    // Relative path for compatibility with GH Pages sub-paths
+    // Relative path for compatibility with GH Pages sub-paths (no leading slash)
     const fileName = `routes/${data.cityName}_${windDirCode}.gpx`;
     
     // Attempt to load GPX

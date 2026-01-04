@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import * as React from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { CITIES } from './constants';
 import { CityAnalysisResult, LoadingState } from './types';
 import { analyzeCity, getWeekendDates } from './services/weatherService';
