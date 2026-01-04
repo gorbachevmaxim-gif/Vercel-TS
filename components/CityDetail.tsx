@@ -178,6 +178,10 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   const [routeDay, setRouteDay] = useState<'saturday' | 'sunday' | null>(null);
   const [routeStatus, setRouteStatus] = useState<string>('');
   
+  // Routes State
+  const [foundRoutes, setFoundRoutes] = useState<[number, number][][]>([]);
+  const [selectedRouteIdx, setSelectedRouteIdx] = useState<number>(0);
+  
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const polylineRef = useRef<L.Polyline | null>(null);
@@ -189,9 +193,8 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
 
   const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
   
-  // Set default route day logic: Prefer Dry Saturday -> Dry Sunday -> Saturday
+  // Set default route day logic
   useEffect(() => {
-      // We only set default if nothing is selected or if we switched weekends
       if (activeWeekend.saturday?.isDry) {
           setRouteDay('saturday');
       } else if (activeWeekend.sunday?.isDry) {
@@ -204,7 +207,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   const activeStats = routeDay === 'saturday' ? activeWeekend.saturday : activeWeekend.sunday;
   const cityCoords = CITIES[data.cityName];
 
-  // Initialize Map
+  // 1. Initialize Map
   useEffect(() => {
     if (!mapContainerRef.current || !cityCoords) return;
 
@@ -217,7 +220,6 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
 
         mapInstanceRef.current = map;
         
-        // Critical fix: Invalidate size after render to prevent gray tiles
         setTimeout(() => {
             map.invalidateSize();
         }, 100);
@@ -231,58 +233,86 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
     }
   }, [cityCoords]);
 
-  // Load Route Logic & Wind Marker
+  // 2. Load GPX Files (Multiple candidates)
+  useEffect(() => {
+    if (!activeStats || !cityCoords) return;
+
+    const windDirCode = getCardinal(activeStats.windDeg);
+    setRouteStatus('Поиск...');
+    setFoundRoutes([]);
+    setSelectedRouteIdx(0);
+
+    // Candidates: Standard, _1, _2, _3
+    const baseName = `routes/${data.cityName}_${windDirCode}`;
+    const candidates = [
+        `${baseName}.gpx`,
+        `${baseName}_1.gpx`,
+        `${baseName}_2.gpx`,
+        `${baseName}_3.gpx`
+    ];
+
+    const fetchRoute = async (url: string) => {
+        try {
+            const res = await fetch(url);
+            if (!res.ok) return null;
+            const txt = await res.text();
+            const points = parseGpx(txt);
+            return points.length > 0 ? points : null;
+        } catch {
+            return null;
+        }
+    };
+
+    Promise.all(candidates.map(url => fetchRoute(url)))
+        .then(results => {
+            const validRoutes = results.filter((r): r is [number, number][] => r !== null);
+            
+            if (validRoutes.length > 0) {
+                setFoundRoutes(validRoutes);
+                setRouteStatus(`Найдено маршрутов: ${validRoutes.length}`);
+            } else {
+                setFoundRoutes([]);
+                setRouteStatus(`Маршрут под ветер ${windDirCode} не найден`);
+            }
+        });
+
+  }, [activeStats, cityCoords, data.cityName]);
+
+
+  // 3. Render Route and Wind Marker on Map
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map || !activeStats || !cityCoords) return;
 
-    // --- GPX ROUTE HANDLING ---
-    // Reset previous layer
+    // --- Draw Route ---
     if (polylineRef.current) {
         polylineRef.current.remove();
         polylineRef.current = null;
     }
 
-    // Determine direction code for file
-    const windDirCode = getCardinal(activeStats.windDeg);
-    
-    // Relative path (assumes /public/routes or root routes folder)
-    const fileName = `routes/${data.cityName}_${windDirCode}.gpx`;
-    
-    setRouteStatus(`Поиск...`);
+    let startPoint: L.LatLngExpression = [cityCoords.lat, cityCoords.lon];
+    const currentPoints = foundRoutes[selectedRouteIdx];
 
-    // Attempt to load GPX
-    fetch(fileName)
-        .then(res => {
-            if (!res.ok) throw new Error("File not found");
-            return res.text();
-        })
-        .then(xmlStr => {
-            const latlngs = parseGpx(xmlStr);
-            if (latlngs.length > 0) {
-                const polyline = L.polyline(latlngs, { color: 'red', weight: 4 }).addTo(map);
-                map.fitBounds(polyline.getBounds(), { padding: [20, 20] });
-                polylineRef.current = polyline;
-                setRouteStatus(`Маршрут найден`);
-            } else {
-                setRouteStatus(`Маршрут под такое направление ветра не создавался`);
-                map.setView([cityCoords.lat, cityCoords.lon], 11);
-            }
-        })
-        .catch(() => {
-            setRouteStatus(`Маршрут под такое направление ветра не создавался`);
-            map.setView([cityCoords.lat, cityCoords.lon], 11);
-        });
+    if (currentPoints && currentPoints.length > 0) {
+        const polyline = L.polyline(currentPoints, { color: 'red', weight: 4 }).addTo(map);
+        map.fitBounds(polyline.getBounds(), { padding: [20, 20] });
+        polylineRef.current = polyline;
+        
+        // Start point is the first point of the GPX
+        startPoint = currentPoints[0];
+    } else {
+        // Fallback to city center
+        map.setView([cityCoords.lat, cityCoords.lon], 11);
+    }
 
-    // --- WIND MARKER HANDLING ---
+
+    // --- Wind Marker ---
     if (windMarkerRef.current) {
         windMarkerRef.current.remove();
         windMarkerRef.current = null;
     }
 
-    // Calculate rotation: Wind comes FROM deg. Arrow points TO (deg + 180).
     const arrowRotation = (activeStats.windDeg + 180) % 360;
-
     const windIconHtml = `
         <div class="relative flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur rounded-full shadow-lg border-2 border-blue-500">
             <div style="transform: rotate(${arrowRotation}deg);" class="transition-transform duration-300">
@@ -298,20 +328,18 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
         className: 'custom-wind-marker',
         html: windIconHtml,
         iconSize: [40, 40],
-        iconAnchor: [20, 20], // Center it
+        iconAnchor: [20, 20],
     });
 
-    const marker = L.marker([cityCoords.lat, cityCoords.lon], { 
+    const marker = L.marker(startPoint, { 
         icon: windIcon,
-        zIndexOffset: 1000 // Ensure it sits on top of the route
+        zIndexOffset: 1000 
     }).addTo(map);
-    
     windMarkerRef.current = marker;
-        
-    // Keep map fresh
+
     setTimeout(() => map.invalidateSize(), 200);
 
-  }, [activeStats, cityCoords, data.cityName]);
+  }, [activeStats, cityCoords, foundRoutes, selectedRouteIdx]);
 
 
   return (
@@ -366,12 +394,31 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                         <span className="text-sm font-medium text-slate-700">
                            Ветер: {activeStats.windDir}
                         </span>
-                        <span className={`text-xs px-2 py-0.5 rounded mt-1 font-mono inline-block ${routeStatus.includes('не создавался') ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-700'}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded mt-1 font-mono inline-block ${foundRoutes.length === 0 ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-700'}`}>
                             {routeStatus}
                         </span>
                     </div>
                 )}
             </div>
+
+            {/* Route Switcher */}
+            {foundRoutes.length > 1 && (
+                <div className="mb-3 flex flex-wrap gap-2">
+                    {foundRoutes.map((_, idx) => (
+                        <button
+                            key={idx}
+                            onClick={() => setSelectedRouteIdx(idx)}
+                            className={`px-3 py-1.5 text-xs font-bold uppercase rounded-md border transition-colors ${
+                                selectedRouteIdx === idx 
+                                ? 'bg-blue-600 text-white border-blue-600' 
+                                : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'
+                            }`}
+                        >
+                            Вариант {idx + 1}
+                        </button>
+                    ))}
+                </div>
+            )}
             
             <div className="relative w-full h-[400px] bg-slate-100 rounded-lg overflow-hidden border border-slate-100 z-0">
                 <div ref={mapContainerRef} className="w-full h-full" />
