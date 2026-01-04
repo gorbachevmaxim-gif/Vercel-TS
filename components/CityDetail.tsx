@@ -115,37 +115,58 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
     );
 };
 
-// Helper to parse basic GPX (supports both trkpt and rtept)
+// Robust GPX Parsing Helper
 const parseGpx = (str: string): [number, number][] => {
     try {
         const parser = new DOMParser();
         const xml = parser.parseFromString(str, "text/xml");
-        let points: [number, number][] = [];
         
-        // Helper to extract points from NodeList
-        const extractFromNodes = (nodes: NodeListOf<Element>) => {
-            const extracted: [number, number][] = [];
-            nodes.forEach(pt => {
-                const lat = parseFloat(pt.getAttribute('lat') || '0');
-                const lon = parseFloat(pt.getAttribute('lon') || '0');
-                if (lat && lon) extracted.push([lat, lon]);
-            });
-            return extracted;
+        // Helper to find elements regardless of namespace (fixes issues with 'xmlns' in GPX files)
+        const getElements = (tagName: string): Element[] => {
+            // Try namespace-agnostic search first (modern browsers)
+            const nsElements = xml.getElementsByTagNameNS('*', tagName);
+            if (nsElements.length > 0) return Array.from(nsElements);
+
+            // Fallback for some environments: standard getElementsByTagName
+            const elements = xml.getElementsByTagName(tagName);
+            if (elements.length > 0) return Array.from(elements);
+
+            // Last resort: manual localName check
+            const all = xml.getElementsByTagName('*');
+            const manual: Element[] = [];
+            for (let i = 0; i < all.length; i++) {
+                if (all[i].localName === tagName) manual.push(all[i]);
+            }
+            return manual;
         };
 
-        // Try 'trkpt' (Tracks) first
-        const trkpts = xml.querySelectorAll('trkpt');
-        if (trkpts.length > 0) {
-            points = extractFromNodes(trkpts);
-        } else {
-            // Fallback to 'rtept' (Routes) if no tracks found
-            const rtepts = xml.querySelectorAll('rtept');
-            if (rtepts.length > 0) {
-                points = extractFromNodes(rtepts);
-            }
-        }
+        const extractPoints = (tagName: string): [number, number][] => {
+            const points: [number, number][] = [];
+            const elements = getElements(tagName);
+            
+            elements.forEach(pt => {
+                const latStr = pt.getAttribute('lat');
+                const lonStr = pt.getAttribute('lon');
+                if (latStr && lonStr) {
+                    const lat = parseFloat(latStr);
+                    const lon = parseFloat(lonStr);
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                        points.push([lat, lon]);
+                    }
+                }
+            });
+            return points;
+        };
+
+        // 1. Try Tracks (trkpt)
+        let result = extractPoints('trkpt');
         
-        return points;
+        // 2. If empty, try Routes (rtept)
+        if (result.length === 0) {
+            result = extractPoints('rtept');
+        }
+
+        return result;
     } catch (e) {
         console.error("GPX Parse error", e);
         return [];
