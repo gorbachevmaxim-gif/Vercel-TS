@@ -10,6 +10,7 @@ import CityDetail from './components/CityDetail';
 const App: React.FC = () => {
   const [data, setData] = useState<CityAnalysisResult[]>([]);
   const [loading, setLoading] = useState<LoadingState>({ total: 0, current: 0, status: 'Starting...' });
+  const [showLoading, setShowLoading] = useState(true);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [initialTab, setInitialTab] = useState<'w1' | 'w2'>('w1');
   
@@ -47,7 +48,8 @@ const App: React.FC = () => {
       }
 
       setData(results);
-      setLoading({ total: 0, current: 0, status: 'Done' });
+      // Ensure we hit 100% state for the animation logic
+      setLoading(prev => ({ ...prev, current: total, status: 'Готово' }));
     };
 
     fetchData();
@@ -64,8 +66,8 @@ const App: React.FC = () => {
   };
 
   // Handle Main View
-  if (loading.total > 0 && loading.current < loading.total) {
-      return <LoadingScreen state={loading} />;
+  if (showLoading) {
+      return <LoadingScreen state={loading} onComplete={() => setShowLoading(false)} />;
   }
 
   return (
