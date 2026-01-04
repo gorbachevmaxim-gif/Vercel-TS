@@ -64,6 +64,8 @@ export const CITY_FILENAMES: Record<string, string> = {
     "Звенигород": "Zvenigorod"
 };
 
+export const FLIGHT_CITIES = ["Фетхие", "Кемер"];
+
 // Map City Name -> Komoot Tour ID
 // You can find the ID in the URL of the planned route: https://www.komoot.com/tour/{ID}
 export const KOMOOT_ROUTE_IDS: Record<string, string> = {

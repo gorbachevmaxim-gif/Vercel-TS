@@ -1,4 +1,4 @@
-import { API_URL, CITY_FILENAMES } from '../constants';
+import { API_URL, CITY_FILENAMES, FLIGHT_CITIES } from '../constants';
 import { CityCoordinates, CityAnalysisResult, WeatherDayStats } from '../types';
 
 const MOUNTAIN_CITIES: string[] = [];
@@ -343,7 +343,12 @@ export async function analyzeCity(
             // Check if route exists only if the weather is good enough to ride
             let hasRoute = false;
             if (isDry) {
-                hasRoute = await checkRouteAvailability(cityName, windDeg);
+                // Always assume routes exist for flight destinations to ensure they appear in the UI
+                if (FLIGHT_CITIES.includes(cityName)) {
+                    hasRoute = true;
+                } else {
+                    hasRoute = await checkRouteAvailability(cityName, windDeg);
+                }
             }
 
             const dayStats: WeatherDayStats = {

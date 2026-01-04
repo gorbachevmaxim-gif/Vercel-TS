@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { CityAnalysisResult, WeatherDayStats } from '../types';
-import { CITIES, CITY_FILENAMES } from '../constants';
+import { CITIES, CITY_FILENAMES, FLIGHT_CITIES } from '../constants';
 import { getCardinal } from '../services/weatherService'; // Imported shared logic
 import TransportBlock from './TransportBlock';
 import * as L from 'leaflet';
@@ -268,6 +268,8 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   const activeStats = routeDay === 'saturday' ? activeWeekend.saturday : activeWeekend.sunday;
   const cityCoords = CITIES[data.cityName];
   const currentRoute = foundRoutes[selectedRouteIdx];
+  
+  const isFlightDestination = FLIGHT_CITIES.includes(data.cityName);
 
   // --- Transport Logic Calculation ---
   const moscow = CITIES['Москва'];
@@ -311,9 +313,6 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   const showTo = distStartMsc > 20;
   const showFrom = distEndMsc > 20;
 
-  // Flight destinations
-  const isFlightDestination = ['Фетхие', 'Кемер'].includes(data.cityName);
-
   // General guard: Don't show suburban schedules if the trip is very far (>300km)
   // unless it is a specific flight destination
   const showTransportBlock = isFlightDestination || ((showTo || showFrom) && (distStartMsc <= 300));
@@ -349,6 +348,13 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   useEffect(() => {
     let isMounted = true;
     if (!activeStats || !cityCoords) return;
+    
+    // Skip route search for flight cities
+    if (isFlightDestination) {
+        setRouteStatus('Авианаправление');
+        setFoundRoutes([]);
+        return;
+    }
 
     const windDirCode = getCardinal(activeStats.windDeg);
     setRouteStatus('Поиск...');
@@ -397,7 +403,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
         });
 
     return () => { isMounted = false; };
-  }, [activeStats, cityCoords, data.cityName]);
+  }, [activeStats, cityCoords, data.cityName, isFlightDestination]);
 
 
   // 3. Render Route and Wind Marker on Map
