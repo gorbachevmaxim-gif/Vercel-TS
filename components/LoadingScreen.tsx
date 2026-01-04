@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { LoadingState } from '../types';
 import GastrodinamikaLogo from './GastrodinamikaLogo';
 
@@ -9,12 +9,15 @@ interface LoadingScreenProps {
 }
 
 const LoadingScreen: React.FC<LoadingScreenProps> = ({ state, onComplete }) => {
-  // Calculate the raw target percentage based on props
-  // Prevent division by zero
-  const targetPercent = state.total > 0 ? (state.current / state.total) * 100 : 0;
+  // Calculate target percentage, clamped between 0 and 100
+  const rawPercent = state.total > 0 ? (state.current / state.total) * 100 : 0;
+  const targetPercent = Math.min(100, Math.max(0, rawPercent));
   
   // Local state for the smooth visual percentage
   const [displayPercent, setDisplayPercent] = useState(0);
+  
+  // Ref to ensure we only trigger complete once
+  const completedRef = useRef(false);
 
   useEffect(() => {
     let animationFrameId: number;
@@ -23,14 +26,20 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ state, onComplete }) => {
       setDisplayPercent(prev => {
         const diff = targetPercent - prev;
         
-        // Stop if sufficiently close to target
+        // If sufficiently close (or if target is 100 and we are close), snap to target
         if (Math.abs(diff) < 0.5) {
-          // If we are close to the target, snap to it
           return targetPercent;
         }
 
         // Smooth easing: move 10% of the distance per frame
-        return prev + diff * 0.1;
+        // Add a minimum step to ensure it doesn't slow down too much at the very end
+        const step = diff * 0.1;
+        const minStep = diff > 0 ? 0.5 : -0.5;
+        
+        // Use the larger of the two (absolute value) to keep momentum
+        const actualStep = Math.abs(step) > Math.abs(minStep) ? step : minStep;
+
+        return prev + actualStep;
       });
 
       animationFrameId = requestAnimationFrame(animate);
@@ -43,11 +52,17 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ state, onComplete }) => {
 
   // Handle completion trigger
   useEffect(() => {
-    if (displayPercent >= 100 && onComplete) {
-        // Add a small delay so the user sees the full circle
+    // Only trigger if we reached 100% (or very close) AND we haven't completed yet
+    if (displayPercent >= 99.5 && onComplete && !completedRef.current) {
+        completedRef.current = true;
+        
+        // Force display to exactly 100 just in case
+        setDisplayPercent(100);
+
+        // Wait 1 second so the user sees the full filled logo
         const timer = setTimeout(() => {
             onComplete();
-        }, 500);
+        }, 1000);
         return () => clearTimeout(timer);
     }
   }, [displayPercent, onComplete]);
