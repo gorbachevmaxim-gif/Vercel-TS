@@ -10,6 +10,9 @@ const GastrodinamikaLogo: React.FC<LogoProps> = ({ percent = 0, className = "" }
   // Файл должен находиться в папке public/ проекта.
   const logoSrc = "/gastrodinamika_ronde_novo.jpg";
 
+  // 10 часов = 300 градусов (0/360 - это 12 часов, 270 - это 9 часов, +30 = 300)
+  const startAngle = 300; 
+
   return (
     <div className={`relative ${className}`}>
        {/* 1. Фоновый слой (Серый) */}
@@ -31,9 +34,9 @@ const GastrodinamikaLogo: React.FC<LogoProps> = ({ percent = 0, className = "" }
          className="absolute inset-0 w-full h-full object-contain mix-blend-multiply"
          style={{
            // Стандартное свойство
-           maskImage: `conic-gradient(from 315deg, black ${percent}%, transparent ${percent}%)`,
+           maskImage: `conic-gradient(from ${startAngle}deg, black ${percent}%, transparent ${percent}%)`,
            // Префикс для Safari/Chrome
-           WebkitMaskImage: `conic-gradient(from 315deg, black ${percent}%, transparent ${percent}%)`
+           WebkitMaskImage: `conic-gradient(from ${startAngle}deg, black ${percent}%, transparent ${percent}%)`
          }}
        />
     </div>

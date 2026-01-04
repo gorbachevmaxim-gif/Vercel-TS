@@ -14,8 +14,8 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ state }) => {
       <div className="w-full max-w-xs flex flex-col items-center space-y-6">
         
         {/* Logo Container */}
-        {/* Image usually needs explicit sizing to contain correctly */}
-        <div className="w-64 h-64 flex items-center justify-center relative">
+        {/* Changed from w-64 h-64 to w-44 h-44 to reduce size by ~30% */}
+        <div className="w-44 h-44 flex items-center justify-center relative">
             <GastrodinamikaLogo 
                 percent={percentage} 
                 className="w-full h-full" 
