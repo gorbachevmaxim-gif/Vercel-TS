@@ -61,7 +61,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
                     <span className="text-lg font-bold text-slate-700">{stats.windRange} <span className="text-sm font-normal">км/ч</span></span>
                     <div className="text-xs mt-1">
                         <span className="text-slate-500">{stats.windDir}</span>
-                        <span className="text-slate-400 ml-1">Порывы {stats.windGusts} км/ч</span>
+                        <span className="text-slate-400 ml-1">Пор: {stats.windGusts} км/ч</span>
                     </div>
                 </div>
 
@@ -142,6 +142,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const polylineRef = useRef<L.Polyline | null>(null);
+  const windMarkerRef = useRef<L.Marker | null>(null);
   
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -191,11 +192,12 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
     }
   }, [cityCoords]);
 
-  // Load Route Logic
+  // Load Route Logic & Wind Marker
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map || !activeStats || !cityCoords) return;
 
+    // --- GPX ROUTE HANDLING ---
     // Reset previous layer
     if (polylineRef.current) {
         polylineRef.current.remove();
@@ -232,6 +234,40 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
             setRouteStatus(`Маршрут под такое направление ветра не создавался`);
             map.setView([cityCoords.lat, cityCoords.lon], 11);
         });
+
+    // --- WIND MARKER HANDLING ---
+    if (windMarkerRef.current) {
+        windMarkerRef.current.remove();
+        windMarkerRef.current = null;
+    }
+
+    // Calculate rotation: Wind comes FROM deg. Arrow points TO (deg + 180).
+    const arrowRotation = (activeStats.windDeg + 180) % 360;
+
+    const windIconHtml = `
+        <div class="relative flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur rounded-full shadow-lg border-2 border-blue-500">
+            <div style="transform: rotate(${arrowRotation}deg);" class="transition-transform duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600">
+                    <line x1="12" y1="19" x2="12" y2="5"></line>
+                    <polyline points="5 12 12 5 19 12"></polyline>
+                </svg>
+            </div>
+        </div>
+    `;
+
+    const windIcon = L.divIcon({
+        className: 'custom-wind-marker',
+        html: windIconHtml,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20], // Center it
+    });
+
+    const marker = L.marker([cityCoords.lat, cityCoords.lon], { 
+        icon: windIcon,
+        zIndexOffset: 1000 // Ensure it sits on top of the route
+    }).addTo(map);
+    
+    windMarkerRef.current = marker;
         
     // Keep map fresh
     setTimeout(() => map.invalidateSize(), 200);
