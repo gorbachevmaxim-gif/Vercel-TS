@@ -4,8 +4,8 @@ interface LogoProps extends React.SVGProps<SVGSVGElement> {
   percent?: number;
 }
 
-const GastrodinamikaLogo: React.FC<LogoProps> = ({ percent = 100, ...props }) => {
-  // Letters paths in clockwise order starting from Г
+const GastrodinamikaLogo: React.FC<LogoProps> = ({ percent = 0, ...props }) => {
+  // Letters paths in clockwise order starting from Г (Top Left)
   // Total 14 letters: Г А С Т Р О Д И Н А М И К А
   const letters = [
     // Г (Top Left)
@@ -45,10 +45,10 @@ const GastrodinamikaLogo: React.FC<LogoProps> = ({ percent = 100, ...props }) =>
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
-      {/* Central Hook/Circle - Always Active (Black) as the hub */}
+      {/* Central Hook/Circle - Always Black to act as the hub */}
       <path
         d="M100 115C108.284 115 115 108.284 115 100C115 91.7157 108.284 85 100 85C91.7157 85 85 91.7157 85 100C85 105 87 109 90 112"
-        stroke="currentColor"
+        stroke="black" 
         strokeWidth="6"
         strokeLinecap="round"
       />
@@ -56,17 +56,18 @@ const GastrodinamikaLogo: React.FC<LogoProps> = ({ percent = 100, ...props }) =>
       {/* Radiating Letters */}
       <g strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
         {letters.map((letterNode, index) => {
-          // Calculate if this letter should be active based on percentage
-          // 14 letters total.
-          // letter 0 activates at > 0%
-          // letter 13 activates at near 100%
+          // Calculate if this letter should be black based on percentage
+          // index 0 (G) activates immediately (>0%)
+          // index 13 (last A) activates near 100%
           const threshold = (index / letters.length) * 100;
           const isActive = percent > threshold;
 
+          // Inactive = Gray (#d1d5db / slate-300), Active = Black
+          const color = isActive ? 'black' : '#d1d5db';
+
           return React.cloneElement(letterNode, {
-            // Use currentColor (black from parent) if active, else light gray
-            stroke: isActive ? 'currentColor' : '#e2e8f0', // slate-200
-            className: 'transition-colors duration-300'
+            stroke: color,
+            className: 'transition-colors duration-200'
           });
         })}
       </g>

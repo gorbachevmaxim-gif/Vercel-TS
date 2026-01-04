@@ -14,16 +14,16 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ state }) => {
       <div className="w-full max-w-xs flex flex-col items-center space-y-6">
         
         {/* Logo Container */}
-        <div className="w-48 h-48 flex items-center justify-center">
-             {/* Pass current percentage to logo to animate filling */}
+        <div className="w-56 h-56 flex items-center justify-center">
+             {/* Pass current percentage to logo to animate filling from Gray to Black */}
             <GastrodinamikaLogo 
                 percent={percentage} 
-                className="w-full h-full text-slate-900" 
+                className="w-full h-full" 
             />
         </div>
         
-        <div className="w-full flex flex-col items-center space-y-2">
-            {/* Minimalist Progress bar */}
+        <div className="w-full flex flex-col items-center space-y-3">
+            {/* Progress bar */}
             <div className="h-1.5 w-full max-w-[200px] overflow-hidden rounded-full bg-slate-200">
               <div 
                 className="h-full bg-slate-900 transition-all duration-300 ease-out"
@@ -36,8 +36,8 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ state }) => {
                 {percentage}%
             </span>
             
-            {/* Status Text */}
-            <p className="text-xs text-slate-400 font-medium animate-pulse h-4">
+            {/* Status Text (Optional, keeps user informed) */}
+            <p className="text-xs text-slate-400 font-medium h-4">
                 {state.status}
             </p>
         </div>
