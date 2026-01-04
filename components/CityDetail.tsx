@@ -449,7 +449,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                 className="flex items-center gap-2 px-6 py-3 bg-[#93bf33] text-white rounded-xl font-bold hover:bg-[#7fa82b] transition-colors shadow-md active:scale-95"
             >
                 <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 0C5.371 0 0 5.373 0 12s5.371 12 12 12 12-5.373 12-12S18.629 0 12 0zm-1.125 18.75c-2.484 0-4.5-2.016-4.5-4.5 0-2.485 2.016-4.5 4.5-4.5 2.485 0 4.5 2.015 4.5 4.5 0 2.484-2.015 4.5-4.5 4.5zm4.875-7.5c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z"/></svg>
-                Маршруты Gastrodinamics
+                Маршруты Gastrodinamica
             </a>
           </div>
       </div>
