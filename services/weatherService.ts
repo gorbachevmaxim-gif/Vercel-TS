@@ -263,15 +263,17 @@ export async function analyzeCity(
             weekend2: { saturday: null, sunday: null }
         };
 
-        // Use a consistent base time (UTC parsing of the date string) for offset calculation
-        const baseTime = new Date(startStr).getTime();
+        // Use a consistent base time for offset calculation based on the INPUT date objects
+        // This avoids cross-browser issues with parsing "YYYY-MM-DD" strings back to Dates
+        const baseTime = targetDates[0].getTime();
 
         // Use Promise.all to handle async route checks correctly within the iteration
         const promises = targetDates.map(async (targetDate, index) => {
             const tStr = toLocalISODate(targetDate);
             
-            // Calculate offset days using timestamp difference of UTC-parsed YYYY-MM-DD strings
-            const targetTime = new Date(tStr).getTime();
+            // Calculate offset days using timestamp difference of the original Date objects
+            // Since all targetDates are set to 12:00 local time, difference is exact multiples of 24h
+            const targetTime = targetDate.getTime();
             const diffTime = targetTime - baseTime;
             const dayOffset = Math.round(diffTime / (1000 * 3600 * 24));
             

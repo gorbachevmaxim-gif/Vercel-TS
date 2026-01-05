@@ -375,7 +375,8 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
 
     const fetchRoute = async (url: string) => {
         try {
-            const res = await fetch(url);
+            // Force bypass cache for the GPX file content as well
+            const res = await fetch(`${url}?t=${Date.now()}`);
             if (!res.ok) return null;
             const txt = await res.text();
             
