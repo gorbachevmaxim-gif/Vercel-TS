@@ -49,9 +49,10 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
           provider: 'yandex'
       };
       if (city === 'Дубна') return {
-          apiName: 'Большая Волга', // Main station before Dubna terminus
+          apiName: 'Большая Волга', 
           displayName: 'Большая Волга',
-          provider: 'yandex'
+          provider: 'yandex',
+          yandexId: 's9601720' // Station code for Bolshaya Volga
       };
 
       return { 
@@ -63,41 +64,46 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
 
   const startConfig = getCityTransportConfig(startCity);
   const endConfig = getCityTransportConfig(endCity);
+  
+  const moscowConfig = {
+      apiName: 'Москва',
+      displayName: 'Москва',
+      provider: 'yandex',
+      yandexId: 'c213'
+  };
 
   const isAeroflot = startConfig.provider === 'aeroflot' || endConfig.provider === 'aeroflot';
 
   // Helper to build URLs based on provider
-  const getUrl = (fromCodeOrName: string, toCodeOrName: string, provider: 'aeroflot' | 'yandex') => {
+  const getUrl = (fromConfig: any, toConfig: any) => {
+    const provider = (fromConfig.provider === 'aeroflot' || toConfig.provider === 'aeroflot') ? 'aeroflot' : 'yandex';
+
     if (provider === 'aeroflot') {
         // Aeroflot format: routes=ORIGIN.YYYYMMDD.DESTINATION
-        // Example: routes=MOW.20260117.AYT
-        return `https://www.aeroflot.ru/sb/app/ru-ru#/search?adults=1&cabin=economy&children=0&childrenaward=0&childrenfrgn=0&infants=0&routes=${fromCodeOrName}.${dateStrAeroflot}.${toCodeOrName}`;
+        const fromCode = fromConfig.apiName === 'Москва' ? 'MOW' : fromConfig.apiName;
+        const toCode = toConfig.apiName === 'Москва' ? 'MOW' : toConfig.apiName;
+        return `https://www.aeroflot.ru/sb/app/ru-ru#/search?adults=1&cabin=economy&children=0&childrenaward=0&childrenfrgn=0&infants=0&routes=${fromCode}.${dateStrAeroflot}.${toCode}`;
     } else {
-        // Yandex format
-        const params = new URLSearchParams({
-            fromName: fromCodeOrName,
-            toName: toCodeOrName,
-            when: dateStrYandex,
-            transport: 'suburban', 
-        });
-        return `https://rasp.yandex.ru/search/?${params.toString()}`;
+        // Yandex format for suburban trains
+        const params = new URLSearchParams();
+        
+        if (fromConfig.yandexId) params.append('fromId', fromConfig.yandexId);
+        params.append('fromName', fromConfig.apiName);
+        
+        if (toConfig.yandexId) params.append('toId', toConfig.yandexId);
+        params.append('toName', toConfig.apiName);
+        
+        params.append('when', dateStrYandex);
+        
+        return `https://rasp.yandex.ru/search/suburban/?${params.toString()}`;
     }
   };
 
   // Logic: "To" means Moscow -> StartCity
-  // If provider is Aeroflot, use codes (MOW -> API Code). Else use names.
-  const toUrl = getUrl(
-      isAeroflot ? 'MOW' : 'Москва', 
-      startConfig.apiName, 
-      startConfig.provider as 'aeroflot' | 'yandex'
-  );
+  const toUrl = getUrl(moscowConfig, startConfig);
 
   // Logic: "From" means EndCity -> Moscow
-  const fromUrl = getUrl(
-      endConfig.apiName, 
-      isAeroflot ? 'MOW' : 'Москва', 
-      endConfig.provider as 'aeroflot' | 'yandex'
-  );
+  const fromUrl = getUrl(endConfig, moscowConfig);
 
   if (!showTo && !showFrom) return null;
 
