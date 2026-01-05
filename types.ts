@@ -7,6 +7,14 @@ export interface CityMap {
   [key: string]: CityCoordinates;
 }
 
+export interface Place {
+  name: string;
+  type: string; // e.g. "Кафе", "Ресторан", "Кофейня"
+  url?: string; // Link to Yandex Maps
+  address?: string;
+  rating?: string;
+}
+
 export interface WeatherDayStats {
   dateObj: Date;
   dateStr: string;
