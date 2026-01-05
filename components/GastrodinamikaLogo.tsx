@@ -8,7 +8,7 @@ interface LogoProps {
 const GastrodinamikaLogo: React.FC<LogoProps> = ({ percent = 0, className = "" }) => {
   // Используем JPG файл.
   // Файл должен находиться в папке public/ проекта.
-  const logoSrc = "/gastrodinamika_ronde_novo.jpg";
+  const logoSrc = "./gastrodinamika_ronde_novo.jpg";
 
   // Измененный угол старта: 290 градуса
   const startAngle = 290; 

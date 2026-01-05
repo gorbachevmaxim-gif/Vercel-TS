@@ -4,7 +4,8 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: './', // Critical for correct asset loading on static hosts
+  // 'base: ./' ensures assets are loaded relatively, fixing blank screens in cloud IDE previews
+  base: './', 
   server: {
     host: true, // Listen on all addresses
     port: 5173,

@@ -190,7 +190,7 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
                  <span className="text-xl font-bold tracking-wider text-slate-700">АЭРОФЛОТ</span>
              ) : (
                  <img 
-                    src="/yandex_rasp_logo.png" 
+                    src="./yandex_rasp_logo.png" 
                     alt="Yandex Raspisaniya" 
                     className="h-8 w-auto object-contain scale-90"
                  />
