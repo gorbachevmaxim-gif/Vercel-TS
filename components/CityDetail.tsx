@@ -395,11 +395,11 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
         decorativeMarkersRef.current.push(endMarker);
 
 
-        // --- C. Add Wind Direction Markers Every 20km ---
+        // --- C. Add Wind Direction Markers Every 15km ---
         const windRotation = (activeStats.windDeg + 180) % 360;
         
         let accumulatedDist = 0;
-        let nextMarkerAt = 20; // First marker at 20km
+        let nextMarkerAt = 15; // First marker at 15km
         const totalDistance = currentRoute.distanceKm;
 
         // Offset configuration
@@ -411,10 +411,10 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
             const dist = getDistanceFromLatLonInKm(prev[0], prev[1], curr[0], curr[1]);
             accumulatedDist += dist;
             
-            // Logic: Place marker every 20km
-            // Condition: Do NOT place if it's within 19km of the finish line
+            // Logic: Place marker every 15km
+            // Condition: Do NOT place if it's within 10km of the finish line
             if (accumulatedDist >= nextMarkerAt) {
-                if ((totalDistance - accumulatedDist) > 19) {
+                if ((totalDistance - accumulatedDist) > 10) {
                     
                     // 1. Calculate bearing of the track at this segment
                     const trackBearing = getBearing(prev[0], prev[1], curr[0], curr[1]);
@@ -446,7 +446,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                     const m = L.marker(curr, { icon: windIcon, zIndexOffset: 50 }).addTo(map);
                     decorativeMarkersRef.current.push(m);
                 }
-                nextMarkerAt += 20;
+                nextMarkerAt += 15;
             }
         }
 
