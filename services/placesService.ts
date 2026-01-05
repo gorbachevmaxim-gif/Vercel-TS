@@ -1,0 +1,82 @@
+import { Place } from '../types';
+
+// Simple cache to prevent spamming the API when switching tabs/routes
+const cache: Record<string, Place[]> = {};
+
+export async function fetchNearbyPlaces(lat: number, lon: number): Promise<Place[]> {
+    const key = `${lat.toFixed(3)},${lon.toFixed(3)}`;
+    if (cache[key]) return cache[key];
+
+    // Query Overpass API for amenities (cafe, restaurant, bar, fast_food) within 5000 meters (5km)
+    // Increased limit to 20 to ensure we find valid named places in the larger area
+    const query = `
+        [out:json][timeout:10];
+        (
+          node["amenity"~"cafe|restaurant|bar|fast_food"](around:5000, ${lat}, ${lon});
+        );
+        out body 20;
+    `;
+
+    try {
+        const response = await fetch('https://overpass-api.de/api/interpreter', {
+            method: 'POST',
+            body: query
+        });
+
+        if (!response.ok) return [];
+
+        const data = await response.json();
+        const elements = data.elements || [];
+
+        const places: Place[] = elements.map((el: any) => {
+            const tags = el.tags || {};
+            
+            // Map OSM tags to our structure
+            let type = "Кафе";
+            if (tags.amenity === 'restaurant') type = "Ресторан";
+            if (tags.amenity === 'bar') type = "Бар";
+            if (tags.amenity === 'fast_food') type = "Фастфуд";
+            if (tags.cuisine) type += ` (${tags.cuisine})`;
+
+            return {
+                name: tags.name || tags['name:ru'] || tags['name:en'] || 'Без названия',
+                type: type,
+                // Create a link to Yandex Maps using the name for better UX in Russia, 
+                // fallback to coords if no name
+                url: tags.name 
+                    ? `https://yandex.ru/maps/?text=${encodeURIComponent(tags.name)}` 
+                    : `https://yandex.ru/maps/?ll=${el.lon},${el.lat}&z=17&pt=${el.lon},${el.lat}`,
+                address: tags['addr:street'] ? `${tags['addr:street']}, ${tags['addr:housenumber'] || ''}` : undefined,
+                rating: undefined // OSM doesn't have ratings usually
+            };
+        }).filter((p: Place) => {
+            if (p.name === 'Без названия') return false;
+
+            // --- FILTER LOGIC ---
+            // Exclude places in Shopping Centers (Malls)
+            const lowerName = p.name.toLowerCase();
+            const lowerAddr = (p.address || '').toLowerCase();
+            
+            // Regex for common Russian mall abbreviations and keywords
+            // ТЦ - Torgoviy Tsentr
+            // ТРЦ - Torgovo-Razvlekatelny Tsentr
+            // ТРК - Torgovo-Razvlekatelny Kompleks
+            // Молл, Mall - Malls
+            // Фудкорт - Food Courts
+            // Specific chains that are big boxes: Мега, Ашан, Лента, Глобус (often have internal cafes)
+            const mallRegex = /\b(тц|трц|трк|молл|mall|мега|ашан|лента|глобус)\b/i;
+            const foodCourtRegex = /(фуд\s?корт|food\s?court)/i;
+
+            if (mallRegex.test(lowerName) || mallRegex.test(lowerAddr)) return false;
+            if (foodCourtRegex.test(lowerName)) return false;
+
+            return true;
+        });
+
+        cache[key] = places;
+        return places;
+    } catch (e) {
+        console.error("Failed to fetch places", e);
+        return [];
+    }
+}
