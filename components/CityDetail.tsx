@@ -480,10 +480,25 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
 
   }, [activeStats, cityCoords, currentRoute]);
 
-  // Generate Yandex Maps link centered on the city
+  // Generate Yandex Maps link centered on the city or specific restaurant area
   // Explicitly adding z=13 to force focus on the city level
-  const yandexMapsUrl = cityCoords
-    ? `https://yandex.ru/maps/?bookmarks%5BpublicId%5D=OfCmg0o9&ll=${cityCoords.lon},${cityCoords.lat}&mode=bookmarks&z=13&utm_source=share&utm_campaign=bookmarks`
+  
+  let collectionFocusCoords = cityCoords;
+  let collectionZoom = 13;
+  
+  // Override for Zavidovo to focus on Varaksino (restaurant cluster)
+  if (data.cityName === 'Завидово') {
+      collectionFocusCoords = { lat: 56.592, lon: 36.523 };
+  }
+
+  // Override for Istra to include both Istra city and Dubrovskoe (Russian Parmesan)
+  if (data.cityName === 'Истра') {
+      collectionFocusCoords = { lat: 55.8985, lon: 36.9025 };
+      collectionZoom = 11;
+  }
+
+  const yandexMapsUrl = collectionFocusCoords
+    ? `https://yandex.ru/maps/?bookmarks%5BpublicId%5D=OfCmg0o9&ll=${collectionFocusCoords.lon},${collectionFocusCoords.lat}&mode=bookmarks&z=${collectionZoom}&utm_source=share&utm_campaign=bookmarks`
     : `https://yandex.ru/maps?bookmarks%5BpublicId%5D=OfCmg0o9&utm_source=share&utm_campaign=bookmarks`;
 
   return (
