@@ -7,11 +7,7 @@ export default {
     "./services/**/*.{js,ts,jsx,tsx}"
   ],
   theme: {
-    extend: {
-      fontFamily: {
-        sans: ['Gilroy', 'sans-serif'],
-      },
-    },
+    extend: {},
   },
   plugins: [],
 }

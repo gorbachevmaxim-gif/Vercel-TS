@@ -26,7 +26,7 @@ class ErrorBoundary extends React.Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-[#edebe5] p-6">
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6">
           <div className="bg-white p-6 rounded-xl shadow-lg border border-red-100 max-w-sm w-full text-center">
             <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
               <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">

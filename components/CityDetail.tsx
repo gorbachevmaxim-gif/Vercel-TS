@@ -375,21 +375,21 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
         const endPoint = routePoints[routePoints.length - 1];
 
         // --- B. Add Start (A) and End (B) Markers ---
-        const createLabelIcon = (label: string, colorClass: string) => L.divIcon({
+        const createLabelIcon = (label: string, bgColor: string) => L.divIcon({
             className: 'custom-label-icon',
-            html: `<div class="flex items-center justify-center w-8 h-8 rounded-full border-2 border-white shadow-lg text-white font-bold font-sans ${colorClass}">${label}</div>`,
-            iconSize: [32, 32],
-            iconAnchor: [16, 16]
+            html: `<div style="background-color: ${bgColor}" class="flex items-center justify-center w-6 h-6 rounded-full border-2 border-white shadow-lg text-white text-xs font-bold font-sans">${label}</div>`,
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
         });
 
         const startMarker = L.marker(startPoint, { 
-            icon: createLabelIcon('A', 'bg-slate-900'), 
+            icon: createLabelIcon('A', '#4f6814'), 
             zIndexOffset: 1000 
         }).addTo(map);
         decorativeMarkersRef.current.push(startMarker);
 
         const endMarker = L.marker(endPoint, { 
-            icon: createLabelIcon('B', 'bg-slate-900'), 
+            icon: createLabelIcon('B', 'rgb(238, 107, 23)'), 
             zIndexOffset: 1000 
         }).addTo(map);
         decorativeMarkersRef.current.push(endMarker);
@@ -424,11 +424,6 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                     const offsetAngleRad = (trackBearing + 90) * (Math.PI / 180);
                     
                     // 3. Calculate X/Y pixel translation
-                    // In CSS/Screen coords: Y is Down.
-                    // Map Angle 0 (North) -> Offset 90 (East) -> X should be +, Y should be 0.
-                    // sin(90) = 1, cos(90) = 0.
-                    // Map Angle 90 (East) -> Offset 180 (South) -> X should be 0, Y should be +.
-                    // sin(180) = 0, cos(180) = -1. Wait. cos(180) is -1. -cos is 1.
                     const dx = PIXEL_OFFSET * Math.sin(offsetAngleRad);
                     const dy = -PIXEL_OFFSET * Math.cos(offsetAngleRad);
 
@@ -436,7 +431,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                     const windIconHtml = `
                         <div style="transform: translate(${dx}px, ${dy}px); width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
                              <div style="transform: rotate(${windRotation}deg); filter: drop-shadow(0px 0px 2px rgba(255,255,255,0.9));">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-slate-800"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
                              </div>
                         </div>
                     `;
