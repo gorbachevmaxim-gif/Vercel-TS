@@ -24,7 +24,7 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
   // Aeroflot expects YYYYMMDD in the routes parameter (e.g. MOW.20260117.AYT)
   const dateStrAeroflot = `${year}${month}${day}`;
   
-  // Helper to resolve city mappings (e.g. Flight destinations)
+  // Helper to resolve city mappings (e.g. Flight destinations or specific train stations)
   const getCityTransportConfig = (city: string) => {
       if (city === 'Фетхие') return { 
           apiName: 'DLM', // Aeroflot Airport Code for Dalaman
@@ -36,6 +36,19 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
           displayName: 'Анталья', 
           provider: 'aeroflot' 
       };
+      
+      // Specific train stations override
+      if (city === 'Воскресенск') return {
+          apiName: '66 км', // Station name for Yandex
+          displayName: '66 км',
+          provider: 'yandex'
+      };
+      if (city === 'Коломна') return {
+          apiName: 'Голутвин', // Main station in Kolomna
+          displayName: 'Голутвин',
+          provider: 'yandex'
+      };
+
       return { 
           apiName: city, 
           displayName: city, 

@@ -214,7 +214,9 @@ async function checkRouteAvailability(cityName: string, windDeg: number): Promis
     // Since we are likely on a static host, we'll try to fetch.
     const checks = candidates.map(async (url) => {
         try {
-            const res = await fetch(url, { method: 'GET' }); // Some static servers reject HEAD
+            // Append timestamp to bypass aggressive 404 caching in some browsers
+            const cacheBustedUrl = `${url}?t=${Date.now()}`;
+            const res = await fetch(cacheBustedUrl, { method: 'GET' }); 
             // If OK and content-type looks like xml or text, valid.
             // Just checking OK status is usually enough for static files.
             if (res.ok) {
