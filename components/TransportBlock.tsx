@@ -48,6 +48,11 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
           displayName: 'Голутвин',
           provider: 'yandex'
       };
+      if (city === 'Дубна') return {
+          apiName: 'Большая Волга', // Main station before Dubna terminus
+          displayName: 'Большая Волга',
+          provider: 'yandex'
+      };
 
       return { 
           apiName: city, 
