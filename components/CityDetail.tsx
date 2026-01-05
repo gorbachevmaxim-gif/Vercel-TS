@@ -1,10 +1,9 @@
 import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
-import { CityAnalysisResult, WeatherDayStats, Place } from '../types';
+import { CityAnalysisResult, WeatherDayStats } from '../types';
 import { CITIES, CITY_FILENAMES, FLIGHT_CITIES } from '../constants';
 import { getCardinal } from '../services/weatherService';
 import TransportBlock from './TransportBlock';
-import PlacesBlock from './PlacesBlock';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -481,6 +480,10 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
 
   }, [activeStats, cityCoords, currentRoute]);
 
+  // Generate Yandex Maps link centered on the city
+  const yandexMapsUrl = cityCoords
+    ? `https://yandex.ru/maps/?bookmarks%5BpublicId%5D=OfCmg0o9&ll=${cityCoords.lon},${cityCoords.lat}&mode=bookmarks&z=12&utm_source=share&utm_campaign=bookmarks`
+    : `https://yandex.ru/maps?bookmarks%5BpublicId%5D=OfCmg0o9&utm_source=share&utm_campaign=bookmarks`;
 
   return (
     <div className="space-y-4">
@@ -624,24 +627,33 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
               />
           )}
 
-           {/* Places Block */}
-           <PlacesBlock 
-                startCity={routeStartCity} 
-                endCity={routeEndCity} 
-            />
-
-          {/* Komoot Link */}
-          <div className="flex justify-center pt-2">
+          {/* Action Buttons Group */}
+          <div className="flex flex-col gap-3 pt-2">
+            {/* Komoot Button */}
             <a 
                 href="https://www.komoot.com/collection/2674102/-lechappe-belle?ref=collection" 
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 px-6 py-3 bg-[#93bf33] text-white rounded-xl font-bold hover:bg-[#7fa82b] transition-colors shadow-md active:scale-95"
+                className="flex items-center justify-center gap-2 px-6 py-4 bg-[#93bf33] text-white rounded-xl font-bold hover:bg-[#7fa82b] transition-colors shadow-md active:scale-95 text-center"
             >
                 <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 0C5.371 0 0 5.373 0 12s5.371 12 12 12 12-5.373 12-12S18.629 0 12 0zm-1.125 18.75c-2.484 0-4.5-2.016-4.5-4.5 0-2.485 2.016-4.5 4.5-4.5 2.485 0 4.5 2.015 4.5 4.5 0 2.484-2.015 4.5-4.5 4.5zm4.875-7.5c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z"/></svg>
-                Маршруты Gastrodinamica
+                Gastrodinamica в Komoot
+            </a>
+
+            {/* Yandex Maps Collection Button */}
+            <a 
+                href={yandexMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 px-6 py-4 bg-yellow-400 text-slate-900 rounded-xl font-bold hover:bg-yellow-300 transition-colors shadow-md active:scale-95 text-center"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+                Ресто и кафе GSTRDNMC
             </a>
           </div>
+
       </div>
     </div>
   );
