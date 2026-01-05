@@ -70,132 +70,71 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-komoot-light text-komoot-dark font-sans">
+    <div className="min-h-screen bg-komoot-light text-komoot-dark font-sans pb-10">
       
-      {/* Komoot-style Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-30 h-16 flex items-center px-4 sm:px-6 justify-between shadow-sm">
-        <div className="flex items-center gap-6 flex-1">
-            {/* Logo Area */}
-            <div className="flex items-center gap-1 cursor-pointer" onClick={() => setSelectedCity(null)}>
-                <div className="w-8 h-8 rounded-full overflow-hidden">
-                    <GastrodinamikaLogo percent={100} />
-                </div>
-                <span className="font-bold text-xl tracking-tight text-slate-900 hidden sm:block">
-                    Gastrodinamika
-                </span>
+      {/* Simple Clean Header */}
+      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 h-16 flex items-center justify-center shadow-sm">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => setSelectedCity(null)}>
+             <div className="w-8 h-8 rounded-full overflow-hidden">
+                <GastrodinamikaLogo percent={100} />
             </div>
-
-            {/* Fake Search Bar */}
-            <div className="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-2 w-full max-w-md text-slate-500">
-                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                 </svg>
-                 <span className="text-sm font-medium">Поиск маршрутов и мест...</span>
-            </div>
-        </div>
-
-        {/* Nav Links (Visual Only) */}
-        <div className="flex items-center gap-4 sm:gap-6">
-            <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
-                <span className="hover:text-slate-900 cursor-pointer">Туры</span>
-                <span className="hover:text-slate-900 cursor-pointer">Карты</span>
-            </nav>
-            
-            {/* "New" Button style from Screenshot */}
-            <button className="hidden sm:flex items-center gap-1 bg-[#4f7c1b] text-white px-4 py-1.5 rounded-full text-sm font-bold hover:bg-[#436a17] transition-colors">
-                Новое
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
-            
-            <div className="w-9 h-9 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-300 cursor-pointer transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-            </div>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900">
+                Gastrodinamika
+            </h1>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
         {!selectedCity ? (
             <div className="space-y-8 animate-fade-in">
-                {/* Page Title */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <h1 className="text-4xl font-bold text-slate-900 tracking-tight">
-                        Планировщик выходных
-                    </h1>
-                    <div className="hidden sm:block text-sm text-slate-500 font-medium">
-                        {data.length} направлений проанализировано
+                
+                {/* Intro Block */}
+                <div className="text-center space-y-2">
+                     <h2 className="text-3xl font-bold text-slate-900">Поиск идеальных выходных</h2>
+                     <p className="text-slate-500">
+                        Мы проанализировали {data.length} направлений, чтобы найти, где сухо и солнечно.
+                     </p>
+                </div>
+
+                {/* Date Switcher */}
+                <div className="flex justify-center">
+                    <div className="inline-flex bg-white p-1 rounded-full border border-slate-200 shadow-sm">
+                        <button 
+                            onClick={() => setActiveWeekendTab('w1')}
+                            className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                                activeWeekendTab === 'w1' 
+                                ? 'bg-komoot-green text-white shadow-sm' 
+                                : 'text-slate-600 hover:bg-slate-50'
+                            }`}
+                        >
+                            Ближайшие ({w1Label})
+                        </button>
+                        <button 
+                             onClick={() => setActiveWeekendTab('w2')}
+                             className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                                activeWeekendTab === 'w2' 
+                                ? 'bg-komoot-green text-white shadow-sm' 
+                                : 'text-slate-600 hover:bg-slate-50'
+                            }`}
+                        >
+                            Через неделю ({w2Label})
+                        </button>
                     </div>
-                </div>
-
-                {/* Filter Chips / Search Bar Styled */}
-                <div className="bg-white p-1.5 rounded-full shadow-sm border border-slate-200 flex items-center w-full max-w-full overflow-x-auto no-scrollbar">
-                     <div className="px-4 py-2 text-slate-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                     </div>
-                     <input 
-                        type="text" 
-                        placeholder="Фильтр по названию..." 
-                        className="flex-1 outline-none text-slate-700 placeholder-slate-400 font-medium text-lg min-w-[150px]"
-                        disabled
-                     />
-                     <button className="mr-2 p-2 text-slate-400 hover:text-slate-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                     </button>
-                </div>
-
-                {/* Filter Tabs (Dates) - Komoot Chip Style */}
-                <div className="flex flex-wrap items-center gap-3">
-                    <button 
-                        onClick={() => setActiveWeekendTab('w1')}
-                        className={`px-4 py-2 rounded-full text-sm font-bold transition-all border ${
-                            activeWeekendTab === 'w1' 
-                            ? 'bg-komoot-green text-white border-komoot-green shadow-sm' 
-                            : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                        }`}
-                    >
-                        Ближайшие ({w1Label})
-                    </button>
-                    <button 
-                         onClick={() => setActiveWeekendTab('w2')}
-                         className={`px-4 py-2 rounded-full text-sm font-bold transition-all border ${
-                            activeWeekendTab === 'w2' 
-                            ? 'bg-komoot-green text-white border-komoot-green shadow-sm' 
-                            : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                        }`}
-                    >
-                        Через неделю ({w2Label})
-                    </button>
-                    
-                    <div className="h-6 w-px bg-slate-300 mx-2 hidden sm:block"></div>
-                    
-                    <button className="px-4 py-2 rounded-full text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all flex items-center gap-1">
-                        Все города
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
                 </div>
 
                 {/* Content Section */}
                 <SummaryView 
                     data={data} 
-                    title={activeWeekendTab === 'w1' ? "Прогноз на ближайшие" : "Прогноз через неделю"}
-                    dateLabel={activeWeekendTab === 'w1' ? w1Label : w2Label}
+                    title=""
+                    dateLabel=""
                     isSecondWeekend={activeWeekendTab === 'w2'} 
                     onCityClick={handleCitySelect} 
                 />
 
-                 {/* All Cities List as Chips */}
-                 <div className="pt-8">
-                   <h3 className="text-xl font-bold text-slate-900 mb-4">Все направления</h3>
-                   <div className="flex flex-wrap gap-2">
+                 {/* All Cities List */}
+                 <div className="pt-8 border-t border-slate-200">
+                   <h3 className="text-lg font-bold text-slate-900 mb-4 text-center">Все направления</h3>
+                   <div className="flex flex-wrap justify-center gap-2">
                        {data.map(city => (
                            <button 
                              key={city.cityName}

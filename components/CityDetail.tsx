@@ -30,7 +30,6 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
 
     const dryColor = stats.isDry ? 'text-green-600' : 'text-red-500';
     const minTemp = parseInt(stats.tempRange.split('..')[0]);
-    const isTooCold = stats.clothingHints.length === 0 && minTemp < 5;
     const windRotation = (stats.windDeg + 180) % 360;
 
     return (
@@ -324,7 +323,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
         `;
         const windIcon = L.divIcon({ className: 'wind-route-marker', html: windIconHtml, iconSize: [24, 24], iconAnchor: [12, 12] });
 
-        // Place 8 markers evenly distributed (excluding exact start/end to avoid clutter)
+        // Place 8 markers evenly distributed
         const markersCount = 8;
         const step = Math.floor(routePoints.length / (markersCount + 1));
         
@@ -358,7 +357,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
         map.setView([cityCoords.lat, cityCoords.lon], 11);
     }
 
-    // Start Marker (Big A or similar, reusing previous wind logic or simplified)
+    // Start Marker 
     const startIconHtml = `
         <div class="flex items-center justify-center w-8 h-8 bg-slate-900 text-white font-bold rounded-full shadow-lg border-2 border-white">
             A
@@ -396,22 +395,22 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
         <div className="flex bg-white rounded-full border border-slate-200 p-1">
              <button 
                 onClick={() => setActiveTab('w1')}
-                className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all ${activeTab === 'w1' ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-50'}`}
+                className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all ${activeTab === 'w1' ? 'bg-komoot-green text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50'}`}
              >
                 Ближайшие
              </button>
              <button 
                 onClick={() => setActiveTab('w2')}
-                className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all ${activeTab === 'w2' ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-50'}`}
+                className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all ${activeTab === 'w2' ? 'bg-komoot-green text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50'}`}
              >
                 Через неделю
              </button>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column: Stats */}
-          <div className="lg:col-span-1 space-y-6">
+      <div className="grid lg:grid-cols-2 gap-8">
+          {/* Left Column: Stats & Map Controls */}
+          <div className="space-y-6">
                <div className="space-y-4">
                   <WeatherCard 
                     stats={activeWeekend.saturday} 
@@ -424,8 +423,34 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                     onClick={() => setRouteDay('sunday')}
                   />
                </div>
+               
+               {/* Route Info & Variants */}
+               {foundRoutes.length > 0 && (
+                 <div className="bg-white rounded-xl border border-slate-200 p-4">
+                     <div className="flex justify-between items-center mb-3">
+                         <span className="font-bold text-slate-800">Маршрут {routeDay === 'saturday' ? 'на субботу' : 'на воскресенье'}</span>
+                         {currentRoute && <span className="text-sm font-medium text-slate-500">{currentRoute.distanceKm.toFixed(1)} км</span>}
+                     </div>
+                     {foundRoutes.length > 1 && (
+                        <div className="flex gap-2 flex-wrap">
+                            {foundRoutes.map((_, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setSelectedRouteIdx(idx)}
+                                    className={`px-3 py-1 text-xs font-bold rounded-md border transition-all ${
+                                        selectedRouteIdx === idx 
+                                        ? 'bg-slate-800 text-white border-slate-800' 
+                                        : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                                    }`}
+                                >
+                                    Вариант {idx + 1}
+                                </button>
+                            ))}
+                        </div>
+                     )}
+                 </div>
+               )}
 
-               {/* Transport & External Links */}
                {activeStats && showTransportBlock && (
                   <TransportBlock 
                       startCity={routeStartCity} 
@@ -436,7 +461,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                   />
                )}
                
-                <a 
+               <a 
                     href={yandexMapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -454,83 +479,19 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                 </a>
           </div>
 
-          {/* Right Column: Route Map & Details */}
-          <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                  {/* Route Header */}
-                  <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                       <div>
-                           <div className="flex items-center gap-2 mb-1">
-                               <span className="bg-komoot-green text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">Велосипед</span>
-                               {foundRoutes.length > 0 && <span className="text-xs font-bold text-slate-400 uppercase">Маршрут найден</span>}
-                           </div>
-                           <h3 className="text-lg font-bold text-slate-900">
-                               {routeDay === 'saturday' ? 'Субботний маршрут' : 'Воскресный маршрут'}
-                           </h3>
-                       </div>
-                       
-                       {/* Route Stats */}
-                       {currentRoute && (
-                           <div className="flex gap-6">
-                               <div className="flex flex-col items-center">
-                                   <span className="text-xs text-slate-500 font-medium uppercase">Дистанция</span>
-                                   <span className="text-lg font-bold text-slate-800">{currentRoute.distanceKm.toFixed(1)} <span className="text-sm font-normal text-slate-500">км</span></span>
-                               </div>
-                               <div className="flex flex-col items-center">
-                                    <span className="text-xs text-slate-500 font-medium uppercase">Набор</span>
-                                   <span className="text-lg font-bold text-slate-800">{Math.round(currentRoute.elevationM)} <span className="text-sm font-normal text-slate-500">м</span></span>
-                               </div>
-                               <div className="flex flex-col items-center">
-                                    <span className="text-xs text-slate-500 font-medium uppercase">Время</span>
-                                   <span className="text-lg font-bold text-slate-800">
-                                       {(() => {
-                                            const totalHours = currentRoute.distanceKm / 30;
-                                            const h = Math.floor(totalHours);
-                                            const m = Math.round((totalHours - h) * 60);
-                                            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-                                        })()}
-                                   </span>
-                               </div>
-                           </div>
-                       )}
-                  </div>
-
-                  {/* Route Variants */}
-                  {foundRoutes.length > 1 && (
-                      <div className="px-5 py-3 bg-slate-50 border-b border-slate-100 flex gap-2 overflow-x-auto no-scrollbar">
-                          {foundRoutes.map((_, idx) => (
-                              <button
-                                  key={idx}
-                                  onClick={() => setSelectedRouteIdx(idx)}
-                                  className={`px-3 py-1 text-xs font-bold rounded-md border transition-all whitespace-nowrap ${
-                                      selectedRouteIdx === idx 
-                                      ? 'bg-slate-800 text-white border-slate-800' 
-                                      : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
-                                  }`}
-                              >
-                                  Вариант {idx + 1}
-                              </button>
-                          ))}
-                      </div>
-                  )}
-
-                  {/* Map */}
-                  <div className="relative w-full h-[500px] z-0">
-                      <div ref={mapContainerRef} className="w-full h-full" />
-                  </div>
-                  
-                  {/* Komoot Link */}
-                  <div className="p-4 bg-slate-50 flex justify-center">
-                       <a 
-                            href="https://www.komoot.com/collection/2674102/-lechappe-belle?ref=collection" 
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-2 px-6 py-2.5 bg-komoot-green text-white rounded-lg font-bold hover:bg-[#7fa82b] transition-colors shadow-sm"
-                        >
-                            Открыть в Komoot
-                        </a>
-                  </div>
-              </div>
+          {/* Right Column: Map */}
+          <div className="h-[500px] lg:h-auto bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm relative z-0">
+               <div ref={mapContainerRef} className="w-full h-full" />
+               <div className="absolute bottom-4 left-0 right-0 flex justify-center z-[500]">
+                    <a 
+                        href="https://www.komoot.com/collection/2674102/-lechappe-belle?ref=collection" 
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur text-komoot-dark text-sm rounded-full font-bold shadow-lg border border-slate-200 hover:bg-white transition-colors"
+                    >
+                        Открыть в Komoot
+                    </a>
+               </div>
           </div>
       </div>
     </div>
