@@ -1,16 +1,57 @@
 import * as React from 'react';
 
+// Database of specific stations to improve routing accuracy
+// ID is optional if name is unique enough for Yandex
+const STATIONS = [
+  { name: 'Большая Волга', id: 's9601720', lat: 56.723, lon: 37.143 },
+  { name: 'Дубна', id: 's9600984', lat: 56.745, lon: 37.193 },
+  { name: 'Голутвин', id: 's9600832', lat: 55.080, lon: 38.792 },
+  { name: 'Коломна', id: 's9601262', lat: 55.102, lon: 38.761 },
+  { name: '88 км', id: 's9601844', lat: 55.323, lon: 38.665 },
+  { name: 'Воскресенск', id: 's9600709', lat: 55.316, lon: 38.681 },
+  { name: 'Истра', id: 's9601053', lat: 55.914, lon: 36.857 },
+  { name: 'Новоиерусалимская', id: 's9600742', lat: 55.925, lon: 36.840 },
+  { name: 'Завидово', id: 's9603009', lat: 56.525, lon: 36.527 },
+  { name: 'Серпухов', id: 's9600693', lat: 54.931, lon: 37.452 },
+  { name: 'Звенигород', id: 's9601243', lat: 55.719, lon: 36.883 },
+  { name: 'Можайск', id: 's9601678', lat: 55.495, lon: 36.035 },
+  { name: 'Дмитров', id: 's9601815', lat: 56.345, lon: 37.514 },
+  { name: 'Яхрома', id: 's9601247', lat: 56.287, lon: 37.489 },
+  { name: 'Турист', id: 's9601874', lat: 56.242, lon: 37.498 },
+  { name: 'Зеленоград-Крюково', id: 's9600692', lat: 55.980, lon: 37.172 },
+  { name: 'Подсолнечная', id: 's9600720', lat: 56.182, lon: 36.974 },
+  { name: 'Александров-1', id: 's9601440', lat: 56.394, lon: 38.729 },
+  { name: 'Сергиев Посад', id: 's9600704', lat: 56.302, lon: 38.134 },
+];
+
 interface TransportBlockProps {
   startCity: string;
   endCity: string;
+  startCoords?: { lat: number; lon: number };
+  endCoords?: { lat: number; lon: number };
   date: Date;
   showTo?: boolean;
   showFrom?: boolean;
 }
 
+// Distance calc helper (Haversine)
+const getDist = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+};
+
 const TransportBlock: React.FC<TransportBlockProps> = ({ 
   startCity, 
   endCity, 
+  startCoords,
+  endCoords,
   date,
   showTo = true,
   showFrom = true
@@ -23,9 +64,30 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
   const dateStrYandex = `${year}-${month}-${day}`;
   // Aeroflot expects YYYYMMDD in the routes parameter (e.g. MOW.20260117.AYT)
   const dateStrAeroflot = `${year}${month}${day}`;
+
+  // Find nearest station if coords provided
+  const findNearestStation = (coords?: { lat: number; lon: number }) => {
+      if (!coords) return null;
+      let closest = null;
+      let minD = Infinity;
+      
+      for (const st of STATIONS) {
+          const d = getDist(coords.lat, coords.lon, st.lat, st.lon);
+          if (d < minD) {
+              minD = d;
+              closest = st;
+          }
+      }
+
+      // Only use if within 5km, otherwise fallback to city name
+      if (closest && minD < 5) {
+          return closest;
+      }
+      return null;
+  };
   
   // Helper to resolve city mappings (e.g. Flight destinations or specific train stations)
-  const getCityTransportConfig = (city: string) => {
+  const getCityTransportConfig = (city: string, coords?: { lat: number; lon: number }) => {
       if (city === 'Фетхие') return { 
           apiName: 'DLM', // Aeroflot Airport Code for Dalaman
           displayName: 'Даламан', 
@@ -36,15 +98,26 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
           displayName: 'Анталья', 
           provider: 'aeroflot' 
       };
+
+      // 1. Try to find exact station by coordinates
+      const station = findNearestStation(coords);
+      if (station) {
+          return {
+              apiName: station.name,
+              displayName: station.name,
+              provider: 'yandex',
+              yandexId: station.id
+          };
+      }
       
-      // Specific train stations override
+      // 2. Fallback to hardcoded city overrides (legacy support)
       if (city === 'Воскресенск') return {
-          apiName: '66 км', // Station name for Yandex
+          apiName: '66 км', 
           displayName: '66 км',
           provider: 'yandex'
       };
       if (city === 'Коломна') return {
-          apiName: 'Голутвин', // Main station in Kolomna
+          apiName: 'Голутвин', 
           displayName: 'Голутвин',
           provider: 'yandex'
       };
@@ -52,9 +125,10 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
           apiName: 'Большая Волга', 
           displayName: 'Большая Волга',
           provider: 'yandex',
-          yandexId: 's9601720' // Station code for Bolshaya Volga
+          yandexId: 's9601720' 
       };
 
+      // 3. Fallback to City Name
       return { 
           apiName: city, 
           displayName: city, 
@@ -62,8 +136,8 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
       };
   };
 
-  const startConfig = getCityTransportConfig(startCity);
-  const endConfig = getCityTransportConfig(endCity);
+  const startConfig = getCityTransportConfig(startCity, startCoords);
+  const endConfig = getCityTransportConfig(endCity, endCoords);
   
   const moscowConfig = {
       apiName: 'Москва',

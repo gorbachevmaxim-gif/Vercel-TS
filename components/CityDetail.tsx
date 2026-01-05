@@ -603,7 +603,9 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
           {activeStats && showTransportBlock && (
               <TransportBlock 
                   startCity={routeStartCity} 
-                  endCity={routeEndCity} 
+                  endCity={routeEndCity}
+                  startCoords={{ lat: routeStartLat, lon: routeStartLon }}
+                  endCoords={{ lat: routeEndLat, lon: routeEndLon }}
                   date={activeStats.dateObj} 
                   showTo={showTo}
                   showFrom={showFrom}
