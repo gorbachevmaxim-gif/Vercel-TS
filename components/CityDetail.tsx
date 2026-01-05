@@ -481,8 +481,9 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   }, [activeStats, cityCoords, currentRoute]);
 
   // Generate Yandex Maps link centered on the city
+  // Explicitly adding z=13 to force focus on the city level
   const yandexMapsUrl = cityCoords
-    ? `https://yandex.ru/maps/?bookmarks%5BpublicId%5D=OfCmg0o9&ll=${cityCoords.lon},${cityCoords.lat}&mode=bookmarks&z=12&utm_source=share&utm_campaign=bookmarks`
+    ? `https://yandex.ru/maps/?bookmarks%5BpublicId%5D=OfCmg0o9&ll=${cityCoords.lon},${cityCoords.lat}&mode=bookmarks&z=13&utm_source=share&utm_campaign=bookmarks`
     : `https://yandex.ru/maps?bookmarks%5BpublicId%5D=OfCmg0o9&utm_source=share&utm_campaign=bookmarks`;
 
   return (
@@ -650,7 +651,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
                 </svg>
-                Ресто и кафе GSTRDNMC
+                Хорошие места
             </a>
           </div>
 
