@@ -51,7 +51,7 @@ const getDist = (lat1: number, lon1: number, lat2: number, lon2: number) => {
 const YandexRaspLogo = () => (
   <div className="flex items-center gap-3 select-none">
     {/* Yandex 'Ya' Logo */}
-    <div className="shrink-0 block" title="Яндекс">
+    <div className="shrink-0 block">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="block">
             <mask id="yandexLogoMask" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="25">
                 <circle cx="12" cy="12.001" r="12" fill="#fff"/>
