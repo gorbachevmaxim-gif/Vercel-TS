@@ -49,7 +49,7 @@ const getDist = (lat1: number, lon1: number, lat2: number, lon2: number) => {
 
 // Internal component for Yandex Raspisaniya Logo (SVG)
 const YandexRaspLogo = () => (
-  <div className="flex items-center gap-3 select-none">
+    <div className="flex items-center gap-3 select-none" style={{ transform: 'scale(0.69)', transformOrigin: 'left center' }}>
     {/* Yandex 'Ya' Logo */}
     <div className="shrink-0 block">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="block">
