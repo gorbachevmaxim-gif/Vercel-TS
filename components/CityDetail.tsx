@@ -412,9 +412,9 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
             accumulatedDist += dist;
             
             // Logic: Place marker every 20km
-            // Condition: Do NOT place if it's within 5km of the finish line
+            // Condition: Do NOT place if it's within 19km of the finish line
             if (accumulatedDist >= nextMarkerAt) {
-                if ((totalDistance - accumulatedDist) > 5) {
+                if ((totalDistance - accumulatedDist) > 19) {
                     
                     // 1. Calculate bearing of the track at this segment
                     const trackBearing = getBearing(prev[0], prev[1], curr[0], curr[1]);
