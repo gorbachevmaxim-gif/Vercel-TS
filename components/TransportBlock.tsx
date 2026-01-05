@@ -64,7 +64,7 @@ const YandexRaspLogo = () => (
     </div>
     
     {/* Service Icon and Text */}
-    <div className="flex items-center gap-2" title="Яндекс Расписания">
+    <div className="flex items-center gap-2">
         <svg width="28" height="28" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 block">
             <path d="M12.848.807a12 12 0 1 1-12 12 12 12 0 0 1 12-12Z" fill="#FC0"/>
             <path d="m14.998 18.275-1.326 1.17-2.99 2.834h4.902l5.746-5.744-5.728-5.728H10.7l.056.052 1.256 1.11 2.992 2.838H1.018c.203 1.208.59 2.378 1.15 3.468h12.83Z" fill="url(#serviceLogoGrad)"/>
