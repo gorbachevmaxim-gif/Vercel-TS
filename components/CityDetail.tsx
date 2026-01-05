@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from 'react';
 import { CityAnalysisResult, WeatherDayStats, Place } from '../types';
 import { CITIES, CITY_FILENAMES, FLIGHT_CITIES } from '../constants';
 import { getCardinal } from '../services/weatherService';
-import { fetchNearbyPlaces } from '../services/placesService';
 import TransportBlock from './TransportBlock';
 import PlacesBlock from './PlacesBlock';
 import * as L from 'leaflet';
@@ -245,11 +244,6 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   const [foundRoutes, setFoundRoutes] = useState<RouteData[]>([]);
   const [selectedRouteIdx, setSelectedRouteIdx] = useState<number>(0);
   
-  // Places State
-  const [autoStartPlaces, setAutoStartPlaces] = useState<Place[]>([]);
-  const [autoEndPlaces, setAutoEndPlaces] = useState<Place[]>([]);
-  const [placesLoading, setPlacesLoading] = useState(false);
-
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const polylineRef = useRef<L.Polyline | null>(null);
@@ -323,27 +317,6 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   // General guard: Don't show suburban schedules if the trip is very far (>300km)
   // unless it is a specific flight destination
   const showTransportBlock = isFlightDestination || ((showTo || showFrom) && (distStartMsc <= 300));
-
-  // --- Automatic Places Fetching ---
-  useEffect(() => {
-      let isMounted = true;
-      setPlacesLoading(true);
-
-      const fetchBoth = async () => {
-          const startP = await fetchNearbyPlaces(routeStartLat, routeStartLon);
-          const endP = await fetchNearbyPlaces(routeEndLat, routeEndLon);
-          
-          if (isMounted) {
-              setAutoStartPlaces(startP);
-              setAutoEndPlaces(endP);
-              setPlacesLoading(false);
-          }
-      };
-
-      fetchBoth();
-
-      return () => { isMounted = false; };
-  }, [routeStartLat, routeStartLon, routeEndLat, routeEndLon]);
 
 
   // 1. Initialize Map
@@ -655,9 +628,6 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
            <PlacesBlock 
                 startCity={routeStartCity} 
                 endCity={routeEndCity} 
-                autoStartPlaces={autoStartPlaces}
-                autoEndPlaces={autoEndPlaces}
-                loading={placesLoading}
             />
 
           {/* Komoot Link */}

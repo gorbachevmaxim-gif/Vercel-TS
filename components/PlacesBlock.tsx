@@ -5,54 +5,32 @@ import { CITY_PLACES } from '../constants';
 interface PlacesBlockProps {
   startCity: string;
   endCity: string;
-  autoStartPlaces: Place[];
-  autoEndPlaces: Place[];
-  loading: boolean;
 }
 
-const PlacesBlock: React.FC<PlacesBlockProps> = ({ startCity, endCity, autoStartPlaces, autoEndPlaces, loading }) => {
-  // 1. Get Curated Places from constants
+const PlacesBlock: React.FC<PlacesBlockProps> = ({ startCity, endCity }) => {
   const getCuratedPlaces = (city: string): Place[] => {
       return CITY_PLACES[city] || [];
   };
 
-  const curatedStart = getCuratedPlaces(startCity);
-  const curatedEnd = getCuratedPlaces(endCity);
-
-  // 2. Merge logic: Curated first, then Auto filled up to 3 items total per section
-  // Note: We prioritize curated.
-  const mergePlaces = (curated: Place[], auto: Place[]) => {
-      // Create a set of curated names to avoid duplicates if OSM finds the same place
-      const curatedNames = new Set(curated.map(p => p.name.toLowerCase()));
-      
-      const filteredAuto = auto.filter(p => !curatedNames.has(p.name.toLowerCase()));
-      
-      // Combine and slice
-      return [...curated, ...filteredAuto].slice(0, 3);
-  };
-
-  const finalStartPlaces = mergePlaces(curatedStart, autoStartPlaces);
-  const finalEndPlaces = mergePlaces(curatedEnd, autoEndPlaces);
+  const startPlaces = getCuratedPlaces(startCity);
+  const endPlaces = getCuratedPlaces(endCity);
 
   const isSameCity = startCity === endCity;
-  
-  if (finalStartPlaces.length === 0 && finalEndPlaces.length === 0 && !loading) return null;
+  const hasPlaces = startPlaces.length > 0 || endPlaces.length > 0;
 
-  const renderPlaceCard = (place: Place, index: number, isCurated: boolean) => (
+  const renderPlaceCard = (place: Place, index: number) => (
       <a 
           key={`${place.name}-${index}`}
           href={place.url ? place.url : `https://yandex.ru/maps/?text=${encodeURIComponent(place.name + ' ' + (place.address || ''))}`}
           target="_blank"
           rel="noopener noreferrer"
-          className={`flex flex-col p-3 bg-white border rounded-lg shadow-sm hover:shadow-md transition-all group ${isCurated ? 'border-amber-200 bg-amber-50/30' : 'border-slate-100'}`}
+          className="flex flex-col p-3 bg-white border border-amber-200 rounded-lg shadow-sm hover:shadow-md transition-all group bg-amber-50/30"
       >
           <div className="flex justify-between items-start mb-1">
-              <span className={`font-bold text-sm group-hover:text-amber-600 transition-colors line-clamp-1 ${isCurated ? 'text-amber-900' : 'text-slate-800'}`}>
+              <span className="font-bold text-sm text-amber-900 group-hover:text-amber-700 transition-colors line-clamp-1">
                   {place.name}
               </span>
-              {isCurated && (
-                  <span title="Рекомендация" className="text-xs">⭐</span>
-              )}
+              <span title="Рекомендация" className="text-xs">⭐</span>
           </div>
           <span className="text-xs text-slate-500 font-medium mb-1 line-clamp-1">{place.type}</span>
           {place.address && (
@@ -68,42 +46,55 @@ const PlacesBlock: React.FC<PlacesBlockProps> = ({ startCity, endCity, autoStart
             <span className="text-xl">🍔</span>
             <h3 className="font-bold text-slate-800">Где поесть</h3>
          </div>
-         {loading && <span className="text-xs text-slate-400 animate-pulse">Поиск вкусного...</span>}
       </div>
 
       <div className="space-y-6">
-        {/* Start City Places */}
-        {finalStartPlaces.length > 0 && (
-            <div>
-                <h4 className="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center">
-                    <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                    Старт: {startCity}
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {finalStartPlaces.map((p, i) => renderPlaceCard(p, i, curatedStart.includes(p)))}
-                </div>
-            </div>
+        {hasPlaces && (
+            <>
+                {startPlaces.length > 0 && (
+                    <div>
+                        <h4 className="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center">
+                            <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
+                            Старт: {startCity}
+                        </h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            {startPlaces.map((p, i) => renderPlaceCard(p, i))}
+                        </div>
+                    </div>
+                )}
+
+                {!isSameCity && endPlaces.length > 0 && (
+                    <div>
+                         {startPlaces.length > 0 && <div className="border-t border-slate-100 my-4" />}
+                        <h4 className="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center">
+                            <span className="w-2 h-2 rounded-full bg-red-500 mr-2"></span>
+                            Финиш: {endCity}
+                        </h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            {endPlaces.map((p, i) => renderPlaceCard(p, i))}
+                        </div>
+                    </div>
+                )}
+            </>
         )}
 
-        {/* End City Places (only if different or if just filling space) */}
-        {!isSameCity && finalEndPlaces.length > 0 && (
-            <div>
-                 {finalStartPlaces.length > 0 && <div className="border-t border-slate-100 my-4" />}
-                <h4 className="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center">
-                    <span className="w-2 h-2 rounded-full bg-red-500 mr-2"></span>
-                    Финиш: {endCity}
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {finalEndPlaces.map((p, i) => renderPlaceCard(p, i, curatedEnd.includes(p)))}
-                </div>
-            </div>
-        )}
-
-        {!loading && finalStartPlaces.length === 0 && finalEndPlaces.length === 0 && (
-            <div className="text-center text-sm text-slate-400 py-2">
-                Рядом с маршрутом ничего не найдено :(
-            </div>
-        )}
+        {/* Global Yandex Collection Link */}
+        <div className={`${hasPlaces ? 'pt-2 border-t border-slate-100' : ''}`}>
+             <a 
+                href="https://yandex.ru/maps?bookmarks%5BpublicId%5D=OfCmg0o9&utm_source=share&utm_campaign=bookmarks"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center w-full p-4 bg-yellow-400 text-slate-900 rounded-lg font-bold hover:bg-yellow-300 transition-colors shadow-sm gap-2"
+             >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>Коллекция Gastrodinamica на Яндекс.Картах</span>
+             </a>
+             <p className="text-xs text-slate-500 text-center mt-2">
+                 Полный список проверенных мест доступен в нашей подборке
+             </p>
+        </div>
       </div>
     </div>
   );
