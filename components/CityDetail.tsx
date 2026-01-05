@@ -26,85 +26,84 @@ interface WeatherCardProps {
 }
 
 const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick }) => {
-    if (!stats) return <div className="p-4 text-center text-slate-400 bg-white rounded-xl border border-slate-200">Нет данных</div>;
+    if (!stats) return <div className="p-4 text-center text-slate-400">Нет данных</div>;
 
     const dryColor = stats.isDry ? 'text-green-600' : 'text-red-500';
     const minTemp = parseInt(stats.tempRange.split('..')[0]);
+    const isTooCold = stats.clothingHints.length === 0 && minTemp < 5;
+    
+    // Wind rotation: +180 because arrow points UP (North 0) but north wind blows South.
     const windRotation = (stats.windDeg + 180) % 360;
 
     return (
         <div 
             onClick={onClick}
-            className={`rounded-xl transition-all cursor-pointer bg-white overflow-hidden ${
-                isSelected 
-                ? 'border-2 border-komoot-green shadow-md ring-1 ring-komoot-green/20' 
-                : 'border border-slate-200 hover:border-slate-300 hover:shadow-sm'
-            }`}
+            className={`rounded-xl border transition-all cursor-pointer bg-white shadow-sm overflow-hidden ${isSelected ? 'border-blue-500 ring-2 ring-blue-100 shadow-md' : 'border-slate-200 hover:border-blue-300'}`}
         >
-            <div className={`px-4 py-3 border-b flex justify-between items-center ${isSelected ? 'bg-komoot-green/5 border-komoot-green/20' : 'bg-slate-50 border-slate-100'}`}>
+            <div className={`px-4 py-3 border-b flex justify-between items-center ${isSelected ? 'bg-blue-50 border-blue-100' : 'bg-slate-50 border-slate-100'}`}>
                 <div>
                     <span className="font-bold text-slate-800 text-lg mr-2">{stats.dayName}</span>
-                    <span className="text-slate-500 text-sm font-medium">{stats.dateObj.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</span>
+                    <span className="text-slate-500 text-sm">{stats.dateObj.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</span>
                 </div>
                 {isSelected && (
-                    <span className="w-4 h-4 rounded-full bg-komoot-green flex items-center justify-center">
-                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
+                    <span className="text-xs font-bold text-blue-700 bg-white border border-blue-200 px-2 py-0.5 rounded-full shadow-sm">
+                        Выбран
                     </span>
                 )}
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
-                <div className="p-4 flex flex-col items-center justify-center text-center">
-                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Температура</span>
-                    <span className="text-xl font-bold text-slate-800">{stats.tempRange}°</span>
-                    <span className="text-xs text-slate-500 font-medium mt-1">Ощущ: {stats.feelsRange}°</span>
+                <div className="p-3 flex flex-col items-center justify-center text-center">
+                    <span className="text-xs text-slate-400 uppercase font-semibold mb-1">Температура</span>
+                    <span className="text-lg font-bold text-slate-700">{stats.tempRange}°</span>
+                    <span className="text-xs text-slate-500">Ощущ: {stats.feelsRange}°</span>
                 </div>
 
-                <div className="p-4 flex flex-col items-center justify-center text-center">
-                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Ветер</span>
-                    <span className="text-xl font-bold text-slate-800">{stats.windRange}</span>
+                <div className="p-3 flex flex-col items-center justify-center text-center">
+                    <span className="text-xs text-slate-400 uppercase font-semibold mb-1">Ветер</span>
+                    <span className="text-lg font-bold text-slate-700">{stats.windRange} <span className="text-sm font-normal">км/ч</span></span>
+                    
                     <div className="flex items-center justify-center mt-1 text-slate-500 gap-1.5">
+                        <span className="text-xs font-medium">{stats.windDir}</span>
                         <svg 
                             style={{ transform: `rotate(${windRotation}deg)` }}
-                            className="transition-transform duration-300 text-slate-400"
-                            xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                            className="transition-transform duration-300"
+                            xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
                         >
                             <line x1="12" y1="19" x2="12" y2="5"></line>
                             <polyline points="5 12 12 5 19 12"></polyline>
                         </svg>
-                        <span className="text-xs font-medium">{stats.windDir}</span>
+                        <span className="text-xs">Порывы {stats.windGusts}</span>
                     </div>
                 </div>
 
-                <div className="p-4 flex flex-col items-center justify-center text-center">
-                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Осадки</span>
-                    <span className={`text-xl font-bold ${dryColor}`}>
-                        {stats.isDry ? '0' : stats.precipSum.toFixed(1)}
-                        <span className="text-xs font-normal text-slate-400 ml-1">мм</span>
+                <div className="p-3 flex flex-col items-center justify-center text-center">
+                    <span className="text-xs text-slate-400 uppercase font-semibold mb-1">Осадки</span>
+                    <span className={`text-lg font-bold ${dryColor}`}>
+                        {stats.isDry ? '0 мм' : `${stats.precipSum.toFixed(1)} мм`}
                     </span>
-                    <span className="text-xs text-slate-500 font-medium mt-1">
-                        {stats.isDry ? 'Сухо' : (stats.rainHours || 'Весь день')}
+                    <span className="text-xs text-slate-500">
+                        {stats.isDry ? 'Без осадков' : (stats.rainHours || 'Весь день')}
                     </span>
                 </div>
 
-                <div className="p-4 flex flex-col items-center justify-center text-center">
-                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Солнце</span>
-                    <span className="text-xl font-bold text-amber-500">{stats.sunStr}</span>
+                <div className="p-3 flex flex-col items-center justify-center text-center">
+                    <span className="text-xs text-slate-400 uppercase font-semibold mb-1">Солнце</span>
+                    <span className="text-lg font-bold text-amber-500">{stats.sunStr}</span>
+                    <span className="text-xs text-slate-500">09:00 - 18:00</span>
                 </div>
             </div>
 
             {stats.clothingHints.length > 0 && (
                 <div className="bg-slate-50 border-t border-slate-100 p-4">
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-                        👕 Рекомендации
+                    <div className="text-xs font-bold text-slate-400 uppercase mb-2 flex items-center gap-1">
+                        👕 Что надеть
                     </div>
                     <div className="flex flex-wrap gap-2">
                         {stats.clothingHints.map((hint, idx) => (
                             <span 
                                 key={idx} 
-                                className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-white text-slate-700 border border-slate-200 shadow-sm"
+                                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                             >
                                 {hint}
                             </span>
@@ -112,11 +111,23 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
                     </div>
                 </div>
             )}
+            
+            {!stats.isDry && stats.isMorningRideSuitable && !isTooCold && (
+                 <div className="bg-slate-50 border-t border-slate-100 p-3 text-xs text-slate-600 text-center font-medium">
+                    Небольшой райд до дождя
+                 </div>
+            )}
+            
+            {isTooCold && (
+                 <div className="bg-slate-50 border-t border-slate-100 p-3 text-xs text-slate-600 text-center font-medium">
+                    Слишком холодно для комфортного заезда (&lt; 5°C)
+                 </div>
+            )}
         </div>
     );
 };
 
-// ... (Helper functions: getDistanceFromLatLonInKm, parseGpx remain the same) ...
+// Haversine formula to calculate distance between two points in km
 const getDistanceFromLatLonInKm = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371; // Radius of the earth in km
     const dLat = (lat2 - lat1) * (Math.PI / 180);
@@ -130,6 +141,7 @@ const getDistanceFromLatLonInKm = (lat1: number, lon1: number, lat2: number, lon
     return d;
 };
 
+// Robust GPX Parsing Helper
 const parseGpx = (str: string): RouteData | null => {
     try {
         const parser = new DOMParser();
@@ -185,34 +197,43 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   const [activeTab, setActiveTab] = useState<'w1' | 'w2'>(initialTab);
   const [routeDay, setRouteDay] = useState<'saturday' | 'sunday' | null>(null);
   const [routeStatus, setRouteStatus] = useState<string>('');
+  
+  // Routes State
   const [foundRoutes, setFoundRoutes] = useState<RouteData[]>([]);
   const [selectedRouteIdx, setSelectedRouteIdx] = useState<number>(0);
   
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const polylineRef = useRef<L.Polyline | null>(null);
-  const startMarkerRef = useRef<L.Marker | null>(null);
   const decorativeMarkersRef = useRef<L.Marker[]>([]);
   
-  useEffect(() => { window.scrollTo(0, 0); }, [data.cityName]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [data.cityName]);
 
   const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
   
   useEffect(() => {
-      if (activeWeekend.saturday?.isDry) setRouteDay('saturday');
-      else if (activeWeekend.sunday?.isDry) setRouteDay('sunday');
-      else setRouteDay('saturday');
+      if (activeWeekend.saturday?.isDry) {
+          setRouteDay('saturday');
+      } else if (activeWeekend.sunday?.isDry) {
+          setRouteDay('sunday');
+      } else {
+          setRouteDay('saturday');
+      }
   }, [activeTab, activeWeekend]);
 
   const activeStats = routeDay === 'saturday' ? activeWeekend.saturday : activeWeekend.sunday;
   const cityCoords = CITIES[data.cityName];
   const currentRoute = foundRoutes[selectedRouteIdx];
+  
   const isFlightDestination = FLIGHT_CITIES.includes(data.cityName);
 
-  // --- Transport Logic (Simplified for layout) ---
+  // --- Transport Logic Calculation ---
   const moscow = CITIES['Москва'];
   const moscowLat = moscow ? moscow.lat : 55.75;
   const moscowLon = moscow ? moscow.lon : 37.61;
+
   let routeStartLat = cityCoords.lat;
   let routeStartLon = cityCoords.lon;
   let routeEndLat = cityCoords.lat;
@@ -225,15 +246,20 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
       routeEndLat = currentRoute.points[lastIdx][0];
       routeEndLon = currentRoute.points[lastIdx][1];
   }
+
   const findClosestCityName = (lat: number, lon: number) => {
       let closestName = data.cityName;
       let minD = Infinity;
       for (const [name, coords] of Object.entries(CITIES)) {
           const d = getDistanceFromLatLonInKm(lat, lon, coords.lat, coords.lon);
-          if (d < minD) { minD = d; closestName = name; }
+          if (d < minD) {
+              minD = d;
+              closestName = name;
+          }
       }
       return closestName;
   };
+
   const routeStartCity = findClosestCityName(routeStartLat, routeStartLon);
   const routeEndCity = findClosestCityName(routeEndLat, routeEndLon);
   const distStartMsc = getDistanceFromLatLonInKm(routeStartLat, routeStartLon, moscowLat, moscowLon);
@@ -242,23 +268,35 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   const showFrom = distEndMsc > 20;
   const showTransportBlock = isFlightDestination || ((showTo || showFrom) && (distStartMsc <= 300));
 
-  // Map Init
+  // 1. Initialize Map
   useEffect(() => {
     if (!mapContainerRef.current || !cityCoords) return;
+
     if (!mapInstanceRef.current) {
         const map = L.map(mapContainerRef.current).setView([cityCoords.lat, cityCoords.lon], 10);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OSM' }).addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
         mapInstanceRef.current = map;
         setTimeout(() => map.invalidateSize(), 100);
     }
-    return () => { if (mapInstanceRef.current) { mapInstanceRef.current.remove(); mapInstanceRef.current = null; } }
+    return () => {
+        if (mapInstanceRef.current) {
+            mapInstanceRef.current.remove();
+            mapInstanceRef.current = null;
+        }
+    }
   }, [cityCoords]);
 
-  // Load GPX
+  // 2. Load GPX Files
   useEffect(() => {
     let isMounted = true;
     if (!activeStats || !cityCoords) return;
-    if (isFlightDestination) { setRouteStatus('Авианаправление'); setFoundRoutes([]); return; }
+    if (isFlightDestination) {
+        setRouteStatus('Авианаправление');
+        setFoundRoutes([]);
+        return;
+    }
 
     const windDirCode = getCardinal(activeStats.windDeg);
     setRouteStatus('Поиск...');
@@ -278,24 +316,32 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
         } catch { return null; }
     };
 
-    Promise.all(candidates.map(url => fetchRoute(url))).then(results => {
-        if (!isMounted) return;
-        const validRoutes = results.filter((r): r is RouteData => r !== null);
-        if (validRoutes.length > 0) { setFoundRoutes(validRoutes); setRouteStatus(`Найдено: ${validRoutes.length}`); }
-        else { setFoundRoutes([]); setRouteStatus(`Маршрут под ветер ${windDirCode} не найден`); }
-    });
+    Promise.all(candidates.map(url => fetchRoute(url)))
+        .then(results => {
+            if (!isMounted) return;
+            const validRoutes = results.filter((r): r is RouteData => r !== null);
+            if (validRoutes.length > 0) {
+                setFoundRoutes(validRoutes);
+                setRouteStatus(`Найдено маршрутов: ${validRoutes.length}`);
+            } else {
+                setFoundRoutes([]);
+                setRouteStatus(`Маршрут под ветер ${windDirCode} не найден`);
+            }
+        });
+
     return () => { isMounted = false; };
   }, [activeStats, cityCoords, data.cityName, isFlightDestination]);
 
-  // Draw Route
+
+  // 3. Render Route and Markers on Map
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map || !activeStats || !cityCoords) return;
+
     map.invalidateSize();
-    
+
     // Clear previous elements
     if (polylineRef.current) { polylineRef.current.remove(); polylineRef.current = null; }
-    if (startMarkerRef.current) { startMarkerRef.current.remove(); startMarkerRef.current = null; }
     decorativeMarkersRef.current.forEach(m => m.remove());
     decorativeMarkersRef.current = [];
 
@@ -303,74 +349,83 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
     const routePoints = currentRoute?.points;
 
     if (routePoints && routePoints.length > 0) {
-        // 1. Draw Polyline (Komoot Blue)
+        // --- A. Draw Route Line (Komoot Blue) ---
         const polyline = L.polyline(routePoints, { 
-            color: '#347aff', // Komoot Blue
-            weight: 5, 
+            color: '#347aff', 
+            weight: 5,
             opacity: 0.9,
             lineCap: 'round',
             lineJoin: 'round'
         }).addTo(map);
+        
         polylineRef.current = polyline;
         startPoint = routePoints[0];
-        
-        // 2. Add Decorative Wind Markers along the route
+        const endPoint = routePoints[routePoints.length - 1];
+
+        // --- B. Add Start (A) and End (B) Markers ---
+        const createLabelIcon = (label: string, colorClass: string) => L.divIcon({
+            className: 'custom-label-icon',
+            html: `<div class="flex items-center justify-center w-8 h-8 rounded-full border-2 border-white shadow-lg text-white font-bold font-sans ${colorClass}">${label}</div>`,
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
+        });
+
+        const startMarker = L.marker(startPoint, { 
+            icon: createLabelIcon('A', 'bg-slate-900'), 
+            zIndexOffset: 1000 
+        }).addTo(map);
+        decorativeMarkersRef.current.push(startMarker);
+
+        const endMarker = L.marker(endPoint, { 
+            icon: createLabelIcon('B', 'bg-slate-900'), 
+            zIndexOffset: 1000 
+        }).addTo(map);
+        decorativeMarkersRef.current.push(endMarker);
+
+
+        // --- C. Add Wind Direction Markers Every 10km ---
         const arrowRotation = (activeStats.windDeg + 180) % 360;
         const windIconHtml = `
-            <div style="transform: rotate(${arrowRotation}deg);" class="flex items-center justify-center w-6 h-6 bg-white/90 rounded-full border border-blue-600 shadow-sm">
+            <div style="transform: rotate(${arrowRotation}deg);" class="flex items-center justify-center w-6 h-6 bg-white rounded-full border border-blue-600 shadow-sm">
                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
             </div>
         `;
         const windIcon = L.divIcon({ className: 'wind-route-marker', html: windIconHtml, iconSize: [24, 24], iconAnchor: [12, 12] });
 
-        // Place 8 markers evenly distributed
-        const markersCount = 8;
-        const step = Math.floor(routePoints.length / (markersCount + 1));
+        let accumulatedDist = 0;
+        let nextMarkerAt = 10; // First marker at 10km
         
-        for (let i = 1; i <= markersCount; i++) {
-            const idx = i * step;
-            if (routePoints[idx]) {
-                const m = L.marker(routePoints[idx], { icon: windIcon, zIndexOffset: 50 }).addTo(map);
+        for (let i = 1; i < routePoints.length; i++) {
+            const dist = getDistanceFromLatLonInKm(
+                routePoints[i-1][0], routePoints[i-1][1],
+                routePoints[i][0], routePoints[i][1]
+            );
+            accumulatedDist += dist;
+            
+            if (accumulatedDist >= nextMarkerAt) {
+                const m = L.marker(routePoints[i], { icon: windIcon, zIndexOffset: 50 }).addTo(map);
                 decorativeMarkersRef.current.push(m);
+                nextMarkerAt += 10;
             }
         }
 
-        // 3. Add Finish Flag Marker
-        const finishPoint = routePoints[routePoints.length - 1];
-        const finishIconHtml = `
-            <div class="flex items-center justify-center w-8 h-8 bg-white rounded-full border-2 border-slate-900 shadow-lg transform -translate-y-1">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="text-slate-900">
-                    <path d="M4 15V4a1 1 0 0 1 2 0v1h10.3c.7 0 1.3.8.9 1.4l-1.6 2.6 1.6 2.6c.4.6-.1 1.4-.9 1.4H6v2a1 1 0 0 1-2 0z"/>
-                    <path d="M4 19h16a1 1 0 0 1 0 2H4a1 1 0 0 1 0-2z"/>
-                 </svg>
-            </div>
-        `;
-        const finishIcon = L.divIcon({ className: 'finish-marker', html: finishIconHtml, iconSize: [32, 32], iconAnchor: [16, 30] });
-        const finishMarker = L.marker(finishPoint, { icon: finishIcon, zIndexOffset: 100 }).addTo(map);
-        decorativeMarkersRef.current.push(finishMarker);
-
         setTimeout(() => {
             const bounds = polyline.getBounds();
-            if (bounds.isValid()) { map.invalidateSize(); map.fitBounds(bounds, { padding: [50, 50] }); }
+            if (bounds.isValid()) {
+                map.invalidateSize(); 
+                map.fitBounds(bounds, { padding: [40, 40] });
+            }
         }, 150);
+
     } else {
         map.setView([cityCoords.lat, cityCoords.lon], 11);
     }
-
-    // Start Marker 
-    const startIconHtml = `
-        <div class="flex items-center justify-center w-8 h-8 bg-slate-900 text-white font-bold rounded-full shadow-lg border-2 border-white">
-            A
-        </div>
-    `;
-    const startIcon = L.divIcon({ className: 'start-marker', html: startIconHtml, iconSize: [32, 32], iconAnchor: [16, 16] });
-    const marker = L.marker(startPoint, { icon: startIcon, zIndexOffset: 1000 }).addTo(map);
-    startMarkerRef.current = marker;
 
   }, [activeStats, cityCoords, currentRoute]);
 
   let collectionFocusCoords = cityCoords;
   let collectionZoom = 13;
+  
   if (data.cityName === 'Завидово') { collectionFocusCoords = { lat: 56.592, lon: 36.523 }; }
   if (data.cityName === 'Истра') { collectionFocusCoords = { lat: 55.8985, lon: 36.9025 }; collectionZoom = 11; }
 
@@ -379,120 +434,165 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
     : `https://yandex.ru/maps?bookmarks%5BpublicId%5D=OfCmg0o9&utm_source=share&utm_campaign=bookmarks`;
 
   return (
-    <div className="space-y-6">
-      {/* Detail Header */}
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-            <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-slate-200 hover:bg-slate-50 transition-colors text-slate-600">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-            </button>
-            <h2 className="text-3xl font-bold text-slate-900">{data.cityName}</h2>
-        </div>
-        
-        {/* Weekend Switcher */}
-        <div className="flex bg-white rounded-full border border-slate-200 p-1">
-             <button 
-                onClick={() => setActiveTab('w1')}
-                className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all ${activeTab === 'w1' ? 'bg-komoot-green text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50'}`}
-             >
-                Ближайшие
-             </button>
-             <button 
-                onClick={() => setActiveTab('w2')}
-                className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all ${activeTab === 'w2' ? 'bg-komoot-green text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50'}`}
-             >
-                Через неделю
-             </button>
-        </div>
+        <h2 className="text-2xl font-bold text-slate-800">{data.cityName}</h2>
+        <button onClick={onClose} className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Назад
+        </button>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-8">
-          {/* Left Column: Stats & Map Controls */}
-          <div className="space-y-6">
-               <div className="space-y-4">
-                  <WeatherCard 
-                    stats={activeWeekend.saturday} 
-                    isSelected={routeDay === 'saturday'} 
-                    onClick={() => setRouteDay('saturday')}
-                  />
-                  <WeatherCard 
-                    stats={activeWeekend.sunday} 
-                    isSelected={routeDay === 'sunday'} 
-                    onClick={() => setRouteDay('sunday')}
-                  />
-               </div>
-               
-               {/* Route Info & Variants */}
-               {foundRoutes.length > 0 && (
-                 <div className="bg-white rounded-xl border border-slate-200 p-4">
-                     <div className="flex justify-between items-center mb-3">
-                         <span className="font-bold text-slate-800">Маршрут {routeDay === 'saturday' ? 'на субботу' : 'на воскресенье'}</span>
-                         {currentRoute && <span className="text-sm font-medium text-slate-500">{currentRoute.distanceKm.toFixed(1)} км</span>}
-                     </div>
-                     {foundRoutes.length > 1 && (
-                        <div className="flex gap-2 flex-wrap">
-                            {foundRoutes.map((_, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => setSelectedRouteIdx(idx)}
-                                    className={`px-3 py-1 text-xs font-bold rounded-md border transition-all ${
-                                        selectedRouteIdx === idx 
-                                        ? 'bg-slate-800 text-white border-slate-800' 
-                                        : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
-                                    }`}
-                                >
-                                    Вариант {idx + 1}
-                                </button>
-                            ))}
-                        </div>
-                     )}
-                 </div>
-               )}
+      <div className="flex p-1 bg-slate-100 rounded-lg">
+          <button 
+            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${activeTab === 'w1' ? 'bg-white shadow text-slate-800' : 'text-slate-500'}`}
+            onClick={() => setActiveTab('w1')}
+          >
+              Ближайшие
+          </button>
+          <button 
+            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${activeTab === 'w2' ? 'bg-white shadow text-slate-800' : 'text-slate-500'}`}
+            onClick={() => setActiveTab('w2')}
+          >
+              Через неделю
+          </button>
+      </div>
 
-               {activeStats && showTransportBlock && (
-                  <TransportBlock 
-                      startCity={routeStartCity} 
-                      endCity={routeEndCity} 
-                      date={activeStats.dateObj} 
-                      showTo={showTo}
-                      showFrom={showFrom}
-                  />
-               )}
-               
-               <a 
-                    href={yandexMapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between w-full px-5 py-4 bg-[#FFCC00] text-slate-900 rounded-xl font-bold hover:bg-[#F0B90B] transition-colors shadow-sm"
-                >
-                    <span className="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+      <div className="space-y-6">
+          <p className="text-xs text-slate-500 font-medium text-center">Нажмите на карточку дня для выбора маршрута</p>
+          
+          <WeatherCard 
+            stats={activeWeekend.saturday} 
+            isSelected={routeDay === 'saturday'} 
+            onClick={() => setRouteDay('saturday')}
+          />
+          <WeatherCard 
+            stats={activeWeekend.sunday} 
+            isSelected={routeDay === 'sunday'} 
+            onClick={() => setRouteDay('sunday')}
+          />
+          
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                <h3 className="text-lg font-bold text-slate-800">
+                    Маршрут ({routeDay === 'saturday' ? 'Суббота' : 'Воскресенье'})
+                </h3>
+                
+                {activeStats && (
+                    <div className="flex flex-col items-end text-right">
+                        <span className="text-sm font-medium text-slate-700">
+                           Ветер: {activeStats.windDirFull}
+                        </span>
+                        <span className={`text-xs px-2 py-0.5 rounded mt-1 font-mono inline-block ${foundRoutes.length === 0 ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-700'}`}>
+                            {routeStatus}
+                        </span>
+                    </div>
+                )}
+            </div>
+
+            {currentRoute && (
+                <div className="mb-3 flex items-center gap-4 sm:gap-6 text-sm text-slate-700 bg-white p-3 rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
+                    <div className="flex items-center gap-2 shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
+                             <path d="M18 8l4 4-4 4" />
+                             <path d="M6 16l-4-4 4-4" />
+                             <path d="M2 12h20" />
                         </svg>
-                        Хорошие места
-                    </span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                </a>
+                        <span className="font-bold text-lg text-slate-800">{currentRoute.distanceKm.toFixed(1)} <span className="text-xs font-normal text-slate-500">км</span></span>
+                    </div>
+                    
+                    {currentRoute.elevationM > 0 && (
+                        <div className="flex items-center gap-2 shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
+                                <path d="M7 17l10-10" />
+                                <path d="M7 7h10v10" />
+                            </svg>
+                            <span className="font-bold text-lg text-slate-800">{Math.round(currentRoute.elevationM)} <span className="text-xs font-normal text-slate-500">м</span></span>
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-2 shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
+                             <circle cx="12" cy="12" r="10"></circle>
+                             <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <span className="font-bold text-lg text-slate-800">
+                            {(() => {
+                                const totalHours = currentRoute.distanceKm / 30;
+                                const h = Math.floor(totalHours);
+                                const m = Math.round((totalHours - h) * 60);
+                                return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                            })()}
+                        </span>
+                    </div>
+                </div>
+            )}
+
+            {foundRoutes.length > 1 && (
+                <div className="mb-3 flex flex-wrap gap-2">
+                    {foundRoutes.map((_, idx) => (
+                        <button
+                            key={idx}
+                            onClick={() => setSelectedRouteIdx(idx)}
+                            className={`px-3 py-1.5 text-xs font-bold uppercase rounded-md border transition-colors ${
+                                selectedRouteIdx === idx 
+                                ? 'bg-blue-600 text-white border-blue-600' 
+                                : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'
+                            }`}
+                        >
+                            Вариант {idx + 1}
+                        </button>
+                    ))}
+                </div>
+            )}
+            
+            <div className="relative w-full h-[400px] bg-slate-100 rounded-lg overflow-hidden border border-slate-100 z-0">
+                <div ref={mapContainerRef} className="w-full h-full" />
+            </div>
+            
+            <div className="mt-4 flex flex-col items-center text-center space-y-2">
+                <p className="text-xs text-slate-400 max-w-lg">
+                   Маршрут подбирается автоматически по направлению ветра.
+                </p>
+            </div>
           </div>
 
-          {/* Right Column: Map */}
-          <div className="h-[500px] lg:h-auto bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm relative z-0">
-               <div ref={mapContainerRef} className="w-full h-full" />
-               <div className="absolute bottom-4 left-0 right-0 flex justify-center z-[500]">
-                    <a 
-                        href="https://www.komoot.com/collection/2674102/-lechappe-belle?ref=collection" 
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur text-komoot-dark text-sm rounded-full font-bold shadow-lg border border-slate-200 hover:bg-white transition-colors"
-                    >
-                        Открыть в Komoot
-                    </a>
-               </div>
+          {activeStats && showTransportBlock && (
+              <TransportBlock 
+                  startCity={routeStartCity} 
+                  endCity={routeEndCity} 
+                  date={activeStats.dateObj} 
+                  showTo={showTo}
+                  showFrom={showFrom}
+              />
+          )}
+
+          <div className="flex flex-col gap-3 pt-2">
+            <a 
+                href="https://www.komoot.com/collection/2674102/-lechappe-belle?ref=collection" 
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-center gap-2 px-6 py-4 bg-[#93bf33] text-white rounded-xl font-bold hover:bg-[#7fa82b] transition-colors shadow-md active:scale-95 text-center"
+            >
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 0C5.371 0 0 5.373 0 12s5.371 12 12 12 12-5.373 12-12S18.629 0 12 0zm-1.125 18.75c-2.484 0-4.5-2.016-4.5-4.5 0-2.485 2.016-4.5 4.5-4.5 2.485 0 4.5 2.015 4.5 4.5 0 2.484-2.015 4.5-4.5 4.5zm4.875-7.5c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z"/></svg>
+                Gastrodinamica в Komoot
+            </a>
+
+            <a 
+                href={yandexMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 px-6 py-4 bg-yellow-400 text-slate-900 rounded-xl font-bold hover:bg-yellow-300 transition-colors shadow-md active:scale-95 text-center"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+                Хорошие места
+            </a>
           </div>
+
       </div>
     </div>
   );

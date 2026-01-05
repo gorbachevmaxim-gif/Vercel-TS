@@ -6,19 +6,18 @@ import { analyzeCity, getWeekendDates } from './services/weatherService';
 import LoadingScreen from './components/LoadingScreen';
 import SummaryView from './components/SummaryView';
 import CityDetail from './components/CityDetail';
-import GastrodinamikaLogo from './components/GastrodinamikaLogo';
 
 const App: React.FC = () => {
   const [data, setData] = useState<CityAnalysisResult[]>([]);
   const [loading, setLoading] = useState<LoadingState>({ total: 0, current: 0, status: 'Starting...' });
   const [showLoading, setShowLoading] = useState(true);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
-  const [activeWeekendTab, setActiveWeekendTab] = useState<'w1' | 'w2'>('w1');
+  const [initialTab, setInitialTab] = useState<'w1' | 'w2'>('w1');
   
   // Date Logic
   const dates = useMemo(() => getWeekendDates(), []);
   
-  // Format: "14 Oct" style
+  // Format: "14 окт"
   const formatDate = (d: Date) => d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
   const w1Label = `${formatDate(dates[0])} - ${formatDate(dates[1])}`;
   const w2Label = `${formatDate(dates[2])} - ${formatDate(dates[3])}`;
@@ -49,6 +48,7 @@ const App: React.FC = () => {
       }
 
       setData(results);
+      // Ensure we hit 100% state for the animation logic
       setLoading(prev => ({ ...prev, current: total, status: 'Готово' }));
     };
 
@@ -60,7 +60,8 @@ const App: React.FC = () => {
       return data.find(c => c.cityName === selectedCity) || null;
   }, [data, selectedCity]);
 
-  const handleCitySelect = (city: string) => {
+  const handleCitySelect = (city: string, tab: 'w1' | 'w2') => {
+      setInitialTab(tab);
       setSelectedCity(city);
   };
 
@@ -70,93 +71,64 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-komoot-light text-komoot-dark font-sans pb-10">
+    <div className="min-h-screen bg-slate-50 text-slate-900 pb-10">
       
-      {/* Simple Clean Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 h-16 flex items-center justify-center shadow-sm">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => setSelectedCity(null)}>
-             <div className="w-8 h-8 rounded-full overflow-hidden">
-                <GastrodinamikaLogo percent={100} />
-            </div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900">
-                Gastrodinamika
-            </h1>
-        </div>
-      </header>
+      {/* Header */}
+      <div className="bg-white border-b border-slate-200 sticky top-0 z-10 px-4 py-3 shadow-sm">
+        <h1 
+            onClick={() => setSelectedCity(null)}
+            className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent cursor-pointer text-center"
+        >
+            Выбор места для райда (сб, вс)
+        </h1>
+        <p className="text-xs text-slate-500 text-center">Поиск идеальной погоды без осадков (09:00 - 18:00)</p>
+      </div>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+      <div className="max-w-2xl mx-auto p-4 space-y-6">
+        
         {!selectedCity ? (
-            <div className="space-y-8 animate-fade-in">
-                
-                {/* Intro Block */}
-                <div className="text-center space-y-2">
-                     <h2 className="text-3xl font-bold text-slate-900">Поиск идеальных выходных</h2>
-                     <p className="text-slate-500">
-                        Мы проанализировали {data.length} направлений, чтобы найти, где сухо и солнечно.
-                     </p>
-                </div>
-
-                {/* Date Switcher */}
-                <div className="flex justify-center">
-                    <div className="inline-flex bg-white p-1 rounded-full border border-slate-200 shadow-sm">
-                        <button 
-                            onClick={() => setActiveWeekendTab('w1')}
-                            className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
-                                activeWeekendTab === 'w1' 
-                                ? 'bg-komoot-green text-white shadow-sm' 
-                                : 'text-slate-600 hover:bg-slate-50'
-                            }`}
-                        >
-                            Ближайшие ({w1Label})
-                        </button>
-                        <button 
-                             onClick={() => setActiveWeekendTab('w2')}
-                             className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
-                                activeWeekendTab === 'w2' 
-                                ? 'bg-komoot-green text-white shadow-sm' 
-                                : 'text-slate-600 hover:bg-slate-50'
-                            }`}
-                        >
-                            Через неделю ({w2Label})
-                        </button>
-                    </div>
-                </div>
-
-                {/* Content Section */}
+            <>
+                {/* Summaries */}
                 <SummaryView 
                     data={data} 
-                    title=""
-                    dateLabel=""
-                    isSecondWeekend={activeWeekendTab === 'w2'} 
-                    onCityClick={handleCitySelect} 
+                    title="Ближайшие выходные"
+                    dateLabel={w1Label} 
+                    onCityClick={(city) => handleCitySelect(city, 'w1')} 
                 />
-
-                 {/* All Cities List */}
-                 <div className="pt-8 border-t border-slate-200">
-                   <h3 className="text-lg font-bold text-slate-900 mb-4 text-center">Все направления</h3>
-                   <div className="flex flex-wrap justify-center gap-2">
+                <SummaryView 
+                    data={data} 
+                    title="Через неделю"
+                    dateLabel={w2Label} 
+                    isSecondWeekend={true} 
+                    onCityClick={(city) => handleCitySelect(city, 'w2')} 
+                />
+                
+                {/* City Picker */}
+                <div className="pt-4">
+                   <h3 className="text-lg font-bold text-slate-800 mb-3">Детальный прогноз</h3>
+                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                        {data.map(city => (
                            <button 
                              key={city.cityName}
-                             onClick={() => handleCitySelect(city.cityName)}
-                             className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:border-komoot-green hover:text-komoot-green hover:shadow-sm transition-all"
+                             onClick={() => handleCitySelect(city.cityName, 'w1')}
+                             className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:border-blue-500 hover:text-blue-600 active:bg-blue-50 transition-colors text-left"
                            >
                                {city.cityName}
                            </button>
                        ))}
                    </div>
                 </div>
-            </div>
+            </>
         ) : (
             selectedData && (
                 <CityDetail 
                     data={selectedData} 
-                    initialTab={activeWeekendTab}
+                    initialTab={initialTab}
                     onClose={() => setSelectedCity(null)} 
                 />
             )
         )}
-      </main>
+      </div>
     </div>
   );
 };
