@@ -71,7 +71,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 pb-10">
+    <div className="min-h-screen bg-[#edebe5] text-slate-900 pb-10">
       
       {/* Header */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-10 px-4 py-3 shadow-sm">

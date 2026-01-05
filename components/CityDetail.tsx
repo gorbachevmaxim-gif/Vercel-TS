@@ -141,6 +141,18 @@ const getDistanceFromLatLonInKm = (lat1: number, lon1: number, lat2: number, lon
     return d;
 };
 
+// Calculate bearing between two points in degrees (0-360)
+const getBearing = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const toRad = (d: number) => d * Math.PI / 180;
+    const toDeg = (r: number) => r * 180 / Math.PI;
+    
+    const y = Math.sin(toRad(lon2 - lon1)) * Math.cos(toRad(lat2));
+    const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
+              Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(toRad(lon2 - lon1));
+    const brng = toDeg(Math.atan2(y, x));
+    return (brng + 360) % 360;
+};
+
 // Robust GPX Parsing Helper
 const parseGpx = (str: string): RouteData | null => {
     try {
@@ -383,29 +395,63 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
         decorativeMarkersRef.current.push(endMarker);
 
 
-        // --- C. Add Wind Direction Markers Every 10km ---
-        const arrowRotation = (activeStats.windDeg + 180) % 360;
-        const windIconHtml = `
-            <div style="transform: rotate(${arrowRotation}deg);" class="flex items-center justify-center w-6 h-6 bg-white rounded-full border border-blue-600 shadow-sm">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
-            </div>
-        `;
-        const windIcon = L.divIcon({ className: 'wind-route-marker', html: windIconHtml, iconSize: [24, 24], iconAnchor: [12, 12] });
-
-        let accumulatedDist = 0;
-        let nextMarkerAt = 10; // First marker at 10km
+        // --- C. Add Wind Direction Markers Every 20km ---
+        const windRotation = (activeStats.windDeg + 180) % 360;
         
+        let accumulatedDist = 0;
+        let nextMarkerAt = 20; // First marker at 20km
+        const totalDistance = currentRoute.distanceKm;
+
+        // Offset configuration
+        const PIXEL_OFFSET = 25; // How many pixels to push away from the line
+
         for (let i = 1; i < routePoints.length; i++) {
-            const dist = getDistanceFromLatLonInKm(
-                routePoints[i-1][0], routePoints[i-1][1],
-                routePoints[i][0], routePoints[i][1]
-            );
+            const prev = routePoints[i-1];
+            const curr = routePoints[i];
+            const dist = getDistanceFromLatLonInKm(prev[0], prev[1], curr[0], curr[1]);
             accumulatedDist += dist;
             
+            // Logic: Place marker every 20km
+            // Condition: Do NOT place if it's within 5km of the finish line
             if (accumulatedDist >= nextMarkerAt) {
-                const m = L.marker(routePoints[i], { icon: windIcon, zIndexOffset: 50 }).addTo(map);
-                decorativeMarkersRef.current.push(m);
-                nextMarkerAt += 10;
+                if ((totalDistance - accumulatedDist) > 5) {
+                    
+                    // 1. Calculate bearing of the track at this segment
+                    const trackBearing = getBearing(prev[0], prev[1], curr[0], curr[1]);
+                    
+                    // 2. Calculate Offset (Right side relative to movement: +90 degrees)
+                    // Convert to Radians
+                    const offsetAngleRad = (trackBearing + 90) * (Math.PI / 180);
+                    
+                    // 3. Calculate X/Y pixel translation
+                    // In CSS/Screen coords: Y is Down.
+                    // Map Angle 0 (North) -> Offset 90 (East) -> X should be +, Y should be 0.
+                    // sin(90) = 1, cos(90) = 0.
+                    // Map Angle 90 (East) -> Offset 180 (South) -> X should be 0, Y should be +.
+                    // sin(180) = 0, cos(180) = -1. Wait. cos(180) is -1. -cos is 1.
+                    const dx = PIXEL_OFFSET * Math.sin(offsetAngleRad);
+                    const dy = -PIXEL_OFFSET * Math.cos(offsetAngleRad);
+
+                    // 4. Create Custom Icon with translation
+                    const windIconHtml = `
+                        <div style="transform: translate(${dx}px, ${dy}px); width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
+                             <div style="transform: rotate(${windRotation}deg); filter: drop-shadow(0px 0px 2px rgba(255,255,255,0.9));">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-slate-800"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                             </div>
+                        </div>
+                    `;
+                    
+                    const windIcon = L.divIcon({ 
+                        className: 'wind-route-marker-smart', 
+                        html: windIconHtml, 
+                        iconSize: [24, 24], 
+                        iconAnchor: [12, 12] // Center the anchor so the translation starts from the exact point
+                    });
+
+                    const m = L.marker(curr, { icon: windIcon, zIndexOffset: 50 }).addTo(map);
+                    decorativeMarkersRef.current.push(m);
+                }
+                nextMarkerAt += 20;
             }
         }
 
