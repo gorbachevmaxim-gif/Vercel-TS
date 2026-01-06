@@ -30,9 +30,13 @@ const App: React.FC = () => {
 
       setLoading({ total, current: 0, status: 'Загрузка списка...' });
 
-      const BATCH_SIZE = 5;
+      // Reduced batch size to 3 to prevent API rate limiting
+      const BATCH_SIZE = 3;
       
       for (let i = 0; i < total; i += BATCH_SIZE) {
+         // Add a small delay between batches
+         if (i > 0) await new Promise(resolve => setTimeout(resolve, 300));
+
          const batch = cityNames.slice(i, i + BATCH_SIZE);
          const promises = batch.map(name => {
              setLoading(prev => ({ ...prev, current: prev.current, status: `Анализ: ${name}` }));
@@ -44,7 +48,7 @@ const App: React.FC = () => {
              if (res) results.push(res);
          });
          
-         setLoading(prev => ({ ...prev, current: i + batch.length }));
+         setLoading(prev => ({ ...prev, current: Math.min(total, i + batch.length) }));
       }
 
       setData(results);
@@ -65,23 +69,24 @@ const App: React.FC = () => {
       setSelectedCity(city);
   };
 
-  // Handle Main View
-  if (showLoading) {
-      return <LoadingScreen state={loading} onComplete={() => setShowLoading(false)} />;
-  }
+    // Handle Main View
+    if (showLoading) {
+            return <LoadingScreen state={loading} onComplete={() => setShowLoading(false)} />;
+    }
 
-  return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 pb-10">
+    return (
+        <div className="min-h-screen text-slate-900 pb-10" style={{ backgroundColor: '#edebe5' }}>
       
       {/* Header */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-10 px-4 py-3 shadow-sm">
         <h1 
             onClick={() => setSelectedCity(null)}
-            className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent cursor-pointer text-center"
+            className="text-xl font-bold cursor-pointer text-center"
+            style={{ color: 'rgb(64, 72, 35)' }}
         >
-            Выбор места для райда (сб, вс)
+            Выбор места для райда
         </h1>
-        <p className="text-xs text-slate-500 text-center">Поиск идеальной погоды без осадков (09:00 - 18:00)</p>
+        <p className="text-xs text-center" style={{ color: '#404823' }}>Поиск идеальной погоды без осадков (09:00 - 18:00)</p>
       </div>
 
       <div className="max-w-2xl mx-auto p-4 space-y-6">
@@ -106,17 +111,23 @@ const App: React.FC = () => {
                 {/* City Picker */}
                 <div className="pt-4">
                    <h3 className="text-lg font-bold text-slate-800 mb-3">Детальный прогноз</h3>
-                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                       {data.map(city => (
-                           <button 
-                             key={city.cityName}
-                             onClick={() => handleCitySelect(city.cityName, 'w1')}
-                             className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:border-blue-500 hover:text-blue-600 active:bg-blue-50 transition-colors text-left"
-                           >
-                               {city.cityName}
-                           </button>
-                       ))}
-                   </div>
+                   {data.length > 0 ? (
+                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                           {data.map(city => (
+                               <button 
+                                 key={city.cityName}
+                                 onClick={() => handleCitySelect(city.cityName, 'w1')}
+                                 className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:border-blue-500 hover:text-blue-600 active:bg-blue-50 transition-colors text-left"
+                               >
+                                   {city.cityName}
+                               </button>
+                           ))}
+                       </div>
+                   ) : (
+                       <div className="p-4 text-center text-slate-500 bg-white rounded-lg border border-slate-200">
+                           Не удалось загрузить данные городов. Попробуйте обновить страницу.
+                       </div>
+                   )}
                 </div>
             </>
         ) : (

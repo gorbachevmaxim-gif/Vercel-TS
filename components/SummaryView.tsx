@@ -10,11 +10,11 @@ interface SummaryViewProps {
 }
 
 const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSecondWeekend = false, onCityClick }) => {
-  // Filter logic: City must be DRY AND have a ROUTE.
+  // Filter logic: Show dry cities even if no route is found (removed hasRoute check)
   const getDryWithRoute = (city: CityAnalysisResult) => {
     const w = isSecondWeekend ? city.weekend2 : city.weekend1;
-    const sat = (w.saturday?.isDry && w.saturday?.hasRoute) ?? false;
-    const sun = (w.sunday?.isDry && w.sunday?.hasRoute) ?? false;
+    const sat = w.saturday?.isDry ?? false;
+    const sun = w.sunday?.isDry ?? false;
     return { sat, sun, name: city.cityName };
   };
 
@@ -23,12 +23,11 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
   const onlySat = processed.filter(x => x.sat && !x.sun).map(x => x.name);
   const onlySun = processed.filter(x => !x.sat && x.sun).map(x => x.name);
 
-  // Sun ranking logic (active hours 09-18) - Only consider cities with routes
+  // Sun ranking logic (active hours 09-18)
   const getSun = (city: CityAnalysisResult, day: 'saturday' | 'sunday') => {
     const w = isSecondWeekend ? city.weekend2 : city.weekend1;
     const d = w[day];
-    // Strict check: must have route to be ranked
-    if (!d || !d.hasRoute) return { name: city.cityName, val: 0, str: '0' };
+    if (!d) return { name: city.cityName, val: 0, str: '0' };
     return { name: city.cityName, val: d.sunSeconds, str: d.sunStr };
   };
 
@@ -47,10 +46,10 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
   return (
     <div className="space-y-6 rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
       <h3 className="text-lg font-bold text-slate-800 border-b pb-2">
-        {title}, <span className="font-normal text-sm text-slate-500">{dateLabel}</span>
+        {title}, <span className="font-normal text-sm" style={{ color: '#404823' }}>{dateLabel}</span>
       </h3>
       
-      {/* Dry Cities Rows - Changed to always be single column (rows) */}
+      {/* Dry Cities Rows */}
       <div className="grid grid-cols-1 gap-4">
         <div className="rounded-lg bg-green-50 p-3">
           <div className="text-xs font-semibold uppercase tracking-wider text-green-700 mb-2">Здесь без осадков весь уикенд</div>
@@ -104,9 +103,9 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
         </div>
       </div>
 
-      {/* Sun Ranking - Horizontal Scroll on Mobile with fixed label */}
+      {/* Sun Ranking */}
       <div className="pt-2">
-        <div className="text-xs font-semibold uppercase tracking-wider text-amber-600 mb-3">☀️ Самые солнечные (09:00 - 18:00)</div>
+        <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: '#ee6b17' }}>Самые солнечные (09:00 - 18:00)</div>
         
         <div className="space-y-3">
             {/* Saturday Row */}
@@ -120,7 +119,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
                             className="shrink-0 flex items-center bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100 hover:bg-amber-100 hover:border-amber-300 active:scale-95 transition-all touch-manipulation"
                         >
                             <span className="text-sm font-medium text-slate-800 mr-1">{item.name}</span>
-                            <span className="text-xs text-amber-600 font-bold">{item.str}</span>
+                            <span className="text-xs font-bold" style={{ color: '#ee6b17' }}>{item.str}</span>
                         </button>
                     )) : <span className="text-sm text-slate-400 pt-1">Нет солнца</span>}
                 </div>
@@ -137,7 +136,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
                             className="shrink-0 flex items-center bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100 hover:bg-amber-100 hover:border-amber-300 active:scale-95 transition-all touch-manipulation"
                         >
                             <span className="text-sm font-medium text-slate-800 mr-1">{item.name}</span>
-                            <span className="text-xs text-amber-600 font-bold">{item.str}</span>
+                            <span className="text-xs font-bold" style={{ color: '#ee6b17' }}>{item.str}</span>
                         </button>
                     )) : <span className="text-sm text-slate-400 pt-1">Нет солнца</span>}
                 </div>

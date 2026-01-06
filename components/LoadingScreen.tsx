@@ -75,7 +75,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ state, onComplete }) => {
   }, [displayPercent, onComplete]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-50 p-6">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6" style={{ backgroundColor: '#edebe5' }}>
       <div className="w-full max-w-xs flex flex-col items-center space-y-6">
         
         {/* Logo Container */}
@@ -93,7 +93,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ state, onComplete }) => {
             </span>
             
             {/* Status Text */}
-            <p className="text-xs text-slate-400 font-medium h-4">
+            <p className="text-xs font-medium h-4" style={{ color: '#404823' }}>
                 {state.status}
             </p>
         </div>

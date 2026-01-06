@@ -38,7 +38,7 @@ class ErrorBoundary extends React.Component<Props, State> {
               Приложение столкнулось с неожиданной ошибкой. Попробуйте обновить страницу.
             </p>
             {this.state.error && (
-              <div className="bg-slate-100 p-2 rounded text-xs text-left text-slate-700 font-mono overflow-auto max-h-32 mb-4">
+              <div className="bg-transparent p-2 rounded text-xs text-left text-slate-700 font-mono overflow-auto max-h-32 mb-4">
                 {this.state.error.toString()}
               </div>
             )}
