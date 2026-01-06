@@ -35,8 +35,8 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
     const windRotation = (stats.windDeg + 180) % 360;
 
     return (
-        <div onClick={onClick} className={`rounded-xl border transition-all cursor-pointer bg-white shadow-sm overflow-hidden ${isSelected ? 'border-transparent ring-2 ring-blue-100 shadow-md' : 'border-transparent hover:shadow-md'}`}>
-            <div className={`px-4 py-3 border-b flex justify-between items-center ${isSelected ? 'bg-blue-50 border-blue-100' : 'bg-slate-50 border-slate-100'}`}>
+        <div onClick={onClick} className={`rounded-xl border transition-all cursor-pointer bg-white shadow-sm overflow-hidden ${isSelected ? 'border-transparent ring-4 ring-[#d1cdc4] shadow-md' : 'border-transparent hover:border-[#404823] hover:shadow-md'}`}>
+            <div className={`px-4 py-3 border-b flex justify-between items-center ${isSelected ? 'bg-[#e0dbce] border-[#e0dbce]' : 'bg-[#e0dbce] border-slate-100'}`}>
                 <div>
                     <span className="font-bold text-slate-800 text-lg mr-2">{stats.dayName}</span>
                     <span className="text-sm" style={{ color: '#404823' }}>{stats.dateObj.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</span>
@@ -321,13 +321,13 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
 
                 {currentRoute && (
                     <div className="flex gap-4 text-right">
-                        <div>
-                            <div className="text-xs font-bold uppercase" style={{ color: '#b5b0a6' }}>Дистанция</div>
-                            <div className="text-lg font-bold text-slate-800 leading-none">{currentRoute.distanceKm.toFixed(0)} км</div>
+                        <div className="flex flex-col items-center justify-center text-center">
+                            <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>Дистанция</span>
+                            <span className="text-lg font-bold text-slate-700">{currentRoute.distanceKm.toFixed(0)} <span className="text-sm font-normal">км</span></span>
                         </div>
-                        <div>
-                            <div className="text-xs font-bold uppercase" style={{ color: '#b5b0a6' }}>Набор</div>
-                            <div className="text-lg font-bold text-slate-800 leading-none">{Math.round(currentRoute.elevationM)} м</div>
+                        <div className="flex flex-col items-center justify-center text-center">
+                            <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>Набор</span>
+                            <span className="text-lg font-bold text-slate-700">{Math.round(currentRoute.elevationM)} <span className="text-sm font-normal">м</span></span>
                         </div>
                     </div>
                 )}
