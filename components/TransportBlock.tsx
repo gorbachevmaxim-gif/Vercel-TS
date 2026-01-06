@@ -102,9 +102,10 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
 
       // 2. Manual Overrides for Train Stations (Prioritized over GPS)
       if (city === 'Воскресенск') return {
-          apiName: '66 км', 
-          displayName: '66 км',
-          provider: 'yandex'
+          apiName: '88 км', 
+          displayName: '88 км',
+          provider: 'yandex',
+          yandexId: 's9601903'
       };
       if (city === 'Коломна') return {
           apiName: 'Голутвин', 
