@@ -5,7 +5,7 @@ import * as React from 'react';
 const STATIONS = [
   { name: 'Большая Волга', id: 's9601720', lat: 56.723, lon: 37.143 },
   { name: 'Дубна', id: 's9600984', lat: 56.745, lon: 37.193 },
-  { name: 'Голутвин', id: 's9600832', lat: 55.080, lon: 38.792 },
+  { name: 'Голутвин', id: 's9600716', lat: 55.080, lon: 38.792 },
   { name: 'Коломна', id: 's9601262', lat: 55.102, lon: 38.761 },
   { name: '88 км', id: 's9601844', lat: 55.323, lon: 38.665 },
   { name: 'Воскресенск', id: 's9600709', lat: 55.316, lon: 38.681 },
@@ -111,7 +111,7 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
           apiName: 'Голутвин', 
           displayName: 'Голутвин',
           provider: 'yandex',
-          yandexId: 's9600832'
+          yandexId: 's9600716'
       };
       if (city === 'Дубна') return {
           apiName: 'Большая Волга', 
