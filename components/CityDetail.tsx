@@ -253,7 +253,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
     decorativeMarkersRef.current = [];
 
     if (currentRoute?.points.length) {
-        const polyline = L.polyline(currentRoute.points, { color: '#347aff', weight: 5, opacity: 0.9 }).addTo(map);
+        const polyline = L.polyline(currentRoute.points, { color: 'rgb(36, 87, 195)', weight: 5, opacity: 0.9 }).addTo(map);
         polylineRef.current = polyline;
 
         const createIcon = (text: string, bgColor: string) => L.divIcon({
