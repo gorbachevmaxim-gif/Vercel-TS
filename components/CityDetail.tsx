@@ -49,12 +49,12 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
                 <div className="p-3 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs text-slate-400 uppercase font-semibold mb-1">Температура</span>
+                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>Температура</span>
                     <span className="text-lg font-bold text-slate-700">{stats.tempRange}°</span>
                     <span className="text-xs" style={{ color: '#404823' }}>Ощущ: {stats.feelsRange}°</span>
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs text-slate-400 uppercase font-semibold mb-1">Ветер</span>
+                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>Ветер</span>
                     <span className="text-lg font-bold text-slate-700">{stats.windRange} <span className="text-sm font-normal">км/ч</span></span>
                     <div className="flex items-center justify-center mt-1 gap-1.5" style={{ color: '#404823' }}>
                         <span className="text-xs font-medium">{stats.windDir}</span>
@@ -63,14 +63,14 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
                     </div>
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs text-slate-400 uppercase font-semibold mb-1">Осадки</span>
+                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>Осадки</span>
                     <span className={`text-lg font-bold ${precipColor}`}>{stats.isDry ? '0 мм' : `${stats.precipSum.toFixed(1)} мм`}</span>
-                    <span className="text-xs text-slate-500">{stats.isDry ? 'Без осадков' : (stats.rainHours || 'Весь день')}</span>
+                    <span className="text-xs" style={{ color: '#404823' }}>{stats.isDry ? 'Без осадков' : (stats.rainHours || 'Весь день')}</span>
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs text-slate-400 uppercase font-semibold mb-1">Солнце</span>
+                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>Солнце</span>
                     <span className="text-lg font-bold text-slate-900">{stats.sunStr}</span>
-                    <span className="text-xs text-slate-500">09:00 - 18:00</span>
+                    <span className="text-xs" style={{ color: '#404823' }}>09:00 - 18:00</span>
                 </div>
             </div>
             {stats.clothingHints.length > 0 && (
@@ -255,13 +255,21 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
     if (currentRoute?.points.length) {
         const polyline = L.polyline(currentRoute.points, { color: '#347aff', weight: 5, opacity: 0.9 }).addTo(map);
         polylineRef.current = polyline;
-        const startMarker = L.marker(currentRoute.points[0]).addTo(map);
-        const endMarker = L.marker(currentRoute.points[currentRoute.points.length - 1]).addTo(map);
+
+        const createIcon = (text: string, bgColor: string) => L.divIcon({
+            html: `<div style="background-color: ${bgColor}; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; items-center; justify-content: center; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); line-height: 20px;">${text}</div>`,
+            className: '',
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+        });
+
+        const startMarker = L.marker(currentRoute.points[0], { icon: createIcon('A', '#4f6814') }).addTo(map);
+        const endMarker = L.marker(currentRoute.points[currentRoute.points.length - 1], { icon: createIcon('B', '#ee6b17') }).addTo(map);
         decorativeMarkersRef.current.push(startMarker, endMarker);
         
         setTimeout(() => {
             const bounds = polyline.getBounds();
-            if (bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
+            if (bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40], animate: false });
         }, 150);
     } else {
         map.setView([cityCoords.lat, cityCoords.lon], 11);
@@ -314,11 +322,11 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                 {currentRoute && (
                     <div className="flex gap-4 text-right">
                         <div>
-                            <div className="text-xs text-slate-400 font-bold uppercase">Дистанция</div>
+                            <div className="text-xs font-bold uppercase" style={{ color: '#b5b0a6' }}>Дистанция</div>
                             <div className="text-lg font-bold text-slate-800 leading-none">{currentRoute.distanceKm.toFixed(0)} км</div>
                         </div>
                         <div>
-                            <div className="text-xs text-slate-400 font-bold uppercase">Набор</div>
+                            <div className="text-xs font-bold uppercase" style={{ color: '#b5b0a6' }}>Набор</div>
                             <div className="text-lg font-bold text-slate-800 leading-none">{Math.round(currentRoute.elevationM)} м</div>
                         </div>
                     </div>
