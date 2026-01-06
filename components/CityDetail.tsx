@@ -238,7 +238,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                 setRouteStatus(`Найдено маршрутов: ${validRoutes.length}`);
             } else {
                 setFoundRoutes([]);
-                setRouteStatus(`Маршрут под ветер ${windDirCode} не найден`);
+                setRouteStatus(`Здесь маршрут под ${activeStats.windDirFull.toLowerCase()} ветер не найден`);
             }
         });
     return () => { isMounted = false; };
@@ -371,7 +371,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                 {/* Error/Empty State overlay */}
                 {!currentRoute && !isFlightDestination && (
                     <div className="absolute inset-0 flex items-center justify-center bg-slate-100/50 backdrop-blur-[1px] z-[400]">
-                         <span className="bg-white/90 px-4 py-2 rounded-lg text-sm font-medium text-slate-500 shadow-sm">
+                         <span className="bg-[#4f6814] px-4 py-2 rounded-lg text-sm font-medium text-white shadow-sm">
                             {routeStatus}
                          </span>
                     </div>
