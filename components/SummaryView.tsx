@@ -51,15 +51,24 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
       
       {/* Dry Cities Rows */}
       <div className="grid grid-cols-1 gap-4">
-        <div className="rounded-lg bg-green-50 p-3">
-          <div className="text-xs font-semibold uppercase tracking-wider text-green-700 mb-2">Здесь без осадков весь уикенд</div>
+        <div className="rounded-lg p-3" style={{ backgroundColor: '#edebe5' }}>
+          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#000000' }}>Здесь без осадков весь уикенд</div>
           {fullWeekend.length > 0 ? (
              <div className="flex flex-wrap gap-2">
                  {fullWeekend.map(c => (
                      <button 
                         key={c} 
                         onClick={() => onCityClick(c)}
-                        className="px-3 py-1.5 bg-white rounded-lg shadow-sm text-sm font-medium text-slate-700 hover:text-blue-600 hover:shadow-md active:scale-95 transition-all touch-manipulation"
+                        className="px-3 py-1.5 bg-white rounded-lg shadow-sm text-sm font-medium text-slate-700 hover:shadow-md active:scale-95 transition-all touch-manipulation border"
+                        style={{ color: '#000000', borderColor: '#ffffff' }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = '#4f6814';
+                          e.currentTarget.style.borderColor = '#4f6814';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = '#000000';
+                          e.currentTarget.style.borderColor = '#ffffff';
+                        }}
                      >
                         {c}
                      </button>
@@ -68,77 +77,117 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
           ) : <span className="text-sm text-slate-400 italic">Нет городов</span>}
         </div>
 
-        <div className="rounded-lg bg-blue-50 p-3">
-          <div className="text-xs font-semibold uppercase tracking-wider text-blue-700 mb-2">Здесь без осадков только в субботу</div>
+        <div className="rounded-lg p-3" style={{ backgroundColor: '#edebe5' }}>
+          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#000000' }}>Здесь без осадков только в субботу</div>
           {onlySat.length > 0 ? (
              <div className="flex flex-wrap gap-2">
                  {onlySat.map(c => (
                      <button 
                         key={c} 
                         onClick={() => onCityClick(c)}
-                        className="px-3 py-1.5 bg-white rounded-lg shadow-sm text-sm font-medium text-slate-700 hover:text-blue-600 hover:shadow-md active:scale-95 transition-all touch-manipulation"
+                        className="px-3 py-1.5 bg-white rounded-lg shadow-sm text-sm font-medium text-slate-700 hover:shadow-md active:scale-95 transition-all touch-manipulation border"
+                        style={{ color: '#000000', borderColor: '#ffffff' }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = '#4f6814';
+                          e.currentTarget.style.borderColor = '#4f6814';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = '#000000';
+                          e.currentTarget.style.borderColor = '#ffffff';
+                        }}
                      >
                         {c}
                      </button>
                  ))}
              </div>
-          ) : <span className="text-sm text-slate-400 italic">Пусто</span>}
+          ) : <span className="text-sm italic" style={{ color: '#404823' }}>Пусто</span>}
         </div>
 
-        <div className="rounded-lg bg-indigo-50 p-3">
-          <div className="text-xs font-semibold uppercase tracking-wider text-indigo-700 mb-2">Здесь без осадков только в воскресенье</div>
+        <div className="rounded-lg p-3" style={{ backgroundColor: '#edebe5' }}>
+          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#000000' }}>Здесь без осадков только в воскресенье</div>
           {onlySun.length > 0 ? (
              <div className="flex flex-wrap gap-2">
                  {onlySun.map(c => (
                      <button 
                         key={c} 
                         onClick={() => onCityClick(c)}
-                        className="px-3 py-1.5 bg-white rounded-lg shadow-sm text-sm font-medium text-slate-700 hover:text-blue-600 hover:shadow-md active:scale-95 transition-all touch-manipulation"
+                        className="px-3 py-1.5 bg-white rounded-lg shadow-sm text-sm font-medium text-slate-700 hover:shadow-md active:scale-95 transition-all touch-manipulation border"
+                        style={{ color: '#000000', borderColor: '#ffffff' }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = '#4f6814';
+                          e.currentTarget.style.borderColor = '#4f6814';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = '#000000';
+                          e.currentTarget.style.borderColor = '#ffffff';
+                        }}
                      >
                         {c}
                      </button>
                  ))}
              </div>
-          ) : <span className="text-sm text-slate-400 italic">Пусто</span>}
+          ) : <span className="text-sm italic" style={{ color: '#404823' }}>Пусто</span>}
         </div>
       </div>
 
       {/* Sun Ranking */}
       <div className="pt-2">
-        <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: '#ee6b17' }}>Самые солнечные (09:00 - 18:00)</div>
+        <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: '#000000' }}>Самые солнечные (09:00 - 18:00)</div>
         
         <div className="space-y-3">
             {/* Saturday Row */}
             <div className="flex items-center gap-2">
-                <span className="shrink-0 text-sm font-bold text-slate-400 w-8">Сб:</span>
+                <span className="shrink-0 text-sm font-bold w-8" style={{ color: '#404823' }}>Сб:</span>
                 <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 flex-1">
                     {topSat.length ? topSat.map((item, i) => (
                         <button 
                             key={i} 
                             onClick={() => onCityClick(item.name)}
-                            className="shrink-0 flex items-center bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100 hover:bg-amber-100 hover:border-amber-300 active:scale-95 transition-all touch-manipulation"
+                            className="shrink-0 flex items-center px-3 py-1.5 rounded-lg border active:scale-95 transition-all touch-manipulation"
+                            style={{ backgroundColor: '#edebe5', borderColor: '#edebe5', color: '#000000' }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = 'transparent';
+                              e.currentTarget.style.borderColor = '#ee6b17';
+                              e.currentTarget.style.color = '#000000';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = '#edebe5';
+                              e.currentTarget.style.borderColor = '#edebe5';
+                              e.currentTarget.style.color = '#000000';
+                            }}
                         >
-                            <span className="text-sm font-medium text-slate-800 mr-1">{item.name}</span>
+                            <span className="text-sm font-medium mr-1">{item.name}</span>
                             <span className="text-xs font-bold" style={{ color: '#ee6b17' }}>{item.str}</span>
                         </button>
-                    )) : <span className="text-sm text-slate-400 pt-1">Нет солнца</span>}
+                    )) : <span className="text-sm pt-1" style={{ color: '#404823' }}>Нет солнца</span>}
                 </div>
             </div>
 
             {/* Sunday Row */}
             <div className="flex items-center gap-2">
-                <span className="shrink-0 text-sm font-bold text-slate-400 w-8">Вс:</span>
+                <span className="shrink-0 text-sm font-bold w-8" style={{ color: '#404823' }}>Вс:</span>
                 <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 flex-1">
                     {topSun.length ? topSun.map((item, i) => (
                         <button 
                             key={i} 
                             onClick={() => onCityClick(item.name)}
-                            className="shrink-0 flex items-center bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100 hover:bg-amber-100 hover:border-amber-300 active:scale-95 transition-all touch-manipulation"
+                            className="shrink-0 flex items-center px-3 py-1.5 rounded-lg border active:scale-95 transition-all touch-manipulation"
+                            style={{ backgroundColor: '#edebe5', borderColor: '#edebe5', color: '#000000' }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = 'transparent';
+                              e.currentTarget.style.borderColor = '#ee6b17';
+                              e.currentTarget.style.color = '#000000';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = '#edebe5';
+                              e.currentTarget.style.borderColor = '#edebe5';
+                              e.currentTarget.style.color = '#000000';
+                            }}
                         >
-                            <span className="text-sm font-medium text-slate-800 mr-1">{item.name}</span>
+                            <span className="text-sm font-medium mr-1">{item.name}</span>
                             <span className="text-xs font-bold" style={{ color: '#ee6b17' }}>{item.str}</span>
                         </button>
-                    )) : <span className="text-sm text-slate-400 pt-1">Нет солнца</span>}
+                    )) : <span className="text-sm pt-1" style={{ color: '#404823' }}>Нет солнца</span>}
                 </div>
             </div>
         </div>

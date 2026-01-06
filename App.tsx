@@ -117,7 +117,18 @@ const App: React.FC = () => {
                                <button 
                                  key={city.cityName}
                                  onClick={() => handleCitySelect(city.cityName, 'w1')}
-                                 className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:border-blue-500 hover:text-blue-600 active:bg-blue-50 transition-colors text-left"
+                                 className="px-3 py-2 bg-white border rounded-lg text-sm font-medium transition-colors text-left"
+                                 style={{ color: '#000000', borderColor: '#d1cdc4' }}
+                                 onMouseEnter={(e) => {
+                                   e.currentTarget.style.borderColor = '#4f6814';
+                                   e.currentTarget.style.backgroundColor = '#4a5427';
+                                   e.currentTarget.style.color = 'white';
+                                 }}
+                                 onMouseLeave={(e) => {
+                                   e.currentTarget.style.borderColor = '#d1cdc4';
+                                   e.currentTarget.style.backgroundColor = 'white';
+                                   e.currentTarget.style.color = '#000000';
+                                 }}
                                >
                                    {city.cityName}
                                </button>

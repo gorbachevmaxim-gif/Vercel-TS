@@ -35,11 +35,11 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
     const windRotation = (stats.windDeg + 180) % 360;
 
     return (
-        <div onClick={onClick} className={`rounded-xl border transition-all cursor-pointer bg-white shadow-sm overflow-hidden ${isSelected ? 'border-transparent ring-4 ring-[#d1cdc4] shadow-md' : 'border-transparent hover:border-[#404823] hover:shadow-md'}`}>
-            <div className={`px-4 py-3 border-b flex justify-between items-center ${isSelected ? 'bg-[#e0dbce] border-[#e0dbce]' : 'bg-[#e0dbce] border-slate-100'}`}>
+        <div onClick={onClick} className={`rounded-xl border transition-all cursor-pointer bg-white shadow-sm overflow-hidden ${isSelected ? 'border-transparent ring-4 ring-[#d1cdc4] shadow-md' : 'border-transparent hover:ring-4 hover:ring-[#d1cdc4] hover:shadow-md'}`}>
+            <div className={`px-4 py-3 border-b flex justify-between items-center ${isSelected ? 'bg-[#4f6814] border-[#4f6814]' : 'bg-[#e0dbce] border-slate-100'}`}>
                 <div>
-                    <span className="font-bold text-slate-800 text-lg mr-2">{stats.dayName}</span>
-                    <span className="text-sm" style={{ color: '#404823' }}>{stats.dateObj.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</span>
+                    <span className={`font-bold text-lg mr-2 ${isSelected ? 'text-[#e0dbce]' : 'text-slate-800'}`}>{stats.dayName}</span>
+                    <span className="text-sm" style={{ color: isSelected ? '#e0dbce' : '#404823' }}>{stats.dateObj.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</span>
                 </div>
                 {isSelected && (
                     <span className="text-xs font-bold bg-white border px-2 py-0.5 rounded-full shadow-sm" style={{ color: '#4f6814', borderColor: 'transparent' }}>
@@ -47,14 +47,14 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
                     </span>
                 )}
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+            <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x" style={{ borderColor: '#d1cdc4' }}>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>Температура</span>
+                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#8b8680' }}>Температура</span>
                     <span className="text-lg font-bold text-slate-700">{stats.tempRange}°</span>
                     <span className="text-xs" style={{ color: '#404823' }}>Ощущ: {stats.feelsRange}°</span>
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>Ветер</span>
+                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#8b8680' }}>Ветер</span>
                     <span className="text-lg font-bold text-slate-700">{stats.windRange} <span className="text-sm font-normal">км/ч</span></span>
                     <div className="flex items-center justify-center mt-1 gap-1.5" style={{ color: '#404823' }}>
                         <span className="text-xs font-medium">{stats.windDir}</span>
@@ -63,22 +63,22 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
                     </div>
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>Осадки</span>
+                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#8b8680' }}>Осадки</span>
                     <span className={`text-lg font-bold ${precipColor}`}>{stats.isDry ? '0 мм' : `${stats.precipSum.toFixed(1)} мм`}</span>
                     <span className="text-xs" style={{ color: '#404823' }}>{stats.isDry ? 'Без осадков' : (stats.rainHours || 'Весь день')}</span>
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>Солнце</span>
+                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#8b8680' }}>Солнце</span>
                     <span className="text-lg font-bold text-slate-900">{stats.sunStr}</span>
                     <span className="text-xs" style={{ color: '#404823' }}>09:00 - 18:00</span>
                 </div>
             </div>
             {stats.clothingHints.length > 0 && (
-                <div className="bg-slate-50 border-t border-slate-100 p-4">
-                    <div className="text-xs font-bold text-slate-400 uppercase mb-2 flex items-center gap-1">👕 Что надеть</div>
+                <div className="border-t p-4" style={{ backgroundColor: '#f5f3f0' }}>
+                    <div className="text-xs uppercase font-semibold mb-2" style={{ color: '#8b8680' }}>Что надеть</div>
                     <div className="flex flex-wrap gap-2">
                         {stats.clothingHints.map((hint, idx) => (
-                            <span key={idx} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">{hint}</span>
+                            <span key={idx} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: 'rgb(224, 219, 206)', color: '#404823' }}>{hint}</span>
                         ))}
                     </div>
                 </div>
@@ -269,8 +269,10 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
         
         setTimeout(() => {
             const bounds = polyline.getBounds();
-            if (bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40], animate: false });
-        }, 150);
+            if (bounds.isValid()) {
+                map.fitBounds(bounds, { padding: [60, 60], maxZoom: 13, animate: false });
+            }
+        }, 100);
     } else {
         map.setView([cityCoords.lat, cityCoords.lon], 11);
     }
@@ -289,7 +291,13 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800">{data.cityName}</h2>
-        <button onClick={onClose} className="text-sm font-medium hover:text-[#3f5210] flex items-center" style={{ color: '#4f6814' }}>Назад</button>
+        <button onClick={onClose} className="text-sm font-medium hover:text-[#3f5210] flex items-center gap-1" style={{ color: '#4f6814' }}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Назад
+        </button>
       </div>
       <div className="flex p-1 border" style={{ borderColor: 'transparent', borderRadius: 20, backgroundColor: '#d1cdc4' }}>
           <button className={`flex-1 py-2 text-sm font-medium transition-all ${activeTab === 'w1' ? 'bg-[#4f6814] text-white shadow' : 'text-black'}`} style={{ borderRadius: 16 }} onClick={() => setActiveTab('w1')}>Ближайшие выходные</button>
@@ -305,11 +313,11 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                         Маршрут ({routeDay === 'saturday' ? 'Суббота' : 'Воскресенье'})
                     </h3>
                     <div className="flex items-center gap-2 mt-1">
-                        <div className="flex items-center text-xs font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
+                        <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: 'rgb(224, 219, 206)', color: '#404823' }}>
                             <span>Ветер: {activeStats?.windDirFull} ({activeStats?.windRange} км/ч)</span>
                             <svg 
                                 style={{ transform: `rotate(${(activeStats?.windDeg || 0) + 180}deg)` }} 
-                                className="ml-1.5 w-3 h-3 text-slate-500" 
+                                className="ml-1.5 w-3 h-3" 
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
                             >
                                 <line x1="12" y1="19" x2="12" y2="5"></line>
@@ -389,7 +397,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
               href="https://www.komoot.com/collection/2674102/-lechappe-belle?ref=collection" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="flex items-center justify-center w-full p-4 bg-[#4a5427] text-white rounded-lg font-bold hover:bg-[#4f6814] transition-colors shadow-sm gap-2 text-center text-sm sm:text-base leading-tight"
+              className="flex items-center justify-center w-full p-4 bg-[#4f6814] text-white rounded-lg font-bold hover:bg-[#4a5427] transition-colors shadow-sm gap-2 text-center text-sm sm:text-base leading-tight"
             >
                 <svg 
                     aria-hidden="true" 
