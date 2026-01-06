@@ -310,7 +310,17 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
             <div className="flex flex-wrap gap-4 justify-between items-end mb-4">
                 <div>
                     <h3 className="text-lg font-bold text-slate-800">
-                        Маршрут ({routeDay === 'saturday' ? 'Суббота' : 'Воскресенье'})
+                        Маршрут{' '}
+                        {activeStats && (
+                          <span className="text-sm" style={{ color: '#404823' }}>
+                            на {(() => {
+                              const wd = activeStats.dateObj.toLocaleDateString('ru-RU', { weekday: 'short' });
+                              const wdCap = wd.charAt(0).toUpperCase() + wd.slice(1);
+                              const dm = activeStats.dateObj.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+                              return `${wdCap}, ${dm}`;
+                            })()}
+                          </span>
+                        )}
                     </h3>
                     <div className="flex items-center gap-2 mt-1">
                         <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: 'rgb(224, 219, 206)', color: '#404823' }}>
