@@ -1,4 +1,3 @@
-
 async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise<T | null> {
     for (let i = 0; i < retries; i++) {
         try {
@@ -16,6 +15,7 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
 }
 
 import { API_URL, CITY_FILENAMES, FLIGHT_CITIES } from '../constants';
+import { parseGpx, RouteData } from './gpxUtils';
 import { CityCoordinates, CityAnalysisResult, WeatherDayStats } from '../types';
 
 const MOUNTAIN_CITIES: string[] = [];
@@ -157,26 +157,36 @@ function getClothingRecommendations(
     return [...new Set(hints)];
 }
 
-async function checkRouteAvailability(cityName: string, windDeg: number): Promise<boolean> {
+async function checkRouteAvailability(cityName: string, windDeg: number): Promise<RouteData | null> {
     const fileCityName = CITY_FILENAMES[cityName] || cityName;
     const windDirCode = getCardinal(windDeg);
     const baseName = `routes/${fileCityName}_${windDirCode}`;
     const candidates = [`${baseName}.gpx`, `${baseName}_1.gpx`, `${baseName}_2.gpx`, `${baseName}_3.gpx`];
-    
+
     try {
-        const checks = candidates.map(async (url) => {
+        const routePromises = candidates.map(async (url) => {
             try {
                 const cacheBustedUrl = `${url}?t=${Date.now()}`;
-                const res = await fetch(cacheBustedUrl, { method: 'GET' }); 
-                if (res.ok) return true;
-                return false;
-            } catch { return false; }
+                const res = await fetch(cacheBustedUrl, { method: 'GET' });
+                if (res.ok) {
+                    const gpxText = await res.text();
+                    return parseGpx(gpxText);
+                }
+                return null;
+            } catch (e) {
+                // console.warn(`Failed to fetch or parse GPX from ${url}`, e);
+                return null;
+            }
         });
-        const results = await Promise.all(checks);
-        return results.some(r => r === true);
+        const results = await Promise.all(routePromises);
+        // Return the first valid route found
+        for (const route of results) {
+            if (route) return route;
+        }
+        return null;
     } catch (e) {
         console.warn("Route check error", e);
-        return false;
+        return null;
     }
 }
 
@@ -219,7 +229,7 @@ export async function analyzeCity(cityName: string, coords: CityCoordinates, tar
             const wetHours = pSlice.map((val: number, i: number) => (val > 0.1 ? i + 4 : -1)).filter((h: number) => h !== -1);
 
             const actStart = sIdx + 9;
-            const actEnd = sIdx + 19; 
+            const actEnd = sIdx + 19;
             const sunSlice = hourly.sunshine_duration.slice(actStart, actEnd) as number[];
             const sunVal = sunSlice.reduce((a: number, b: number) => a + (b || 0), 0);
 
@@ -228,7 +238,7 @@ export async function analyzeCity(cityName: string, coords: CityCoordinates, tar
             const windSlice = hourly.wind_speed_10m.slice(actStart, actEnd) as number[];
             const windGustSlice = hourly.wind_gusts_10m.slice(actStart, actEnd) as number[];
             const windDirSlice = hourly.wind_direction_10m.slice(actStart, actEnd) as number[];
-            
+
             const pActiveSlice = hourly.precipitation.slice(actStart, actEnd) as number[];
             const activeRainSum = pActiveSlice.reduce((a: number, b: number) => a + (b || 0), 0);
 
@@ -243,7 +253,7 @@ export async function analyzeCity(cityName: string, coords: CityCoordinates, tar
             const wMin = windSlice.length ? Math.min(...windSlice) : 0;
             const wMax = windSlice.length ? Math.max(...windSlice) : 0;
             const gMax = windGustSlice.length ? Math.max(...windGustSlice) : 0;
-            
+
             let windDirStr = "";
             let windDirFullStr = "";
             let windDeg = 0;
@@ -268,17 +278,28 @@ export async function analyzeCity(cityName: string, coords: CityCoordinates, tar
 
             const isDry = activeRainSum <= 0.5;
             let hasRoute = false;
+            let rideDuration: string | undefined = undefined;
+            let startTemperature: number | undefined = undefined;
+            let endTemperature: number | undefined = undefined;
             
-            // Check route availability defensively
+            // Check route availability defensively and get RouteData
             if (isDry) {
                 if (FLIGHT_CITIES.includes(cityName)) {
                     hasRoute = true;
+                    rideDuration = "3h 0min"; // Default for flight cities
+                    startTemperature = hourly.temperature_2m[sIdx + 10] !== undefined ? Math.round(hourly.temperature_2m[sIdx + 10]) : undefined;
+                    endTemperature = hourly.temperature_2m[sIdx + 13] !== undefined ? Math.round(hourly.temperature_2m[sIdx + 13]) : undefined;
                 } else {
-                    try {
-                        hasRoute = await checkRouteAvailability(cityName, windDeg);
-                    } catch (e) {
-                        console.warn(`Route check failed for ${cityName}, assuming no route`, e);
-                        hasRoute = false;
+                    const routeData = await checkRouteAvailability(cityName, windDeg);
+                    if (routeData) {
+                        hasRoute = true;
+                        const estimatedRideHours = Math.ceil(routeData.distanceKm / 20); // 20 km/h average speed
+                        rideDuration = `${estimatedRideHours}h ${Math.round((routeData.distanceKm / 20 - estimatedRideHours) * 60)}min`;
+
+                        // Default ride start time is 10:00 AM local time (sIdx + 10)
+                        startTemperature = hourly.temperature_2m[sIdx + 10] !== undefined ? Math.round(hourly.temperature_2m[sIdx + 10]) : undefined;
+                        // Ride end time based on dynamic duration
+                        endTemperature = hourly.temperature_2m[sIdx + 10 + estimatedRideHours] !== undefined ? Math.round(hourly.temperature_2m[sIdx + 10 + estimatedRideHours]) : undefined;
                     }
                 }
             }
@@ -302,7 +323,10 @@ export async function analyzeCity(cityName: string, coords: CityCoordinates, tar
                 sunSeconds: sunVal,
                 sunStr: formatSunTime(sunVal),
                 accuracy: 'High',
-                clothingHints
+                clothingHints,
+                rideDuration: rideDuration,
+                startTemperature: startTemperature,
+                endTemperature: endTemperature
             };
 
             if (index === 0) result.weekend1.saturday = dayStats;
@@ -310,6 +334,7 @@ export async function analyzeCity(cityName: string, coords: CityCoordinates, tar
             if (index === 2) result.weekend2.saturday = dayStats;
             if (index === 3) result.weekend2.sunday = dayStats;
         });
+
 
         await Promise.all(promises);
         return result;

@@ -35,6 +35,10 @@ export interface WeatherDayStats {
   sunStr: string;
   accuracy: 'High' | 'Medium' | 'Low';
   clothingHints: string[];
+
+  rideDuration?: string;
+  startTemperature?: number;
+  endTemperature?: number;
 }
 
 export interface CityAnalysisResult {
