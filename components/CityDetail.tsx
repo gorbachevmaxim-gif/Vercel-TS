@@ -238,7 +238,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                 setRouteStatus(`Найдено маршрутов: ${validRoutes.length}`);
             } else {
                 setFoundRoutes([]);
-                setRouteStatus(`Здесь маршрут под ${activeStats.windDirFull.toLowerCase()} ветер не найден`);
+                setRouteStatus(`Маршрут под ${activeStats.windDirFull.toLowerCase()} ветер не найден`);
             }
         });
     return () => { isMounted = false; };
