@@ -12,19 +12,19 @@ interface CityDetailProps {
   onClose: () => void;
 }
 
-interface WeatherCardProps { 
-    stats: WeatherDayStats | null; 
-    isSelected?: boolean; 
+interface WeatherCardProps {
+    stats: WeatherDayStats | null;
+    isSelected?: boolean;
     onClick?: () => void;
 }
 
 const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick }) => {
     if (!stats) return <div className="p-4 text-center text-slate-400">Нет данных</div>;
-    
+
     // Logic: Black if isDry (displayed as 0mm) OR precipSum < 0.5mm. Orange (#ee6b17) otherwise.
     // This fixes the issue where night rain causes precipSum > 0.5 (Orange) but isDry=true displays "0 mm".
     const precipColor = (stats.isDry || stats.precipSum < 0.5) ? 'text-slate-900' : 'text-[#ee6b17]';
-    
+
     const minTemp = parseInt(stats.tempRange.split('..')[0]);
     const isTooCold = stats.clothingHints.length === 0 && minTemp < 5;
     const windRotation = (stats.windDeg + 180) % 360;
@@ -92,9 +92,9 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   const mapInstanceRef = useRef<L.Map | null>(null);
   const polylineRef = useRef<L.Polyline | null>(null);
   const decorativeMarkersRef = useRef<L.Marker[]>([]);
-  
+
   const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
-  
+
   useEffect(() => {
       if (activeWeekend.saturday?.isDry) setRouteDay('saturday');
       else if (activeWeekend.sunday?.isDry) setRouteDay('sunday');
@@ -205,7 +205,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
         const startMarker = L.marker(currentRoute.points[0], { icon: createIcon('A', '#4f6814') }).addTo(map);
         const endMarker = L.marker(currentRoute.points[currentRoute.points.length - 1], { icon: createIcon('B', '#ee6b17') }).addTo(map);
         decorativeMarkersRef.current.push(startMarker, endMarker);
-        
+
         setTimeout(() => {
             const bounds = polyline.getBounds();
             if (bounds.isValid()) {
@@ -264,9 +264,9 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                     <div className="flex items-center gap-2 mt-1">
                         <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: 'rgb(224, 219, 206)', color: '#404823' }}>
                             <span>Ветер: {activeStats?.windDirFull} ({activeStats?.windRange} км/ч)</span>
-                            <svg 
-                                style={{ transform: `rotate(${(activeStats?.windDeg || 0) + 180}deg)` }} 
-                                className="ml-1.5 w-3 h-3" 
+                            <svg
+                                style={{ transform: `rotate(${(activeStats?.windDeg || 0) + 180}deg)` }}
+                                className="ml-1.5 w-3 h-3"
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
                             >
                                 <line x1="12" y1="19" x2="12" y2="5"></line>
@@ -290,7 +290,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                             <div className="flex flex-col items-center justify-center text-center">
                                 <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>Поездка</span>
                                 <span className="text-lg font-bold text-slate-700">
-                                    {activeStats.rideDuration} ({activeStats.startTemperature}°C - {activeStats.endTemperature}°C)
+                                    {activeStats.rideDuration} ({activeStats.startTemperature}°C .. {activeStats.endTemperature}°C)
                                 </span>
                             </div>
                         )}
@@ -299,7 +299,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
             </div>
             <div className="relative w-full h-[400px] bg-slate-100 rounded-lg overflow-hidden border border-slate-100 z-0">
                 <div ref={mapContainerRef} className="w-full h-full" />
-                
+
                 {/* Route Switcher Buttons */}
                 {foundRoutes.length > 1 && (
                     <div className="absolute bottom-4 left-4 z-[400] flex gap-2">
@@ -326,7 +326,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
             </div>
           </div>
           {activeStats && showTransportBlock && (
-              <TransportBlock 
+              <TransportBlock
                   startCity={routeStartCity} endCity={routeEndCity}
                   startCoords={{ lat: routeStartLat, lon: routeStartLon }}
                   endCoords={{ lat: routeEndLat, lon: routeEndLon }}
@@ -334,10 +334,10 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
               />
           )}
           <div className="flex flex-col gap-3">
-            <a 
-              href={yandexMapsUrl} 
-              target="_blank" 
-              rel="noopener noreferrer" 
+            <a
+              href={yandexMapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={() => {
                   if (mapInstanceRef.current && collectionFocusCoords) {
                       mapInstanceRef.current.setView([collectionFocusCoords.lat, collectionFocusCoords.lon], 13);
@@ -350,18 +350,18 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                   </svg>
                   <span>Хорошие места</span>
             </a>
-            <a 
-              href="https://www.komoot.com/collection/2674102/-lechappe-belle?ref=collection" 
-              target="_blank" 
-              rel="noopener noreferrer" 
+            <a
+              href="https://www.komoot.com/collection/2674102/-lechappe-belle?ref=collection"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center justify-center w-full p-4 bg-[#4f6814] text-white rounded-lg font-bold hover:bg-[#4a5427] transition-colors shadow-sm gap-2 text-center text-sm sm:text-base leading-tight"
             >
-                <svg 
-                    aria-hidden="true" 
-                    role="presentation" 
-                    viewBox="0 0 40 40" 
-                    fill="none" 
-                    xmlns="http://www.w3.org/2000/svg" 
+                <svg
+                    aria-hidden="true"
+                    role="presentation"
+                    viewBox="0 0 40 40"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
                     className="shrink-0 w-5 h-5"
                 >
                     <path d="M8.40252 33.288C7.92483 33.7657 7.92217 34.5438 8.43188 34.9872C9.86413 36.233 11.4906 37.2409 13.2493 37.9694C15.3854 38.8542 17.6748 39.3096 19.9868 39.3096C22.2988 39.3096 24.5882 38.8542 26.7243 37.9694C28.483 37.2409 30.1095 36.233 31.5417 34.9872C32.0514 34.5438 32.0488 33.7657 31.5711 33.288L21.7167 23.4336C20.7613 22.4782 19.2123 22.4782 18.2569 23.4336L8.40252 33.288Z" fill="currentColor"></path>
