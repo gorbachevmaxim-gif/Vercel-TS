@@ -86,4 +86,4 @@ export async function fetchNearbyPlaces(lat: number, lon: number): Promise<Place
     } catch (e: any) {
         console.error(`Failed to fetch nearby places for ${lat},${lon}: ${e.message}`);
         return [];
-    }}
+    }
