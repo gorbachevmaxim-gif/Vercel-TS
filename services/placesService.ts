@@ -1,4 +1,3 @@
-
 async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise<T | null> {
     for (let i = 0; i < retries; i++) {
         try {
@@ -21,6 +20,19 @@ import { Place } from '../types';
 const cache: Record<string, Place[]> = {};
 
 export async function fetchNearbyPlaces(lat: number, lon: number): Promise<Place[]> {
+
+    const key = `${lat.toFixed(3)},${lon.toFixed(3)}`;
+    if (cache[key]) return cache[key];
+
+    // Query Overpass API for amenities (cafe, restaurant, bar, fast_food) within 5000 meters (5km)
+    // Increased limit to 20 to ensure we find valid named places in the larger area
+    const query = `
+        [out:json][timeout:10];
+        (
+          node["amenity"~"cafe|restaurant|bar|fast_food"](around:5000, ${lat}, ${lon});
+        );
+        out body 20;
+    `;
 
     try {
         const response = await retry(async () => {
@@ -87,3 +99,4 @@ export async function fetchNearbyPlaces(lat: number, lon: number): Promise<Place
         console.error(`Failed to fetch nearby places for ${lat},${lon}: ${e.message}`);
         return [];
     }
+}
