@@ -290,7 +290,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                             <div className="flex flex-col items-center justify-center text-center">
                                 <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>Поездка</span>
                                 <span className="text-lg font-bold text-slate-700">
-                                    {activeStats.rideDuration} ({activeStats.startTemperature}°C .. {activeStats.endTemperature}°C)
+                                    {activeStats.rideDuration}
                                 </span>
                             </div>
                         )}
