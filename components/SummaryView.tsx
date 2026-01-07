@@ -1,3 +1,4 @@
+import { useSummaryFiltering } from '../hooks/useSummaryFiltering';
 import * as React from 'react';
 import { CityAnalysisResult } from '../types';
 
@@ -10,52 +11,79 @@ interface SummaryViewProps {
 }
 
 const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSecondWeekend = false, onCityClick }) => {
-  // Filter logic: Show dry cities even if no route is found (removed hasRoute check)
-  const getDryWithRoute = (city: CityAnalysisResult) => {
-    const w = isSecondWeekend ? city.weekend2 : city.weekend1;
-    const sat = w.saturday?.isDry ?? false;
-    const sun = w.sunday?.isDry ?? false;
-    return { sat, sun, name: city.cityName };
-  };
+  const filteredData = useSummaryFiltering({ data, isSecondWeekend });
+  const weekendType = isSecondWeekend ? 'weekend2' : 'weekend1';
 
-  const processed = data.map(getDryWithRoute);
-  const fullWeekend = processed.filter(x => x.sat && x.sun).map(x => x.name);
-  const onlySat = processed.filter(x => x.sat && !x.sun).map(x => x.name);
-  const onlySun = processed.filter(x => !x.sat && x.sun).map(x => x.name);
+  const citiesDryAllWeekend = React.useMemo(() => {
+    return filteredData
+      .filter(city => {
+        const satStats = city[weekendType]?.saturday;
+        const sunStats = city[weekendType]?.sunday;
+        return (satStats?.isDry && satStats?.isMorningRideSuitable && satStats?.hasRoute) &&
+               (sunStats?.isDry && sunStats?.isMorningRideSuitable && sunStats?.hasRoute);
+      })
+      .map(city => city.cityName);
+  }, [filteredData, weekendType]);
 
-  // Sun ranking logic (active hours 09-18)
-  const getSun = (city: CityAnalysisResult, day: 'saturday' | 'sunday') => {
-    const w = isSecondWeekend ? city.weekend2 : city.weekend1;
-    const d = w[day];
-    if (!d) return { name: city.cityName, val: 0, str: '0' };
-    return { name: city.cityName, val: d.sunSeconds, str: d.sunStr };
-  };
+  const onlySat = React.useMemo(() => {
+    return filteredData
+      .filter(city => {
+        const satStats = city[weekendType]?.saturday;
+        const sunStats = city[weekendType]?.sunday;
+        return (satStats?.isDry && satStats?.isMorningRideSuitable && satStats?.hasRoute) &&
+               !(sunStats?.isDry && sunStats?.isMorningRideSuitable && sunStats?.hasRoute);
+      })
+      .map(city => city.cityName);
+  }, [filteredData, weekendType]);
 
-  const topSat = data
-    .map(c => getSun(c, 'saturday'))
-    .sort((a, b) => b.val - a.val)
-    .slice(0, 5)
-    .filter(x => x.val > 0);
+  const onlySun = React.useMemo(() => {
+    return filteredData
+      .filter(city => {
+        const satStats = city[weekendType]?.saturday;
+        const sunStats = city[weekendType]?.sunday;
+        return !(satStats?.isDry && satStats?.isMorningRideSuitable && satStats?.hasRoute) &&
+               (sunStats?.isDry && sunStats?.isMorningRideSuitable && sunStats?.hasRoute);
+      })
+      .map(city => city.cityName);
+  }, [filteredData, weekendType]);
 
-  const topSun = data
-    .map(c => getSun(c, 'sunday'))
-    .sort((a, b) => b.val - a.val)
-    .slice(0, 5)
-    .filter(x => x.val > 0);
+  const topSat = React.useMemo(() => {
+    return filteredData
+      .filter(city => city[weekendType]?.saturday?.sunSeconds !== undefined && city[weekendType]?.saturday?.sunSeconds > 0)
+      .sort((a, b) => (b[weekendType]?.saturday?.sunSeconds || 0) - (a[weekendType]?.saturday?.sunSeconds || 0))
+      .slice(0, 5) // Top 5
+      .map(city => ({
+        name: city.cityName,
+        str: city[weekendType]?.saturday?.sunStr || ''
+      }));
+  }, [filteredData, weekendType]);
+
+  const topSun = React.useMemo(() => {
+    return filteredData
+      .filter(city => city[weekendType]?.sunday?.sunSeconds !== undefined && city[weekendType]?.sunday?.sunSeconds > 0)
+      .sort((a, b) => (b[weekendType]?.sunday?.sunSeconds || 0) - (a[weekendType]?.sunday?.sunSeconds || 0))
+      .slice(0, 5) // Top 5
+      .map(city => ({
+        name: city.cityName,
+        str: city[weekendType]?.sunday?.sunStr || ''
+      }));
+  }, [filteredData, weekendType]);
+
+
 
   return (
     <div className="space-y-6 rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
       <h3 className="text-lg font-bold text-slate-800 border-b pb-2">
-        {title}, <span className="font-normal text-sm" style={{ color: '#404823' }}>{dateLabel}</span>
+        {title}, <span className="font-normal text-sm text-[#404823]">{dateLabel}</span>
       </h3>
       
       {/* Dry Cities Rows */}
       <div className="grid grid-cols-1 gap-4">
-        <div className="rounded-lg p-3" style={{ backgroundColor: '#edebe5' }}>
-          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#000000' }}>Здесь без осадков весь уикенд</div>
-          {fullWeekend.length > 0 ? (
+        <div className="rounded-lg p-3 bg-[#edebe5]">
+          <div className="text-xs font-semibold uppercase tracking-wider mb-2 text-black">Здесь без осадков весь уикенд</div>
+          {citiesDryAllWeekend.length > 0 ? (
              <div className="flex flex-wrap gap-2">
-                 {fullWeekend.map(c => (
+                 {citiesDryAllWeekend.map(c => (
                      <button 
                         key={c} 
                         onClick={() => onCityClick(c)}
@@ -77,8 +105,8 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
           ) : <span className="text-sm text-slate-400 italic">Нет городов</span>}
         </div>
 
-        <div className="rounded-lg p-3" style={{ backgroundColor: '#edebe5' }}>
-          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#000000' }}>Здесь без осадков только в субботу</div>
+        <div className="rounded-lg p-3 bg-[#edebe5]">
+          <div className="text-xs font-semibold uppercase tracking-wider mb-2 text-black">Здесь без осадков только в субботу</div>
           {onlySat.length > 0 ? (
              <div className="flex flex-wrap gap-2">
                  {onlySat.map(c => (
@@ -100,11 +128,11 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
                      </button>
                  ))}
              </div>
-          ) : <span className="text-sm italic" style={{ color: '#404823' }}>Пусто</span>}
+          ) : <span className="text-sm italic text-[#404823]">Пусто</span>}
         </div>
 
-        <div className="rounded-lg p-3" style={{ backgroundColor: '#edebe5' }}>
-          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#000000' }}>Здесь без осадков только в воскресенье</div>
+        <div className="rounded-lg p-3 bg-[#edebe5]">
+          <div className="text-xs font-semibold uppercase tracking-wider mb-2 text-black">Здесь без осадков только в воскресенье</div>
           {onlySun.length > 0 ? (
              <div className="flex flex-wrap gap-2">
                  {onlySun.map(c => (
@@ -126,18 +154,18 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
                      </button>
                  ))}
              </div>
-          ) : <span className="text-sm italic" style={{ color: '#404823' }}>Пусто</span>}
+          ) : <span className="text-sm italic text-[#404823]">Пусто</span>}
         </div>
       </div>
 
       {/* Sun Ranking */}
       <div className="pt-2">
-        <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: '#000000' }}>Самые солнечные (09:00 - 18:00)</div>
+        <div className="text-xs font-semibold uppercase tracking-wider mb-3 text-black">Самые солнечные (09:00 - 18:00)</div>
         
         <div className="space-y-3">
             {/* Saturday Row */}
             <div className="flex items-center gap-2">
-                <span className="shrink-0 text-sm font-bold w-8" style={{ color: '#404823' }}>Сб:</span>
+                <span className="shrink-0 text-sm font-bold w-8 text-[#404823]">Сб:</span>
                 <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 flex-1">
                     {topSat.length ? topSat.map((item, i) => (
                         <button 
@@ -157,15 +185,15 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
                             }}
                         >
                             <span className="text-sm font-medium mr-1">{item.name}</span>
-                            <span className="text-xs font-bold" style={{ color: '#ee6b17' }}>{item.str}</span>
+                            <span className="text-xs font-bold text-[#ee6b17]">{item.str}</span>
                         </button>
-                    )) : <span className="text-sm pt-1" style={{ color: '#404823' }}>Нет солнца</span>}
+                    )) : <span className="text-sm pt-1 text-[#404823]">Нет солнца</span>}
                 </div>
             </div>
 
             {/* Sunday Row */}
             <div className="flex items-center gap-2">
-                <span className="shrink-0 text-sm font-bold w-8" style={{ color: '#404823' }}>Вс:</span>
+                <span className="shrink-0 text-sm font-bold w-8 text-[#404823]">Вс:</span>
                 <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 flex-1">
                     {topSun.length ? topSun.map((item, i) => (
                         <button 
@@ -185,9 +213,9 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
                             }}
                         >
                             <span className="text-sm font-medium mr-1">{item.name}</span>
-                            <span className="text-xs font-bold" style={{ color: '#ee6b17' }}>{item.str}</span>
+                            <span className="text-xs font-bold text-[#ee6b17]">{item.str}</span>
                         </button>
-                    )) : <span className="text-sm pt-1" style={{ color: '#404823' }}>Нет солнца</span>}
+                    )) : <span className="text-sm pt-1 text-[#404823]">Нет солнца</span>}
                 </div>
             </div>
         </div>

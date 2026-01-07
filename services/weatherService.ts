@@ -1,3 +1,20 @@
+
+async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise<T | null> {
+    for (let i = 0; i < retries; i++) {
+        try {
+            return await fn();
+        } catch (error: any) {
+            if (i < retries - 1) {
+                console.warn(`Retry attempt ${i + 1}/${retries} failed. Retrying in ${delay}ms...`, error.message);
+                await new Promise(res => setTimeout(res, delay));
+            } else {
+                throw error; // Last attempt failed, re-throw the error
+            }
+        }
+    }
+    return null;
+}
+
 import { API_URL, CITY_FILENAMES, FLIGHT_CITIES } from '../constants';
 import { CityCoordinates, CityAnalysisResult, WeatherDayStats } from '../types';
 

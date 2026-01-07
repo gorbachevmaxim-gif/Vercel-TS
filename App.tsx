@@ -12,6 +12,7 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState<LoadingState>({ total: 0, current: 0, status: 'Starting...' });
   const [showLoading, setShowLoading] = useState(true);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [initialTab, setInitialTab] = useState<'w1' | 'w2'>('w1');
   
   // Date Logic
@@ -56,7 +57,15 @@ const App: React.FC = () => {
       setLoading(prev => ({ ...prev, current: total, status: 'Готово' }));
     };
 
-    fetchData();
+    const fetchDataAndHandleErrors = async () => {
+      try {
+        await fetchData();
+      } catch (err: any) {
+        console.error("Error fetching data:", err);
+        setError(err.message || 'An unknown error occurred while fetching data.');
+      }
+    };
+    fetchDataAndHandleErrors();
   }, [dates]);
 
   const selectedData = useMemo(() => {
@@ -75,18 +84,23 @@ const App: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen text-slate-900 pb-10" style={{ backgroundColor: '#edebe5' }}>
+        <div className="min-h-screen text-slate-900 pb-10 bg-[#edebe5]">
       
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mx-auto max-w-2xl mt-4" role="alert">
+          <strong className="font-bold">Ошибка: </strong>
+          <span className="block sm:inline">{error}</span>
+        </div>
+      )}
       {/* Header */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-10 px-4 py-3 shadow-sm">
         <h1 
             onClick={() => setSelectedCity(null)}
-            className="text-xl font-bold cursor-pointer text-center"
-            style={{ color: 'rgb(64, 72, 35)' }}
+            className="text-xl font-bold cursor-pointer text-center text-[rgb(64,72,35)]"
         >
             Выбор места для райда
         </h1>
-        <p className="text-xs text-center" style={{ color: '#404823' }}>Поиск идеальной погоды без осадков (09:00 - 18:00)</p>
+        <p className="text-xs text-center text-[#404823]">Поиск идеальной погоды без осадков (09:00 - 18:00)</p>
       </div>
 
       <div className="max-w-2xl mx-auto p-4 space-y-6">
@@ -117,18 +131,7 @@ const App: React.FC = () => {
                                <button 
                                  key={city.cityName}
                                  onClick={() => handleCitySelect(city.cityName, 'w1')}
-                                 className="px-3 py-2 bg-white border rounded-lg text-sm font-medium transition-colors text-left"
-                                 style={{ color: '#000000', borderColor: '#d1cdc4' }}
-                                 onMouseEnter={(e) => {
-                                   e.currentTarget.style.borderColor = '#4f6814';
-                                   e.currentTarget.style.backgroundColor = '#4a5427';
-                                   e.currentTarget.style.color = 'white';
-                                 }}
-                                 onMouseLeave={(e) => {
-                                   e.currentTarget.style.borderColor = '#d1cdc4';
-                                   e.currentTarget.style.backgroundColor = 'white';
-                                   e.currentTarget.style.color = '#000000';
-                                 }}
+                                 className="px-3 py-2 bg-white border rounded-lg text-sm font-medium transition-colors text-left text-black border-[#d1cdc4] hover:border-[#4f6814] hover:bg-[#4a5427] hover:text-white"
                                >
                                    {city.cityName}
                                </button>

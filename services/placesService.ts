@@ -1,29 +1,43 @@
+
+async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise<T | null> {
+    for (let i = 0; i < retries; i++) {
+        try {
+            return await fn();
+        } catch (error: any) {
+            if (i < retries - 1) {
+                console.warn(`Retry attempt ${i + 1}/${retries} failed. Retrying in ${delay}ms...`, error.message);
+                await new Promise(res => setTimeout(res, delay));
+            } else {
+                throw error; // Last attempt failed, re-throw the error
+            }
+        }
+    }
+    return null;
+}
+
 import { Place } from '../types';
 
 // Simple cache to prevent spamming the API when switching tabs/routes
 const cache: Record<string, Place[]> = {};
 
 export async function fetchNearbyPlaces(lat: number, lon: number): Promise<Place[]> {
-    const key = `${lat.toFixed(3)},${lon.toFixed(3)}`;
-    if (cache[key]) return cache[key];
-
-    // Query Overpass API for amenities (cafe, restaurant, bar, fast_food) within 5000 meters (5km)
-    // Increased limit to 20 to ensure we find valid named places in the larger area
-    const query = `
-        [out:json][timeout:10];
-        (
-          node["amenity"~"cafe|restaurant|bar|fast_food"](around:5000, ${lat}, ${lon});
-        );
-        out body 20;
-    `;
 
     try {
-        const response = await fetch('https://overpass-api.de/api/interpreter', {
-            method: 'POST',
-            body: query
-        });
+        const response = await retry(async () => {
+            const res = await fetch('https://overpass-api.de/api/interpreter', {
+                method: 'POST',
+                body: query
+            });
+            if (!res.ok) {
+                throw new Error(`Overpass API returned ${res.status}. Details: ${await res.text()}`);
+            }
+            return res;
+        }, 3, 500); // 3 retries, 500ms delay
 
-        if (!response.ok) return [];
+        if (!response) {
+            console.error("Failed to fetch places from Overpass API after multiple retries.");
+            return [];
+        }
 
         const data = await response.json();
         const elements = data.elements || [];
@@ -41,7 +55,7 @@ export async function fetchNearbyPlaces(lat: number, lon: number): Promise<Place
             return {
                 name: tags.name || tags['name:ru'] || tags['name:en'] || 'Без названия',
                 type: type,
-                // Create a link to Yandex Maps using the name for better UX in Russia, 
+                // Create a link to Yandex Maps using the name for better UX in Russia,
                 // fallback to coords if no name
                 url: tags.name 
                     ? `https://yandex.ru/maps/?text=${encodeURIComponent(tags.name)}` 
@@ -58,12 +72,6 @@ export async function fetchNearbyPlaces(lat: number, lon: number): Promise<Place
             const lowerAddr = (p.address || '').toLowerCase();
             
             // Regex for common Russian mall abbreviations and keywords
-            // ТЦ - Torgoviy Tsentr
-            // ТРЦ - Torgovo-Razvlekatelny Tsentr
-            // ТРК - Torgovo-Razvlekatelny Kompleks
-            // Молл, Mall - Malls
-            // Фудкорт - Food Courts
-            // Specific chains that are big boxes: Мега, Ашан, Лента, Глобус (often have internal cafes)
             const mallRegex = /\b(тц|трц|трк|молл|mall|мега|ашан|лента|глобус)\b/i;
             const foodCourtRegex = /(фуд\s?корт|food\s?court)/i;
 
@@ -75,8 +83,7 @@ export async function fetchNearbyPlaces(lat: number, lon: number): Promise<Place
 
         cache[key] = places;
         return places;
-    } catch (e) {
-        console.error("Failed to fetch places", e);
+    } catch (e: any) {
+        console.error(`Failed to fetch nearby places for ${lat},${lon}: ${e.message}`);
         return [];
     }
-}
