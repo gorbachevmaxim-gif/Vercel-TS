@@ -276,35 +276,45 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
                   isMorningRideSuitable
               );
 
-              const isDry = activeRainSum <= 0.5;
-              let hasRoute = false;
-              let rideDuration: string | undefined = undefined;
-              let startTemperature: number | undefined = undefined;
-              let endTemperature: number | undefined = undefined;
-
-              // Check route availability defensively and get RouteData
-              if (isDry) {
-                  if (FLIGHT_CITIES.includes(cityName)) {
-                      hasRoute = true;
-                      rideDuration = "3h 0min"; // Default for flight cities
-                      startTemperature = hourly.temperature_2m[sIdx + 10] !== undefined ? Math.round(hourly.temperature_2m[sIdx + 10]) : undefined;
-                      endTemperature = hourly.temperature_2m[sIdx + 13] !== undefined ? Math.round(hourly.temperature_2m[sIdx + 13]) : undefined;
-                  } else {
-                      const routeData = await checkRouteAvailability(cityName, windDeg);
-                      if (routeData) {
-                          hasRoute = true;
-                          const estimatedRideHours = Math.ceil(routeData.distanceKm / 20); // 20 km/h average speed
-                          rideDuration = `${estimatedRideHours}h ${Math.round((routeData.distanceKm / 20 - estimatedRideHours) * 60)}min`;
-
-                          // Default ride start time is 10:00 AM local time (sIdx + 10)
-                          startTemperature = hourly.temperature_2m[sIdx + 10] !== undefined ? Math.round(hourly.temperature_2m[sIdx + 10]) : undefined;
-                          // Ride end time based on dynamic duration
-                          endTemperature = hourly.temperature_2m[sIdx + 10 + estimatedRideHours] !== undefined ? Math.round(hourly.temperature_2m[sIdx + 10 + estimatedRideHours]) : undefined;
-                      }
-                  }
-              }
-
-              const dayStats: WeatherDayStats = {
+              
+                        
+                        
+                        const isDry = activeRainSum <= 0.5;
+                        let hasRoute = false;
+                        let rideDuration: string | undefined = undefined;
+                        let startTemperature: number | undefined = undefined;
+                        let endTemperature: number | undefined = undefined;
+            
+                        // Check route availability defensively and get RouteData
+                        if (isDry) {
+                            if (FLIGHT_CITIES.includes(cityName)) {
+                                hasRoute = true;
+                                // For flight cities, assume a default ride of 3 hours (90km at 30km/h) for temperature calculation
+                                const estimatedRideHours = 3;
+                                const estimatedRideMinutes = 0;
+                                rideDuration = `${String(estimatedRideHours).padStart(2, '0')}:${String(estimatedRideMinutes).padStart(2, '0')}`;
+            
+                                startTemperature = hourly.temperature_2m[sIdx + 10] !== undefined ? Math.round(hourly.temperature_2m[sIdx + 10]) : undefined;
+                                endTemperature = hourly.temperature_2m[sIdx + 10 + estimatedRideHours] !== undefined ? Math.round(hourly.temperature_2m[sIdx + 10 + estimatedRideHours]) : undefined;
+                            } else {
+                                const routeData = await checkRouteAvailability(cityName, windDeg);
+                                if (routeData) {
+                                    hasRoute = true;
+                                    const estimatedRideHours = Math.floor(routeData.distanceKm / 30); // 30 km/h average speed
+                                    const estimatedRideMinutes = Math.round((routeData.distanceKm / 30 - estimatedRideHours) * 60);
+                                    rideDuration = `${String(estimatedRideHours).padStart(2, '0')}:${String(estimatedRideMinutes).padStart(2, '0')}`;
+            
+                                    // Default ride start time is 10:00 AM local time (sIdx + 10)
+                                    startTemperature = hourly.temperature_2m[sIdx + 10] !== undefined ? Math.round(hourly.temperature_2m[sIdx + 10]) : undefined;
+                                    // Ride end time based on dynamic duration
+                                    // Convert estimatedRideHours and estimatedRideMinutes to total hours for index calculation
+                                    const totalRideHoursForIndex = estimatedRideHours + Math.floor(estimatedRideMinutes / 60);
+                                    const finalHourIndex = sIdx + 10 + totalRideHoursForIndex; // Start at 10 AM, add ride duration
+                                    endTemperature = hourly.temperature_2m[finalHourIndex] !== undefined ? Math.round(hourly.temperature_2m[finalHourIndex]) : undefined;
+                                }
+                            }
+                        }
+            const dayStats: WeatherDayStats = {
                   dateObj: targetDate,
                   dateStr: tStr,
                   dayName: targetDate.getDay() === 6 ? "Суббота" : "Воскресенье",
