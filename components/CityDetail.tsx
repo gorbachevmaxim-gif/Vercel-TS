@@ -383,7 +383,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                 {/* Error/Empty State overlay */}
                 {!currentRouteData && !isFlightDestination && (
                     <div className="absolute inset-0 flex items-center justify-center bg-slate-100/50 backdrop-blur-[1px] z-[400]">
-                         <span className="bg-[#4f6814] px-4 py-2 rounded-lg text-sm font-medium text-white shadow-sm">
+                         <span className="bg-[#4f6814] px-4 py-2 rounded-lg text-sm font-medium text-white shadow-sm text-center">
                             {routeStatus}
                          </span>
                     </div>

@@ -171,7 +171,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
                         <button 
                             key={i} 
                             onClick={() => onCityClick(item.name)}
-                            className="shrink-0 flex items-center px-3 py-1.5 rounded-lg border active:scale-95 transition-all touch-manipulation"
+                            className="shrink-0 flex items-center px-3 py-1.5 rounded-lg border active:scale-95 transition-all touch-manipulation shadow-sm hover:shadow-md"
                             style={{ backgroundColor: '#edebe5', borderColor: '#edebe5', color: '#000000' }}
                             onMouseEnter={(e) => {
                               e.currentTarget.style.backgroundColor = '#edebe5';
@@ -199,7 +199,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
                         <button 
                             key={i} 
                             onClick={() => onCityClick(item.name)}
-                            className="shrink-0 flex items-center px-3 py-1.5 rounded-lg border active:scale-95 transition-all touch-manipulation"
+                            className="shrink-0 flex items-center px-3 py-1.5 rounded-lg border active:scale-95 transition-all touch-manipulation shadow-sm hover:shadow-md"
                             style={{ backgroundColor: '#edebe5', borderColor: '#edebe5', color: '#000000' }}
                             onMouseEnter={(e) => {
                               e.currentTarget.style.backgroundColor = '#edebe5';
