@@ -147,7 +147,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   useEffect(() => {
     if (!mapContainerRef.current || !cityCoords) return;
     if (!mapInstanceRef.current) {
-        const map = L.map(mapContainerRef.current).setView([cityCoords.lat, cityCoords.lon], 10);
+        const map = L.map(mapContainerRef.current);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
@@ -251,10 +251,12 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                 map.fitBounds(bounds, { padding: [60, 60], maxZoom: 13, animate: false });
             }
         }, 100);
-    } else {
+    } else if (routeStatus !== 'Поиск...') {
+        // Only focus on the city if a route is not found, and we're not actively searching for one.
+        // This prevents the map from re-centering on the city when switching days.
         map.setView([cityCoords.lat, cityCoords.lon], 11);
     }
-  }, [activeStats, cityCoords, currentRouteData]);
+  }, [activeStats, cityCoords, currentRouteData, routeStatus]);
 
   let collectionFocusCoords = cityCoords;
   let collectionZoom = 13;
