@@ -66,7 +66,7 @@ export const CITY_FILENAMES: Record<string, string> = {
     "Фетхие": "Fethiye"
 };
 
-export const FLIGHT_CITIES = ["Фетхие", "Кемер"];
+export const FLIGHT_CITIES = ["Фетхие"];
 
 // Map City Name -> Komoot Tour ID
 export const KOMOOT_ROUTE_IDS: Record<string, string> = {
