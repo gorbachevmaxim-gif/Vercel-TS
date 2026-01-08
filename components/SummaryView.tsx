@@ -174,7 +174,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
                             className="shrink-0 flex items-center px-3 py-1.5 rounded-lg border active:scale-95 transition-all touch-manipulation"
                             style={{ backgroundColor: '#edebe5', borderColor: '#edebe5', color: '#000000' }}
                             onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = 'transparent';
+                              e.currentTarget.style.backgroundColor = '#edebe5';
                               e.currentTarget.style.borderColor = '#ee6b17';
                               e.currentTarget.style.color = '#000000';
                             }}
@@ -202,7 +202,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
                             className="shrink-0 flex items-center px-3 py-1.5 rounded-lg border active:scale-95 transition-all touch-manipulation"
                             style={{ backgroundColor: '#edebe5', borderColor: '#edebe5', color: '#000000' }}
                             onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = 'transparent';
+                              e.currentTarget.style.backgroundColor = '#edebe5';
                               e.currentTarget.style.borderColor = '#ee6b17';
                               e.currentTarget.style.color = '#000000';
                             }}
