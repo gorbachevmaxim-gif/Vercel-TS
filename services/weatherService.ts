@@ -53,8 +53,8 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
       if (seconds <= 0) return "0 мин";
       const hours = Math.floor(seconds / 3600);
       const minutes = Math.floor((seconds % 3600) / 60);
-      if (hours > 0) return `${hours}ч ${minutes}мин`;
-      return `${minutes}мин`;
+      if (hours > 0) return `${hours} ч ${minutes} мин`;
+      return `${minutes} мин`;
   }
 
   function formatRainHours(hours: number[]): string | null {
@@ -127,14 +127,13 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
       else hints.push("Bib Shorts");
 
       if (tMax >= 14 && tMax <= 19) hints.push("Leg or Knee Warmers");
-      if (tMax > 19 && tMax <= 22) hints.push("Наколенники");
 
       let jersey = "";
       if (tMax < 15) jersey = "Long Sleeve Jersey Cold";
       else if (tMax >= 15 && tMax <= 22) jersey = "Long Sleeve Jersey Hot";
-      else jersey = "Летняя джерси";
+      else jersey = "Jersey";
 
-      if (useArmWarmers && jersey === "Long Sleeve Jersey Hot") jersey = "Летняя джерси";
+      if (useArmWarmers && jersey === "Long Sleeve Jersey Hot") jersey = "Jersey";
 
       let outerLayer = "";
       const needsProtection = tMin < 12 || wMax > 15 || (tMax > 10 && tMax <= 20);
