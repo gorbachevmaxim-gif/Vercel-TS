@@ -393,7 +393,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
               <div className="pt-3">
                 <button
                   onClick={handleDownloadGpx}
-                  className="flex items-center justify-center w-full p-3 bg-[#e3d2b4] text-[#404823] rounded-lg font-bold hover:bg-[#d1c0a2] transition-colors shadow-sm gap-2 text-center"
+                  className="flex items-center justify-center w-full p-3 bg-[rgb(223,219,207)] text-slate-800 rounded-lg font-bold hover:bg-[rgb(209,205,193)] transition-colors shadow-sm gap-2 text-center"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
