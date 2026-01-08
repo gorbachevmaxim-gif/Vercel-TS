@@ -82,11 +82,16 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
     );
 };
 
+interface FoundRoute {
+  routeData: RouteData;
+  gpxString: string;
+}
+
 const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClose }) => {
   const [activeTab, setActiveTab] = useState<'w1' | 'w2'>(initialTab);
   const [routeDay, setRouteDay] = useState<'saturday' | 'sunday' | null>(null);
   const [routeStatus, setRouteStatus] = useState<string>('');
-  const [foundRoutes, setFoundRoutes] = useState<RouteData[]>([]);
+  const [foundRoutes, setFoundRoutes] = useState<FoundRoute[]>([]);
   const [selectedRouteIdx, setSelectedRouteIdx] = useState<number>(0);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -103,7 +108,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
 
   const activeStats = routeDay === 'saturday' ? activeWeekend.saturday : activeWeekend.sunday;
   const cityCoords = CITIES[data.cityName];
-  const currentRoute = foundRoutes[selectedRouteIdx];
+  const currentRouteData = foundRoutes[selectedRouteIdx]?.routeData;
   const isFlightDestination = FLIGHT_CITIES.includes(data.cityName);
 
   const moscow = CITIES['Москва'];
@@ -113,12 +118,12 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   let routeStartLat = cityCoords.lat, routeStartLon = cityCoords.lon;
   let routeEndLat = cityCoords.lat, routeEndLon = cityCoords.lon;
 
-  if (currentRoute && currentRoute.points.length > 0) {
-      routeStartLat = currentRoute.points[0][0];
-      routeStartLon = currentRoute.points[0][1];
-      const lastIdx = currentRoute.points.length - 1;
-      routeEndLat = currentRoute.points[lastIdx][0];
-      routeEndLon = currentRoute.points[lastIdx][1];
+  if (currentRouteData && currentRouteData.points.length > 0) {
+      routeStartLat = currentRouteData.points[0][0];
+      routeStartLon = currentRouteData.points[0][1];
+      const lastIdx = currentRouteData.points.length - 1;
+      routeEndLat = currentRouteData.points[lastIdx][0];
+      routeEndLon = currentRouteData.points[lastIdx][1];
   }
 
   const findClosestCityName = (lat: number, lon: number) => {
@@ -168,18 +173,28 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
     const baseName = `routes/${fileCityName}_${windDirCode}`;
     const candidates = [`${baseName}.gpx`, `${baseName}_1.gpx`, `${baseName}_2.gpx`, `${baseName}_3.gpx`];
 
-    Promise.all(candidates.map(url => fetch(`${url}?t=${Date.now()}`).then(r => r.ok ? r.text() : '').then(parseGpx)))
-        .then(results => {
-            if (!isMounted) return;
-            const validRoutes = results.filter((r): r is RouteData => r !== null);
-            if (validRoutes.length > 0) {
-                setFoundRoutes(validRoutes);
-                setRouteStatus(`Найдено маршрутов: ${validRoutes.length}`);
-            } else {
-                setFoundRoutes([]);
-                setRouteStatus(`Маршрут под ${activeStats.windDirFull.toLowerCase()} ветер не сделан`);
-            }
-        });
+    Promise.all(candidates.map(url =>
+      fetch(`${url}?t=${Date.now()}`).then(r => r.ok ? r.text() : Promise.resolve(null))
+    ))
+    .then(gpxStrings => {
+        if (!isMounted) return;
+        const validRoutes: FoundRoute[] = gpxStrings
+            .map(gpxString => {
+                if (!gpxString) return null;
+                const routeData = parseGpx(gpxString);
+                if (!routeData) return null;
+                return { routeData, gpxString };
+            })
+            .filter((r): r is FoundRoute => r !== null);
+
+        if (validRoutes.length > 0) {
+            setFoundRoutes(validRoutes);
+            setRouteStatus(`Найдено маршрутов: ${validRoutes.length}`);
+        } else {
+            setFoundRoutes([]);
+            setRouteStatus(`Маршрут под ${activeStats.windDirFull.toLowerCase()} ветер не сделан`);
+        }
+    });
     return () => { isMounted = false; };
   }, [activeStats, cityCoords, data.cityName, isFlightDestination]);
 
@@ -191,8 +206,8 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
     decorativeMarkersRef.current.forEach(m => m.remove());
     decorativeMarkersRef.current = [];
 
-    if (currentRoute?.points.length) {
-        const polyline = L.polyline(currentRoute.points, { color: 'rgb(36, 87, 195)', weight: 5, opacity: 0.9 }).addTo(map);
+    if (currentRouteData?.points.length) {
+        const polyline = L.polyline(currentRouteData.points, { color: 'rgb(36, 87, 195)', weight: 5, opacity: 0.9 }).addTo(map);
         polylineRef.current = polyline;
 
         const createIcon = (text: string, bgColor: string) => L.divIcon({
@@ -202,8 +217,8 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
             iconAnchor: [12, 12]
         });
 
-        const startMarker = L.marker(currentRoute.points[0], { icon: createIcon('A', '#4f6814') }).addTo(map);
-        const endMarker = L.marker(currentRoute.points[currentRoute.points.length - 1], { icon: createIcon('B', '#ee6b17') }).addTo(map);
+        const startMarker = L.marker(currentRouteData.points[0], { icon: createIcon('A', '#4f6814') }).addTo(map);
+        const endMarker = L.marker(currentRouteData.points[currentRouteData.points.length - 1], { icon: createIcon('B', '#ee6b17') }).addTo(map);
         decorativeMarkersRef.current.push(startMarker, endMarker);
 
 
@@ -215,7 +230,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                 iconSize: [50, 0], // Size will be determined by content
                 iconAnchor: [24, -25] // Adjust to position relative to marker
             });
-            const startTempMarker = L.marker(currentRoute.points[0], { icon: startTempIcon }).addTo(map);
+            const startTempMarker = L.marker(currentRouteData.points[0], { icon: startTempIcon }).addTo(map);
             decorativeMarkersRef.current.push(startTempMarker);
         }
         if (activeStats?.endTemperature !== undefined) {
@@ -225,7 +240,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                 iconSize: [50, 0], // Size will be determined by content
                 iconAnchor: [24, 55] // Adjust to position relative to marker
             });
-            const endTempMarker = L.marker(currentRoute.points[currentRoute.points.length - 1], { icon: endTempIcon }).addTo(map);
+            const endTempMarker = L.marker(currentRouteData.points[currentRouteData.points.length - 1], { icon: endTempIcon }).addTo(map);
             decorativeMarkersRef.current.push(endTempMarker);
         }
 
@@ -239,7 +254,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
     } else {
         map.setView([cityCoords.lat, cityCoords.lon], 11);
     }
-  }, [activeStats, cityCoords, currentRoute]);
+  }, [activeStats, cityCoords, currentRouteData]);
 
   let collectionFocusCoords = cityCoords;
   let collectionZoom = 13;
@@ -249,6 +264,25 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   const yandexMapsUrl = collectionFocusCoords
     ? `https://yandex.ru/maps/?bookmarks%5BpublicId%5D=OfCmg0o9&ll=${collectionFocusCoords.lon},${collectionFocusCoords.lat}&mode=bookmarks&z=${collectionZoom}&utm_source=share&utm_campaign=bookmarks`
     : `https://yandex.ru/maps?bookmarks%5BpublicId%5D=OfCmg0o9&utm_source=share&utm_campaign=bookmarks`;
+
+  const handleDownloadGpx = () => {
+    const selectedRoute = foundRoutes[selectedRouteIdx];
+    if (!selectedRoute || !activeStats) return;
+
+    const fileCityName = CITY_FILENAMES[data.cityName] || data.cityName;
+    const windDirCode = getCardinal(activeStats.windDeg);
+    const filename = `${fileCityName}_${windDirCode}${foundRoutes.length > 1 ? `_${selectedRouteIdx + 1}` : ''}.gpx`;
+
+    const blob = new Blob([selectedRoute.gpxString], { type: 'application/gpx+xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="space-y-4">
@@ -303,15 +337,15 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                     </div>
                 </div>
 
-                {currentRoute && (
+                {currentRouteData && (
                     <div className="flex gap-4 text-right">
                         <div className="flex flex-col items-center justify-center text-center">
                             <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>ДИСТАНЦИЯ</span>
-                            <span className="text-lg font-bold text-slate-700">{currentRoute.distanceKm.toFixed(0)} <span className="text-sm font-normal">км</span></span>
+                            <span className="text-lg font-bold text-slate-700">{currentRouteData.distanceKm.toFixed(0)} <span className="text-sm font-normal">км</span></span>
                         </div>
                         <div className="flex flex-col items-center justify-center text-center">
                             <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>НАБОР</span>
-                            <span className="text-lg font-bold text-slate-700">{Math.round(currentRoute.elevationM)} <span className="text-sm font-normal">м</span></span>
+                            <span className="text-lg font-bold text-slate-700">{Math.round(currentRouteData.elevationM)} <span className="text-sm font-normal">м</span></span>
                         </div>
                         <div className="flex flex-col items-center justify-center text-center">
                                 <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>ТЕМП</span>
@@ -347,7 +381,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                 )}
 
                 {/* Error/Empty State overlay */}
-                {!currentRoute && !isFlightDestination && (
+                {!currentRouteData && !isFlightDestination && (
                     <div className="absolute inset-0 flex items-center justify-center bg-slate-100/50 backdrop-blur-[1px] z-[400]">
                          <span className="bg-[#4f6814] px-4 py-2 rounded-lg text-sm font-medium text-white shadow-sm">
                             {routeStatus}
@@ -355,6 +389,21 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                     </div>
                 )}
             </div>
+            {currentRouteData && (
+              <div className="pt-3">
+                <button
+                  onClick={handleDownloadGpx}
+                  className="flex items-center justify-center w-full p-3 bg-[#e3d2b4] text-[#404823] rounded-lg font-bold hover:bg-[#d1c0a2] transition-colors shadow-sm gap-2 text-center"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  <span>Скачать GPX</span>
+                </button>
+              </div>
+            )}
           </div>
           {activeStats && showTransportBlock && (
               <TransportBlock
