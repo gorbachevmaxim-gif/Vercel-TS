@@ -15,3 +15,8 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
 }
 
 import { Place } from '../types';
+
+// Simple cache to prevent spamming the API when switching tabs/routes
+const cache: Record<string, Place[]> = {};
+
+// NOTE: fetchNearbyPlaces function has been removed as per user request.

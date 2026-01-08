@@ -102,7 +102,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
                      </button>
                  ))}
              </div>
-          ) : <span className="text-sm text-slate-400 italic">Нет городов</span>}
+          ) : <span className="text-sm italic" style={{ color: '#404823' }}>Нет городов</span>}
         </div>
 
         <div className="rounded-lg p-3 bg-[#edebe5]">
@@ -128,7 +128,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
                      </button>
                  ))}
              </div>
-          ) : <span className="text-sm italic text-[#404823]">Пусто</span>}
+          ) : <span className="text-sm italic text-[#404823]">Нет городов</span>}
         </div>
 
         <div className="rounded-lg p-3 bg-[#edebe5]">
@@ -154,7 +154,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
                      </button>
                  ))}
              </div>
-          ) : <span className="text-sm italic text-[#404823]">Пусто</span>}
+          ) : <span className="text-sm italic text-[#404823]">Нет городов</span>}
         </div>
       </div>
 

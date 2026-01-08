@@ -206,6 +206,30 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
         const endMarker = L.marker(currentRoute.points[currentRoute.points.length - 1], { icon: createIcon('B', '#ee6b17') }).addTo(map);
         decorativeMarkersRef.current.push(startMarker, endMarker);
 
+
+        // Add temperature markers
+        if (activeStats?.startTemperature !== undefined) {
+            const startTempIcon = L.divIcon({
+                html: `<div style="background-color: #4f6814; color: white; padding: 5px 8px; border-radius: 4px; font-weight: bold; border: 0px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); white-space: nowrap;">${activeStats.startTemperature}°C</div>`,
+                className: '',
+                iconSize: [50, 0], // Size will be determined by content
+                iconAnchor: [24, -25] // Adjust to position relative to marker
+            });
+            const startTempMarker = L.marker(currentRoute.points[0], { icon: startTempIcon }).addTo(map);
+            decorativeMarkersRef.current.push(startTempMarker);
+        }
+        if (activeStats?.endTemperature !== undefined) {
+            const endTempIcon = L.divIcon({
+                html: `<div style="background-color: #ee6b17; color: white; padding: 5px 8px; border-radius: 4px; font-weight: bold; border: 0px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); white-space: nowrap;">${activeStats.endTemperature}°C</div>`,
+                className: '',
+                iconSize: [50, 0], // Size will be determined by content
+                iconAnchor: [24, 55] // Adjust to position relative to marker
+            });
+            const endTempMarker = L.marker(currentRoute.points[currentRoute.points.length - 1], { icon: endTempIcon }).addTo(map);
+            decorativeMarkersRef.current.push(endTempMarker);
+        }
+
+
         setTimeout(() => {
             const bounds = polyline.getBounds();
             if (bounds.isValid()) {
@@ -261,6 +285,9 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                           </span>
                         )}
                     </h3>
+
+
+
                     <div className="flex items-center gap-2 mt-1">
                         <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: 'rgb(224, 219, 206)', color: '#404823' }}>
                             <span>Ветер: {activeStats?.windDirFull} ({activeStats?.windRange} км/ч)</span>
@@ -279,20 +306,24 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
                 {currentRoute && (
                     <div className="flex gap-4 text-right">
                         <div className="flex flex-col items-center justify-center text-center">
-                            <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>Дистанция</span>
+                            <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>ДИСТАНЦИЯ</span>
                             <span className="text-lg font-bold text-slate-700">{currentRoute.distanceKm.toFixed(0)} <span className="text-sm font-normal">км</span></span>
                         </div>
                         <div className="flex flex-col items-center justify-center text-center">
-                            <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>Набор</span>
+                            <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>НАБОР</span>
                             <span className="text-lg font-bold text-slate-700">{Math.round(currentRoute.elevationM)} <span className="text-sm font-normal">м</span></span>
                         </div>
-                        {activeStats?.rideDuration && activeStats?.startTemperature !== undefined && activeStats?.endTemperature !== undefined && (
-                            <div className="flex flex-col items-center justify-center text-center">
-                                <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>Поездка</span>
+                        <div className="flex flex-col items-center justify-center text-center">
+                                <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>ТЕМП</span>
+                                <span className="text-lg font-bold text-slate-700">30 <span className="text-sm font-normal">км/ч</span></span>
+                        </div>
+                        {activeStats?.rideDuration && (
+                        <div className="flex flex-col items-center justify-center text-center">
+                                <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>В СЕДЛЕ</span>
                                 <span className="text-lg font-bold text-slate-700">
                                     {activeStats.rideDuration}
                                 </span>
-                            </div>
+                        </div>
                         )}
                     </div>
                 )}

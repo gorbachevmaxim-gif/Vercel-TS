@@ -98,7 +98,7 @@ const App: React.FC = () => {
             onClick={() => setSelectedCity(null)}
             className="text-xl font-bold cursor-pointer text-center text-[rgb(64,72,35)]"
         >
-            Выбор места для райда
+            ПОДБОР МЕСТА ДЛЯ РАЙДА
         </h1>
         <p className="text-xs text-center text-[#404823]">Поиск идеальной погоды без осадков (09:00 - 18:00)</p>
       </div>
@@ -138,8 +138,8 @@ const App: React.FC = () => {
                            ))}
                        </div>
                    ) : (
-                       <div className="p-4 text-center text-slate-500 bg-white rounded-lg border border-slate-200">
-                           Не удалось загрузить данные городов. Попробуйте обновить страницу.
+                       <div className="p-4 text-center italic bg-white rounded-lg border border-slate-200 text-[#404823]">
+                               Не удалось загрузить данные городов. Попробуйте обновить страницу.
                        </div>
                    )}
                 </div>

@@ -279,6 +279,9 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
               
                         
                         
+                        
+                        
+                        
                         const isDry = activeRainSum <= 0.5;
                         let hasRoute = false;
                         let rideDuration: string | undefined = undefined;
