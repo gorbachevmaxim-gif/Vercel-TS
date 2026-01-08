@@ -61,7 +61,9 @@ export const CITY_FILENAMES: Record<string, string> = {
     "Подольск": "Podolsk",
     "Тула": "Tula",
     "Пушкино": "Pushkino",
-    "Звенигород": "Zvenigorod"
+    "Звенигород": "Zvenigorod",
+    "Кемер": "Kemer",
+    "Фетхие": "Fethiye"
 };
 
 export const FLIGHT_CITIES = ["Фетхие", "Кемер"];
