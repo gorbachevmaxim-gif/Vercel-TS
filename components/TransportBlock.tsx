@@ -15,7 +15,7 @@ const STATIONS = [
   { name: 'Завидово', id: 's9602593', lat: 56.525, lon: 36.527 },
   { name: 'Серпухов', id: 's9600693', lat: 54.931, lon: 37.452 },
   { name: 'Звенигород', id: 's9601368', lat: 55.719, lon: 36.883 },
-  { name: 'Можайск', id: 's9601678', lat: 55.495, lon: 36.035 },
+  { name: 'Можайск', id: 's9601006', lat: 55.495, lon: 36.035 },
   { name: 'Дмитров', id: 's9601815', lat: 56.345, lon: 37.514 },
   { name: 'Яхрома', id: 's9601247', lat: 56.287, lon: 37.489 },
   { name: 'Турист', id: 's9601874', lat: 56.242, lon: 37.498 },
@@ -125,6 +125,12 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
           displayName: 'Павловский Посад',
           provider: 'yandex',
           yandexId: 's9601872'
+      };
+           if (city === 'Завидово') return {
+          apiName: 'Новозавидовский',
+          displayName: 'Новозавидовский',
+          provider: 'yandex',
+          yandexId: 'c22478'
       };
 
       // 3. Try to find exact station by coordinates

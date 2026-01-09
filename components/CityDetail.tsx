@@ -182,7 +182,7 @@ const activeWeekend = activeTab === "w1" ? data.weekend1 : data.weekend2;
             doubleClickZoom: true,
         });
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution: "&copy; OpenStreetMap"
+            attribution: "&copy; OSM"
         }).addTo(map);
         mapInstanceRef.current = map;
         setTimeout(() => map.invalidateSize(), 100);
