@@ -67,7 +67,15 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
                     <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#8b8680' }}>Солнце</span>
-                    <span className="text-lg font-bold text-slate-900">{stats.sunStr}</span>
+                    <span className="text-lg font-bold text-slate-900">
+                        {stats.sunStr.includes('ч') ? (
+                            <>
+                                {stats.sunStr.split(' ')[0]} <span className="text-sm font-normal">ч</span> {stats.sunStr.split(' ')[2]} <span className="text-sm font-normal">мин</span>
+                            </>
+                        ) : (
+                            <>{stats.sunStr.split(' ')[0]} <span className="text-sm font-normal">мин</span></>
+                        )}
+                    </span>
                     <span className="text-xs" style={{ color: '#404823' }}>09:00 - 18:00</span>
                 </div>
             </div>
@@ -331,7 +339,7 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
         });
       } catch (error) {
         console.error('Error sharing', error);
-      }
+      } 
     } else {
       alert('Web Share API is not supported for files in your browser.');
     }
