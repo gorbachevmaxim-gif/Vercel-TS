@@ -114,7 +114,8 @@ const App: React.FC = () => {
                     data={data} 
                     title="Ближайшие выходные"
                     dateLabel={w1Label} 
-                    onCityClick={(city, day) => handleCitySelect(city, 'w1', day)} // Updated call
+                    onCityClick={(city, day) => handleCitySelect(city, 'w1', day)}
+                    overrideSundayClick={(city) => handleCitySelect(city, 'w2', 'sunday')}
                 />
                 <SummaryView 
                     data={data} 

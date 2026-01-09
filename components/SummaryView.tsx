@@ -8,9 +8,10 @@ interface SummaryViewProps {
   dateLabel: string;
   isSecondWeekend?: boolean;
   onCityClick: (city: string, day: 'saturday' | 'sunday') => void;
+  overrideSundayClick?: (city: string) => void;
 }
 
-const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSecondWeekend = false, onCityClick }) => {
+const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSecondWeekend = false, onCityClick, overrideSundayClick }) => {
   const filteredData = useSummaryFiltering({ data, isSecondWeekend });
   const weekendType = isSecondWeekend ? 'weekend2' : 'weekend1';
 
@@ -138,7 +139,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
                  {onlySun.map(c => (
                      <button 
                         key={c} 
-                        onClick={() => onCityClick(c, 'sunday')}
+                        onClick={() => overrideSundayClick ? overrideSundayClick(c) : onCityClick(c, 'sunday')}
                         className="px-3 py-1.5 bg-white rounded-lg shadow-sm text-sm font-medium text-slate-700 hover:shadow-md active:scale-95 transition-all touch-manipulation border"
                         style={{ color: '#000000', borderColor: '#ffffff' }}
                         onMouseEnter={(e) => {
@@ -198,7 +199,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
                     {topSun.length ? topSun.map((item, i) => (
                         <button 
                             key={i} 
-                            onClick={() => onCityClick(item.name, 'sunday')}
+                            onClick={() => overrideSundayClick ? overrideSundayClick(item.name) : onCityClick(item.name, 'sunday')}
                             className="shrink-0 flex items-center px-3 py-1.5 rounded-lg border active:scale-95 transition-all touch-manipulation shadow-sm hover:shadow-md"
                             style={{ backgroundColor: '#edebe5', borderColor: '#edebe5', color: '#000000' }}
                             onMouseEnter={(e) => {

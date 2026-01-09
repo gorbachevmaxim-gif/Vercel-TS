@@ -105,7 +105,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', initia
 const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
 
   useEffect(() => {
-    if (navigator.share) {
+    if ('share' in navigator && 'canShare' in navigator) {
         const testFile = new File([], 'test.gpx', {type: 'application/gpx+xml'});
         if (navigator.canShare({ files: [testFile] })) {
             setCanShare(true);
