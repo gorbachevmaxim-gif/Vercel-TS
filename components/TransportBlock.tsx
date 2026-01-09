@@ -119,6 +119,12 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
           provider: 'yandex',
           yandexId: 's9601720' 
       };
+      if (city === 'Павловский Посад') return {
+          apiName: 'Павловский Посад',
+          displayName: 'Павловский Посад',
+          provider: 'yandex',
+          yandexId: 's9601872'
+      };
 
       // 3. Try to find exact station by coordinates
       const station = findNearestStation(coords);
