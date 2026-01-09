@@ -95,7 +95,7 @@ const App: React.FC = () => {
         </div>
       )}
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-10 px-4 py-3 shadow-sm">
+      <div className="bg-white sticky top-0 z-10 px-4 py-3 header-shadow">
         <h1 
             onClick={() => setSelectedCity(null)}
             className="text-lg font-bold cursor-pointer text-center text-[rgb(64,72,35)]"
@@ -126,8 +126,8 @@ const App: React.FC = () => {
                 />
                 
                 {/* City Picker */}
-                <div className="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
-                   <h3 className="sticky-header text-lg font-bold text-slate-800 border-b pb-2">Детальный прогноз</h3>
+                <div className="rounded-2xl bg-white p-5">
+                   <h3 className="sticky-header text-lg font-bold text-slate-800 border-b border-[#edebe5] pb-2">Детальный прогноз</h3>
                    <div className="pt-4">
                        {data.length > 0 ? (
                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -163,7 +163,7 @@ const App: React.FC = () => {
       {/* 
         @software{Zippenfenfenig_Open-Meteo,
           author = {Zippenfenig, Patrick},
-          doi = {10.5281/zenodo.7970649},
+          doi = {H10.5281/zenodo.7970649},
           licence = {CC-BY-4.0},
           title = {Open-Meteo.com Weather API},
           year = {2023},

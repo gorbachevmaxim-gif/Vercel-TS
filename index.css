@@ -9,7 +9,15 @@
 .sticky-header {
   position: -webkit-sticky;
   position: sticky;
-  top: 70px;
+  top: 68px;
   background-color: white;
   z-index: 5;
+}
+
+.header-shadow {
+  box-shadow: 0 2px 4px 0 rgba(237, 235, 229, 1);
+}
+
+.hover-border-3px:hover {
+  border-width: 3px;
 }

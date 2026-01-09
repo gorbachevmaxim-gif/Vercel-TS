@@ -31,7 +31,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
     const windRotation = (stats.windDeg + 180) % 360;
 
     return (
-        <div onClick={onClick} className={`rounded-xl border transition-all cursor-pointer bg-white shadow-sm overflow-hidden ${isSelected ? 'border-transparent ring-4 ring-[#d1cdc4] shadow-md' : 'border-transparent hover:ring-4 hover:ring-[#d1cdc4] hover:shadow-md'}`}>
+        <div onClick={onClick} className={`rounded-xl transition-all cursor-pointer bg-white overflow-hidden ${isSelected ? 'ring-4 ring-[#d1cdc4] shadow-md' : 'hover:ring-4 hover:ring-[#d1cdc4] hover:shadow-md'}`}>
             <div className={`px-4 py-3 border-b flex justify-between items-center ${isSelected ? 'bg-[#4f6814] border-[#4f6814]' : 'bg-[#e0dbce] border-slate-100'}`}>
                 <div>
                     <span className={`font-bold text-lg mr-2 ${isSelected ? 'text-[#e0dbce]' : 'text-slate-800'}`}>{stats.dayName}</span>
@@ -167,7 +167,7 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
   useEffect(() => {
     if (!mapContainerRef.current || !cityCoords) return;
     if (!mapInstanceRef.current) {
-        const map = L.map(mapContainerRef.current, {
+        const map = L.map(mapContainerRef.current, { 
             scrollWheelZoom: false,
             dragging: !L.Browser.mobile,
             touchZoom: true,
@@ -198,7 +198,7 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
     const baseName = `routes/${fileCityName}_${windDirCode}`;
     const candidates = [`${baseName}.gpx`, `${baseName}_1.gpx`, `${baseName}_2.gpx`, `${baseName}_3.gpx`];
 
-    Promise.all(candidates.map(url =>
+    Promise.all(candidates.map(url => 
       fetch(`${url}?t=${Date.now()}`).then(r => r.ok ? r.text() : Promise.resolve(null))
     ))
     .then(gpxStrings => {
@@ -356,7 +356,7 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
       <div className="space-y-6">
           <WeatherCard stats={activeWeekend.saturday} isSelected={routeDay === 'saturday'} onClick={() => setRouteDay('saturday')} />
           <WeatherCard stats={activeWeekend.sunday} isSelected={routeDay === 'sunday'} onClick={() => setRouteDay('sunday')} />
-          <div className="bg-white rounded-xl border border-transparent shadow-sm p-4">
+          <div className="bg-white rounded-xl p-4">
             <div className="flex flex-wrap gap-4 justify-between items-end mb-4">
                 <div>
                     <h3 className="text-lg font-bold text-slate-800">

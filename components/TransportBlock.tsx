@@ -123,7 +123,7 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
       // 3. Try to find exact station by coordinates
       const station = findNearestStation(coords);
       if (station) {
-          return {
+          return { 
               apiName: station.name,
               displayName: station.name,
               provider: 'yandex',
@@ -185,7 +185,7 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
   if (!showTo && !showFrom) return null;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+    <div className="bg-white rounded-xl p-5 space-y-4">
       <div className="space-y-3">
         {/* Buttons */}
         <div className={`grid gap-3 ${showTo && showFrom ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
@@ -194,7 +194,7 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
                     href={toUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between px-4 py-3 bg-white border border-slate-200 rounded-lg hover:border-[#404823] hover:shadow-md transition-all group"
+                    className="flex items-center justify-between px-4 py-3 bg-white border border-[#edebe5] rounded-lg transition-all group"
                 >
                     <div className="flex flex-col">
                         <span className="text-xs font-medium uppercase mb-1" style={{ color: '#404823' }}>Туда</span>
@@ -219,7 +219,7 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
                     href={fromUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between px-4 py-3 bg-white border border-slate-200 rounded-lg hover:border-[#404823] hover:shadow-md transition-all group"
+                    className="flex items-center justify-between px-4 py-3 bg-white border border-[#edebe5] rounded-lg transition-all group"
                 >
                     <div className="flex flex-col">
                         <span className="text-xs font-medium uppercase mb-1" style={{ color: '#404823' }}>Обратно</span>
