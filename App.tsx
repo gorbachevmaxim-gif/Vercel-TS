@@ -102,7 +102,7 @@ const App: React.FC = () => {
         >
             ПОДБОР МЕСТА ДЛЯ РАЙДА
         </h1>
-        <p className="text-xs text-center text-[#404823]">поиск идеальной погоды без осадков на сб и вс</p>
+        <p className="text-xs text-center text-[#404823]">поиск идеальной погоды на выходные</p>
       </div>
 
       <div className="max-w-2xl mx-auto p-4 space-y-6">
@@ -112,7 +112,7 @@ const App: React.FC = () => {
                 {/* Summaries */}
                 <SummaryView 
                     data={data} 
-                    title="Ближайшие выходные"
+                    title="Ближайшие сб-вс"
                     dateLabel={w1Label} 
                     onCityClick={(city, day) => handleCitySelect(city, 'w1', day)}
                     overrideSundayClick={(city) => handleCitySelect(city, 'w2', 'sunday')}

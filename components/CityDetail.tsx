@@ -345,7 +345,7 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
         </button>
       </div>
       <div className="flex p-1 border" style={{ borderColor: 'transparent', borderRadius: 20, backgroundColor: '#d1cdc4' }}>
-          <button className={`flex-1 py-2 text-sm font-medium transition-all ${activeTab === 'w1' ? 'bg-[#4f6814] text-white shadow' : 'text-black'}`} style={{ borderRadius: 16 }} onClick={() => setActiveTab('w1')}>Ближайшие выходные</button>
+          <button className={`flex-1 py-2 text-sm font-medium transition-all ${activeTab === 'w1' ? 'bg-[#4f6814] text-white shadow' : 'text-black'}`} style={{ borderRadius: 16 }} onClick={() => setActiveTab('w1')}>Ближайшие сб-вс</button>
           <button className={`flex-1 py-2 text-sm font-medium transition-all ${activeTab === 'w2' ? 'bg-[#4f6814] text-white shadow' : 'text-black'}`} style={{ borderRadius: 16 }} onClick={() => setActiveTab('w2')}>Через неделю</button>
       </div>
       <div className="space-y-6">
