@@ -1,4 +1,5 @@
 import * as React from 'react';
+import YandexIcon from './YandexIcon';
 
 // Database of specific stations to improve routing accuracy
 // ID is optional if name is unique enough for Yandex
@@ -11,15 +12,15 @@ const STATIONS = [
   { name: 'Воскресенск', id: 's9600709', lat: 55.316, lon: 38.681 },
   { name: 'Истра', id: 's9601053', lat: 55.914, lon: 36.857 },
   { name: 'Новоиерусалимская', id: 's9600742', lat: 55.925, lon: 36.840 },
-  { name: 'Завидово', id: 's9603009', lat: 56.525, lon: 36.527 },
+  { name: 'Завидово', id: 's9602593', lat: 56.525, lon: 36.527 },
   { name: 'Серпухов', id: 's9600693', lat: 54.931, lon: 37.452 },
-  { name: 'Звенигород', id: 's9601243', lat: 55.719, lon: 36.883 },
+  { name: 'Звенигород', id: 's9601368', lat: 55.719, lon: 36.883 },
   { name: 'Можайск', id: 's9601678', lat: 55.495, lon: 36.035 },
   { name: 'Дмитров', id: 's9601815', lat: 56.345, lon: 37.514 },
   { name: 'Яхрома', id: 's9601247', lat: 56.287, lon: 37.489 },
   { name: 'Турист', id: 's9601874', lat: 56.242, lon: 37.498 },
-  { name: 'Зеленоград-Крюково', id: 's9600692', lat: 55.980, lon: 37.172 },
-  { name: 'Подсолнечная', id: 's9600720', lat: 56.182, lon: 36.974 },
+  { name: 'Зеленоград-Крюково', id: 's9600212', lat: 55.980, lon: 37.172 },
+  { name: 'Подсолнечная', id: 's9603468', lat: 56.182, lon: 36.974 },
   { name: 'Александров-1', id: 's9601440', lat: 56.394, lon: 38.729 },
   { name: 'Сергиев Посад', id: 's9600704', lat: 56.302, lon: 38.134 },
 ];
@@ -206,7 +207,7 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
                         <span className="text-xs font-medium uppercase mb-1" style={{ color: '#404823' }}>Туда</span>
                         <span className="font-bold text-slate-800 group-hover:text-[#4f6814] transition-colors">Москва → {startConfig.displayName}</span>
                     </div>
-                    <svg width="24" height="24" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.848.807a12 12 0 1 1-12 12 12 12 0 0 1 12-12Z" fill="#FC0"></path><path d="m14.998 18.275-1.326 1.17-2.99 2.834h4.902l5.746-5.744-5.728-5.728H10.7l.056.052 1.256 1.11 2.992 2.838H1.018c.203 1.208.59 2.378 1.15 3.468h12.83Z" fill="url(#serviceLogo)"></path><g filter="url(#serviceLogoFilter)"><path d="M10.1 14.807h4.904l-3-2.834-1.256-1.11-.07-.06h14a11.98 11.98 0 0 0-1.152-3.47H10.7l1.322-1.19 2.964-2.8h-4.902L4.356 9.07l5.744 5.738Z" fill="#fff"></path></g><defs><linearGradient id="serviceLogo" x1="11.174" y1="22.279" x2="11.174" y2="10.807" gradientUnits="userSpaceOnUse"><stop stop-color="#FC3F1D"></stop><stop offset="1" stop-color="#FF2700"></stop></linearGradient><filter id="serviceLogoFilter" x="3.727" y="2.923" width="21.162" height="12.304" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feColorMatrix in="SourceAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"></feColorMatrix><feOffset dx="-.21"></feOffset><feGaussianBlur stdDeviation=".21"></feGaussianBlur><feColorMatrix values="0 0 0 0 0.0509804 0 0 0 0 0.137255 0 0 0 0 0.262745 0 0 0 0.05 0"></feColorMatrix><feBlend in2="BackgroundImageFix" result="effect1_dropShadow_15_8407"></feBlend><feBlend in="SourceGraphic" in2="effect1_dropShadow_15_8407" result="shape"></feBlend></filter></defs></svg>
+                    <YandexIcon idSuffix="to" />
                 </a>
             )}
 
@@ -221,7 +222,7 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
                         <span className="text-xs font-medium uppercase mb-1" style={{ color: '#404823' }}>Обратно</span>
                         <span className="font-bold text-slate-800 group-hover:text-[#4f6814] transition-colors">{endConfig.displayName} → Москва</span>
                     </div>
-                    <svg width="24" height="24" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.848.807a12 12 0 1 1-12 12 12 12 0 0 1 12-12Z" fill="#FC0"></path><path d="m14.998 18.275-1.326 1.17-2.99 2.834h4.902l5.746-5.744-5.728-5.728H10.7l.056.052 1.256 1.11 2.992 2.838H1.018c.203 1.208.59 2.378 1.15 3.468h12.83Z" fill="url(#serviceLogo)"></path><g filter="url(#serviceLogoFilter)"><path d="M10.1 14.807h4.904l-3-2.834-1.256-1.11-.07-.06h14a11.98 11.98 0 0 0-1.152-3.47H10.7l1.322-1.19 2.964-2.8h-4.902L4.356 9.07l5.744 5.738Z" fill="#fff"></path></g><defs><linearGradient id="serviceLogo" x1="11.174" y1="22.279" x2="11.174" y2="10.807" gradientUnits="userSpaceOnUse"><stop stop-color="#FC3F1D"></stop><stop offset="1" stop-color="#FF2700"></stop></linearGradient><filter id="serviceLogoFilter" x="3.727" y="2.923" width="21.162" height="12.304" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feColorMatrix in="SourceAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"></feColorMatrix><feOffset dx="-.21"></feOffset><feGaussianBlur stdDeviation=".21"></feGaussianBlur><feColorMatrix values="0 0 0 0 0.0509804 0 0 0 0 0.137255 0 0 0 0 0.262745 0 0 0 0.05 0"></feColorMatrix><feBlend in2="BackgroundImageFix" result="effect1_dropShadow_15_8407"></feBlend><feBlend in="SourceGraphic" in2="effect1_dropShadow_15_8407" result="shape"></feBlend></filter></defs></svg>
+                    <YandexIcon idSuffix="from" />
                 </a>
             )}
         </div>
