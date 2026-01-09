@@ -12,17 +12,17 @@ const STATIONS = [
   { name: 'Воскресенск', id: 's9600709', lat: 55.316, lon: 38.681 },
   { name: 'Истра', id: 's9601053', lat: 55.914, lon: 36.857 },
   { name: 'Новоиерусалимская', id: 's9600742', lat: 55.925, lon: 36.840 },
-  { name: 'Завидово', id: 's9602593', lat: 56.525, lon: 36.527 },
-  { name: 'Серпухов', id: 's9600693', lat: 54.931, lon: 37.452 },
+  { name: 'Завидово', id: '9602593', lat: 56.525, lon: 36.527 },
+  { name: 'Серпухов', id: 's9600830', lat: 54.931, lon: 37.452 },
   { name: 'Звенигород', id: 's9601368', lat: 55.719, lon: 36.883 },
   { name: 'Можайск', id: 's9601006', lat: 55.495, lon: 36.035 },
   { name: 'Дмитров', id: 's9601815', lat: 56.345, lon: 37.514 },
-  { name: 'Яхрома', id: 's9601247', lat: 56.287, lon: 37.489 },
+  { name: 'Яхрома', id: 's9737523', lat: 56.287, lon: 37.489 },
   { name: 'Турист', id: 's9601874', lat: 56.242, lon: 37.498 },
   { name: 'Зеленоград-Крюково', id: 's9600212', lat: 55.980, lon: 37.172 },
   { name: 'Подсолнечная', id: 's9603468', lat: 56.182, lon: 36.974 },
-  { name: 'Александров-1', id: 's9601440', lat: 56.394, lon: 38.729 },
-  { name: 'Сергиев Посад', id: 's9600704', lat: 56.302, lon: 38.134 },
+  { name: 'Александров-1', id: 's9601547', lat: 56.394, lon: 38.729 },
+  { name: 'Сергиев Посад', id: 's9601389', lat: 56.302, lon: 38.134 },
 ];
 
 interface TransportBlockProps {
@@ -126,12 +126,19 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
           provider: 'yandex',
           yandexId: 's9601872'
       };
-           if (city === 'Завидово') return {
+      if (city === 'Завидово') return {
           apiName: 'Новозавидовский',
           displayName: 'Новозавидовский',
           provider: 'yandex',
           yandexId: 'c22478'
       };
+      if (city === 'Жуковский') return {
+          apiName: 'Отдых',
+          displayName: 'Отдых',
+          provider: 'yandex',
+          yandexId: 'c20571'
+      };
+
 
       // 3. Try to find exact station by coordinates
       const station = findNearestStation(coords);
