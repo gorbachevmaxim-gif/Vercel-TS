@@ -158,6 +158,20 @@ const App: React.FC = () => {
             )
         )}
       </div>
+      {/* 
+        @software{Zippenfenig_Open-Meteo,
+          author = {Zippenfenig, Patrick},
+          doi = {10.5281/zenodo.7970649},
+          licence = {CC-BY-4.0},
+          title = {Open-Meteo.com Weather API},
+          year = {2023},
+          copyright = {Creative Commons Attribution 4.0 International},
+          url = {https://open-meteo.com/}
+        }
+      */}
+      <div className="text-center mt-4">
+        <a href="https://open-meteo.com/" className="text-xs text-slate-500 hover:text-slate-700">Weather data by Open-Meteo.com</a>
+      </div>
     </div>
   );
 };
