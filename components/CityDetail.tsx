@@ -32,7 +32,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
 
     return (
         <div onClick={onClick} className={`rounded-xl transition-all cursor-pointer bg-white overflow-hidden ${isSelected ? "ring-4 ring-[#d1cdc4] shadow-md" : "hover:ring-4 hover:ring-[#d1cdc4] hover:shadow-md"}`}>
-            <div className={`px-4 py-3 border-b flex justify-between items-center ${isSelected ? "bg-[#4f6814] border-[#4f6814]" : "bg-[#e0dbce] border-slate-100"}`}>
+            <div className={`px-4 py-3 border-b flex justify-between items-center ${isSelected ? "bg-[#4f6814] border-[#4f6814]" : "bg-[#e0dbce] border-[#e0dbce]"}`}>
                 <div>
                     <span className={`font-bold text-lg mr-2 ${isSelected ? "text-[#e0dbce]" : "text-slate-800"}`}>{stats.dayName}</span>
                     <span className="text-sm" style={{ color: isSelected ? "#e0dbce" : "#404823" }}>{stats.dateObj.toLocaleDateString("ru-RU", { day: "numeric", month: "long" })}</span>
