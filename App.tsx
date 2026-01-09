@@ -64,6 +64,7 @@ const App: React.FC = () => {
       } catch (err: any) {
         console.error("Error fetching data:", err);
         setError(err.message || 'An unknown error occurred while fetching data.');
+        setShowLoading(false);
       }
     };
     fetchDataAndHandleErrors();
