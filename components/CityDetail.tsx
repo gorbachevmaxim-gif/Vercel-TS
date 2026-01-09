@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { CityAnalysisResult, WeatherDayStats } from '../types';
-import { CITIES, CITY_FILENAMES, FLIGHT_CITIES } from '../constants';
-import { getCardinal } from '../services/weatherService';
-import { parseGpx, getDistanceFromLatLonInKm, getBearing, RouteData } from '../services/gpxUtils';
-import TransportBlock from './TransportBlock';
-import * as L from 'leaflet';
+import React, { useState, useEffect, useRef } from "react";
+import { CityAnalysisResult, WeatherDayStats } from "../types";
+import { CITIES, CITY_FILENAMES, FLIGHT_CITIES } from "../constants";
+import { getCardinal } from "../services/weatherService";
+import { parseGpx, getDistanceFromLatLonInKm, getBearing, RouteData } from "../services/gpxUtils";
+import TransportBlock from "./TransportBlock";
+import * as L from "leaflet";
 
 interface CityDetailProps {
   data: CityAnalysisResult;
-  initialTab?: 'w1' | 'w2';
-  initialDay?: 'saturday' | 'sunday'; // NEW PROP
+  initialTab?: "w1" | "w2";
+  initialDay?: "saturday" | "sunday"; // NEW PROP
   onClose: () => void;
 }
 
@@ -24,67 +24,67 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
 
     // Logic: Black if isDry (displayed as 0mm) OR precipSum < 0.5mm. Orange (#ee6b17) otherwise.
     // This fixes the issue where night rain causes precipSum > 0.5 (Orange) but isDry=true displays "0 mm".
-    const precipColor = (stats.isDry || stats.precipSum < 0.5) ? 'text-slate-900' : 'text-[#ee6b17]';
+    const precipColor = (stats.isDry || stats.precipSum < 0.5) ? "text-slate-900" : "text-[#ee6b17]";
 
-    const minTemp = parseInt(stats.tempRange.split('..')[0]);
+    const minTemp = parseInt(stats.tempRange.split("..")[0]);
     const isTooCold = stats.clothingHints.length === 0 && minTemp < 5;
     const windRotation = (stats.windDeg + 180) % 360;
 
     return (
-        <div onClick={onClick} className={`rounded-xl transition-all cursor-pointer bg-white overflow-hidden ${isSelected ? 'ring-4 ring-[#d1cdc4] shadow-md' : 'hover:ring-4 hover:ring-[#d1cdc4] hover:shadow-md'}`}>
-            <div className={`px-4 py-3 border-b flex justify-between items-center ${isSelected ? 'bg-[#4f6814] border-[#4f6814]' : 'bg-[#e0dbce] border-slate-100'}`}>
+        <div onClick={onClick} className={`rounded-xl transition-all cursor-pointer bg-white overflow-hidden ${isSelected ? "ring-4 ring-[#d1cdc4] shadow-md" : "hover:ring-4 hover:ring-[#d1cdc4] hover:shadow-md"}`}>
+            <div className={`px-4 py-3 border-b flex justify-between items-center ${isSelected ? "bg-[#4f6814] border-[#4f6814]" : "bg-[#e0dbce] border-slate-100"}`}>
                 <div>
-                    <span className={`font-bold text-lg mr-2 ${isSelected ? 'text-[#e0dbce]' : 'text-slate-800'}`}>{stats.dayName}</span>
-                    <span className="text-sm" style={{ color: isSelected ? '#e0dbce' : '#404823' }}>{stats.dateObj.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</span>
+                    <span className={`font-bold text-lg mr-2 ${isSelected ? "text-[#e0dbce]" : "text-slate-800"}`}>{stats.dayName}</span>
+                    <span className="text-sm" style={{ color: isSelected ? "#e0dbce" : "#404823" }}>{stats.dateObj.toLocaleDateString("ru-RU", { day: "numeric", month: "long" })}</span>
                 </div>
                 {isSelected && (
-                    <span className="text-xs font-bold bg-white border px-2 py-0.5 rounded-full shadow-sm" style={{ color: '#4f6814', borderColor: 'transparent' }}>
+                    <span className="text-xs font-bold bg-white border px-2 py-0.5 rounded-full shadow-sm" style={{ color: "#4f6814", borderColor: "transparent" }}>
                         Выбран
                     </span>
                 )}
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x" style={{ borderColor: '#d1cdc4' }}>
+            <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x" style={{ borderColor: "#d1cdc4" }}>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#000000' }}>Температура</span>
+                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#000000" }}>Температура</span>
                     <span className="text-lg font-bold text-slate-900">{stats.tempRange}°</span>
-                    <span className="text-xs" style={{ color: '#404823' }}>Ощущ: {stats.feelsRange}°</span>
+                    <span className="text-xs" style={{ color: "#404823" }}>Ощущ: {stats.feelsRange}°</span>
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#000000' }}>Ветер</span>
+                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#000000" }}>Ветер</span>
                     <span className="text-lg font-bold text-slate-900">{stats.windRange} <span className="text-sm font-normal">км/ч</span></span>
-                    <div className="flex items-center justify-center mt-1 gap-1.5" style={{ color: '#404823' }}>
+                    <div className="flex items-center justify-center mt-1 gap-1.5" style={{ color: "#404823" }}>
                         <span className="text-xs font-medium">{stats.windDir}</span>
                         <svg style={{ transform: `rotate(${windRotation}deg)` }} className="transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
                         <span className="text-xs">Порывы {stats.windGusts}</span>
                     </div>
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#000000' }}>Осадки</span>
+                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#000000" }}>Осадки</span>
                     <span className={`text-lg font-bold ${precipColor}`}> {/* CORRECTED: from class to className */}
-                        {stats.isDry ? '0 мм' : `${stats.precipSum.toFixed(1)} мм`}
+                        {stats.isDry ? "0 мм" : `${stats.precipSum.toFixed(1)} мм`}
                     </span>
-                    <span className="text-xs" style={{ color: '#404823' }}>{stats.isDry ? 'Без осадков' : (stats.rainHours || 'Весь день')}</span>
+                    <span className="text-xs" style={{ color: "#404823" }}>{stats.isDry ? "Без осадков" : (stats.rainHours || "Весь день")}</span>
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#000000' }}>Солнце</span>
+                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#000000" }}>Солнце</span>
                     <span className="text-lg font-bold text-slate-900">
-                        {stats.sunStr.includes('ч') ? (
+                        {stats.sunStr.includes("ч") ? (
                             <>
-                                {stats.sunStr.split(' ')[0]} <span className="text-sm font-normal">ч</span> {stats.sunStr.split(' ')[2]} <span className="text-sm font-normal">мин</span>
+                                {stats.sunStr.split(" ")[0]} <span className="text-sm font-normal">ч</span> {stats.sunStr.split(" ")[2]} <span className="text-sm font-normal">мин</span>
                             </>
                         ) : (
-                            <>{stats.sunStr.split(' ')[0]} <span className="text-sm font-normal">мин</span></>
+                            <>{stats.sunStr.split(" ")[0]} <span className="text-sm font-normal">мин</span></>
                         )}
                     </span>
-                    <span className="text-xs" style={{ color: '#404823' }}>09:00 - 18:00</span>
+                    <span className="text-xs" style={{ color: "#404823" }}>09:00 - 18:00</span>
                 </div>
             </div>
             {stats.clothingHints.length > 0 && (
-                <div className="border-t p-4" style={{ backgroundColor: '#f5f3f0' }}>
-                    <div className="text-xs uppercase font-semibold mb-2" style={{ color: '#8b8680' }}>Что надеть</div>
+                <div className="border-t p-4" style={{ backgroundColor: "#f5f3f0" }}>
+                    <div className="text-xs uppercase font-semibold mb-2" style={{ color: "#8b8680" }}>Что надеть</div>
                     <div className="flex flex-wrap gap-2">
                         {stats.clothingHints.map((hint, idx) => (
-                            <span key={idx} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: 'rgb(224, 219, 206)', color: '#404823' }}>{hint}</span>
+                            <span key={idx} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: "rgb(224, 219, 206)", color: "#404823" }}>{hint}</span>
                         ))}
                     </div>
                 </div>
@@ -98,11 +98,11 @@ interface FoundRoute {
   gpxString: string;
 }
 
-const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', initialDay, onClose }) => {
+const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = "w1", initialDay, onClose }) => {
   const [canShare, setCanShare] = useState(false);
-  const [activeTab, setActiveTab] = useState<'w1' | 'w2'>(initialTab);
-  const [routeDay, setRouteDay] = useState<'saturday' | 'sunday' | null>(null);
-  const [routeStatus, setRouteStatus] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<"w1" | "w2">(initialTab);
+  const [routeDay, setRouteDay] = useState<"saturday" | "sunday" | null>(null);
+  const [routeStatus, setRouteStatus] = useState<string>("");
   const [foundRoutes, setFoundRoutes] = useState<FoundRoute[]>([]);
   const [selectedRouteIdx, setSelectedRouteIdx] = useState<number>(0);
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -110,11 +110,11 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', initia
   const polylineRef = useRef<L.Polyline | null>(null);
   const decorativeMarkersRef = useRef<L.Marker[]>([]);
 
-const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
+const activeWeekend = activeTab === "w1" ? data.weekend1 : data.weekend2;
 
   useEffect(() => {
-    if ('share' in navigator && 'canShare' in navigator) {
-        const testFile = new File([], 'test.gpx', {type: 'application/gpx+xml'});
+    if ("share" in navigator && "canShare" in navigator) {
+        const testFile = new File([], "test.gpx", {type: "application/gpx+xml"});
         if (navigator.canShare({ files: [testFile] })) {
             setCanShare(true);
         }
@@ -126,20 +126,20 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
       if (initialDay) {
           setRouteDay(initialDay);
       } else if (activeWeekend.saturday?.isDry) {
-          setRouteDay('saturday');
+          setRouteDay("saturday");
       } else if (activeWeekend.sunday?.isDry) {
-          setRouteDay('sunday');
+          setRouteDay("sunday");
       } else {
-          setRouteDay('saturday'); // Default to 'saturday' if neither is dry and no initialDay
+          setRouteDay("saturday"); // Default to "saturday" if neither is dry and no initialDay
       }
   }, [activeTab, activeWeekend, initialDay]);
 
-  const activeStats = routeDay === 'saturday' ? activeWeekend.saturday : activeWeekend.sunday;
+  const activeStats = routeDay === "saturday" ? activeWeekend.saturday : activeWeekend.sunday;
   const cityCoords = CITIES[data.cityName];
   const currentRouteData = foundRoutes[selectedRouteIdx]?.routeData;
   const isFlightDestination = FLIGHT_CITIES.includes(data.cityName);
 
-  const moscow = CITIES['Москва'];
+  const moscow = CITIES["Москва"];
   const moscowLat = moscow ? moscow.lat : 55.75;
   const moscowLon = moscow ? moscow.lon : 37.61;
 
@@ -181,8 +181,8 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
             touchZoom: true,
             doubleClickZoom: true,
         });
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap'
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: "&copy; OpenStreetMap"
         }).addTo(map);
         mapInstanceRef.current = map;
         setTimeout(() => map.invalidateSize(), 100);
@@ -194,12 +194,12 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
     let isMounted = true;
     if (!activeStats || !cityCoords) return;
     if (isFlightDestination) {
-        setRouteStatus('Авианаправление');
+        setRouteStatus("Авианаправление");
         setFoundRoutes([]);
         return;
     }
     const windDirCode = getCardinal(activeStats.windDeg);
-    setRouteStatus('Поиск...');
+    setRouteStatus("Поиск...");
     setFoundRoutes([]);
     setSelectedRouteIdx(0);
     const fileCityName = CITY_FILENAMES[data.cityName] || data.cityName;
@@ -240,18 +240,18 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
     decorativeMarkersRef.current = [];
 
     if (currentRouteData?.points.length) {
-        const polyline = L.polyline(currentRouteData.points, { color: 'rgb(36, 87, 195)', weight: 5, opacity: 0.9 }).addTo(map);
+        const polyline = L.polyline(currentRouteData.points, { color: "rgb(36, 87, 195)", weight: 5, opacity: 0.9 }).addTo(map);
         polylineRef.current = polyline;
 
         const createIcon = (text: string, bgColor: string) => L.divIcon({
             html: `<div style="background-color: ${bgColor}; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; items-center; justify-content: center; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); line-height: 20px;">${text}</div>`,
-            className: '',
+            className: "",
             iconSize: [24, 24],
             iconAnchor: [12, 12]
         });
 
-        const startMarker = L.marker(currentRouteData.points[0], { icon: createIcon('A', '#4f6814') }).addTo(map);
-        const endMarker = L.marker(currentRouteData.points[currentRouteData.points.length - 1], { icon: createIcon('B', '#ee6b17') }).addTo(map);
+        const startMarker = L.marker(currentRouteData.points[0], { icon: createIcon("A", "#4f6814") }).addTo(map);
+        const endMarker = L.marker(currentRouteData.points[currentRouteData.points.length - 1], { icon: createIcon("B", "#ee6b17") }).addTo(map);
         decorativeMarkersRef.current.push(startMarker, endMarker);
 
 
@@ -259,7 +259,7 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
         if (activeStats?.startTemperature !== undefined) {
             const startTempIcon = L.divIcon({
                 html: `<div style="background-color: #4f6814; color: white; padding: 5px 8px; border-radius: 4px; font-weight: bold; border: 0px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); white-space: nowrap;">${activeStats.startTemperature}°C</div>`,
-                className: '',
+                className: "",
                 iconSize: [50, 0], // Size will be determined by content
                 iconAnchor: [24, -25] // Adjust to position relative to marker
             });
@@ -269,7 +269,7 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
         if (activeStats?.endTemperature !== undefined) {
             const endTempIcon = L.divIcon({
                 html: `<div style="background-color: #ee6b17; color: white; padding: 5px 8px; border-radius: 4px; font-weight: bold; border: 0px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); white-space: nowrap;">${activeStats.endTemperature}°C</div>`,
-                className: '',
+                className: "",
                 iconSize: [50, 0], // Size will be determined by content
                 iconAnchor: [24, 55] // Adjust to position relative to marker
             });
@@ -284,8 +284,8 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
                 map.fitBounds(bounds, { padding: [60, 60], maxZoom: 13, animate: false });
             }
         }, 100);
-    } else if (routeStatus !== 'Поиск...') {
-        // Only focus on the city if a route is not found, and we're not actively searching for one.
+    } else if (routeStatus !== "Поиск...") {
+        // Only focus on the city if a route is not found, and we"re not actively searching for one.
         // This prevents the map from re-centering on the city when switching days.
         map.setView([cityCoords.lat, cityCoords.lon], 11);
     }
@@ -293,8 +293,8 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
 
   let collectionFocusCoords = cityCoords;
   let collectionZoom = 13;
-  if (data.cityName === 'Завидово') { collectionFocusCoords = { lat: 56.592, lon: 36.523 }; }
-  if (data.cityName === 'Истра') { collectionFocusCoords = { lat: 55.8985, lon: 36.9025 }; collectionZoom = 11; }
+  if (data.cityName === "Завидово") { collectionFocusCoords = { lat: 56.592, lon: 36.523 }; }
+  if (data.cityName === "Истра") { collectionFocusCoords = { lat: 55.8985, lon: 36.9025 }; collectionZoom = 11; }
 
   const yandexMapsUrl = collectionFocusCoords
     ? `https://yandex.ru/maps/?bookmarks%5BpublicId%5D=OfCmg0o9&ll=${collectionFocusCoords.lon},${collectionFocusCoords.lat}&mode=bookmarks&z=${collectionZoom}&utm_source=share&utm_campaign=bookmarks`
@@ -306,11 +306,11 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
 
     const fileCityName = CITY_FILENAMES[data.cityName] || data.cityName;
     const windDirCode = getCardinal(activeStats.windDeg);
-    const filename = `${fileCityName}_${windDirCode}${foundRoutes.length > 1 ? `_${selectedRouteIdx + 1}` : ''}.gpx`;
+    const filename = `${fileCityName}_${windDirCode}${foundRoutes.length > 1 ? `_${selectedRouteIdx + 1}` : ""}.gpx`;
 
-    const blob = new Blob([selectedRoute.gpxString], { type: 'application/gpx+xml' });
+    const blob = new Blob([selectedRoute.gpxString], { type: "application/gpx+xml" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
@@ -325,31 +325,31 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
 
     const fileCityName = CITY_FILENAMES[data.cityName] || data.cityName;
     const windDirCode = getCardinal(activeStats.windDeg);
-    const filename = `${fileCityName}_${windDirCode}${foundRoutes.length > 1 ? `_${selectedRouteIdx + 1}` : ''}.gpx`;
+    const filename = `${fileCityName}_${windDirCode}${foundRoutes.length > 1 ? `_${selectedRouteIdx + 1}` : ""}.gpx`;
 
-    const blob = new Blob([selectedRoute.gpxString], { type: 'application/gpx+xml' });
-    const file = new File([blob], filename, { type: 'application/gpx+xml' });
+    const blob = new Blob([selectedRoute.gpxString], { type: "application/gpx+xml" });
+    const file = new File([blob], filename, { type: "application/gpx+xml" });
 
     if (navigator.share && navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({
           files: [file],
-          title: 'GPX Route',
+          title: "GPX Route",
           text: `GPX route for ${data.cityName}`,
         });
       } catch (error) {
-        console.error('Error sharing', error);
+        console.error("Error sharing", error);
       } 
     } else {
-      alert('Web Share API is not supported for files in your browser.');
+      alert("Web Share API is not supported for files in your browser.");
     }
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between sticky top-[68px] bg-[#edebe5] z-10 -mx-4 px-4 py-3 border-b border-white">
         <h2 className="text-2xl font-bold text-slate-800">{data.cityName}</h2>
-        <button onClick={onClose} className="text-sm font-medium hover:text-[#3f5210] flex items-center gap-1" style={{ color: '#4f6814' }}>
+        <button onClick={onClose} className="text-sm font-medium hover:text-[#3f5210] flex items-center gap-1" style={{ color: "#4f6814" }}>
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="19" y1="12" x2="5" y2="12"></line>
             <polyline points="12 19 5 12 12 5"></polyline>
@@ -357,24 +357,24 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
           Назад
         </button>
       </div>
-      <div className="flex p-1 border" style={{ borderColor: 'transparent', borderRadius: 20, backgroundColor: '#d1cdc4' }}>
-          <button className={`flex-1 py-2 text-sm font-medium transition-all ${activeTab === 'w1' ? 'bg-[#4f6814] text-white shadow' : 'text-black'}`} style={{ borderRadius: 16 }} onClick={() => setActiveTab('w1')}>Ближайшие сб-вс</button>
-          <button className={`flex-1 py-2 text-sm font-medium transition-all ${activeTab === 'w2' ? 'bg-[#4f6814] text-white shadow' : 'text-black'}`} style={{ borderRadius: 16 }} onClick={() => setActiveTab('w2')}>Через неделю</button>
+      <div className="flex p-1 border" style={{ borderColor: "transparent", borderRadius: 20, backgroundColor: "#d1cdc4" }}>
+          <button className={`flex-1 py-2 text-sm font-medium transition-all ${activeTab === "w1" ? "bg-[#4f6814] text-white shadow" : "text-black"}`} style={{ borderRadius: 16 }} onClick={() => setActiveTab("w1")}>Ближайшие сб-вс</button>
+          <button className={`flex-1 py-2 text-sm font-medium transition-all ${activeTab === "w2" ? "bg-[#4f6814] text-white shadow" : "text-black"}`} style={{ borderRadius: 16 }} onClick={() => setActiveTab("w2")}>Через неделю</button>
       </div>
       <div className="space-y-6">
-          <WeatherCard stats={activeWeekend.saturday} isSelected={routeDay === 'saturday'} onClick={() => setRouteDay('saturday')} />
-          <WeatherCard stats={activeWeekend.sunday} isSelected={routeDay === 'sunday'} onClick={() => setRouteDay('sunday')} />
+          <WeatherCard stats={activeWeekend.saturday} isSelected={routeDay === "saturday"} onClick={() => setRouteDay("saturday")} />
+          <WeatherCard stats={activeWeekend.sunday} isSelected={routeDay === "sunday"} onClick={() => setRouteDay("sunday")} />
           <div className="bg-white rounded-xl p-4">
             <div className="flex flex-wrap gap-4 justify-between items-end mb-4">
                 <div>
                     <h3 className="text-lg font-bold text-slate-800">
-                        Маршрут{' '}
+                        Маршрут{" "}
                         {activeStats && (
-                          <span className="text-sm" style={{ color: '#404823' }}>
+                          <span className="text-sm" style={{ color: "#404823" }}>
                             на {(() => {
-                              const wd = activeStats.dateObj.toLocaleDateString('ru-RU', { weekday: 'short' });
+                              const wd = activeStats.dateObj.toLocaleDateString("ru-RU", { weekday: "short" });
                               const wdCap = wd.charAt(0).toUpperCase() + wd.slice(1);
-                              const dm = activeStats.dateObj.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+                              const dm = activeStats.dateObj.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
                               return `${wdCap}, ${dm}`;
                             })()}
                           </span>
@@ -384,7 +384,7 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
 
 
                     <div className="flex items-center gap-2 mt-1">
-                        <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: 'rgb(224, 219, 206)', color: '#404823' }}>
+                        <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: "rgb(224, 219, 206)", color: "#404823" }}>
                             <span>Ветер: {activeStats?.windDirFull} ({activeStats?.windRange} км/ч)</span>
                             <svg
                                 style={{ transform: `rotate(${(activeStats?.windDeg || 0) + 180}deg)` }}
@@ -401,20 +401,20 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
                 {currentRouteData && (
                     <div className="flex gap-4 text-right">
                         <div className="flex flex-col items-center justify-center text-center">
-                            <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#000000' }}>ДИСТАНЦИЯ</span>
+                            <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#000000" }}>ДИСТАНЦИЯ</span>
                             <span className="text-lg font-bold text-slate-900">{currentRouteData.distanceKm.toFixed(0)} <span className="text-sm font-normal">км</span></span>
                         </div>
                         <div className="flex flex-col items-center justify-center text-center">
-                            <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#000000' }}>НАБОР</span>
+                            <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#000000" }}>НАБОР</span>
                             <span className="text-lg font-bold text-slate-900">{Math.round(currentRouteData.elevationM)} <span className="text-sm font-normal">м</span></span>
                         </div>
                         <div className="flex flex-col items-center justify-center text-center">
-                                <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#000000' }}>ТЕМП</span>
+                                <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#000000" }}>ТЕМП</span>
                                 <span className="text-lg font-bold text-slate-900">30 <span className="text-sm font-normal">км/ч</span></span>
                         </div>
                         {activeStats?.rideDuration && (
                         <div className="flex flex-col items-center justify-center text-center">
-                                <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#000000' }}>В СЕДЛЕ</span>
+                                <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#000000" }}>В СЕДЛЕ</span>
                                 <span className="text-lg font-bold text-slate-900">
                                     {activeStats.rideDuration}
                                 </span>
@@ -433,7 +433,7 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
                              <button
                                 key={idx}
                                 onClick={(e) => { e.stopPropagation(); setSelectedRouteIdx(idx); }}
-                                className={`h-8 px-3 rounded-lg text-sm font-bold shadow-sm transition-all ${selectedRouteIdx === idx ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
+                                className={`h-8 px-3 rounded-lg text-sm font-bold shadow-sm transition-all ${selectedRouteIdx === idx ? "bg-blue-600 text-white shadow-md" : "bg-white text-slate-600 hover:bg-slate-50"}`}
                              >
                                 #{idx + 1}
                              </button>
