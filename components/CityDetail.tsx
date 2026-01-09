@@ -374,7 +374,7 @@ const activeWeekend = activeTab === "w1" ? data.weekend1 : data.weekend2;
                     <h3 className="text-lg font-bold text-slate-800">
                         Маршрут{" "}
                         {activeStats && (
-                          <span className="text-sm" style={{ color: "#404823" }}>
+                          <span className="text-lg font-bold text-slate-800">
                             на {(() => {
                               const wd = activeStats.dateObj.toLocaleDateString("ru-RU", { weekday: "short" });
                               const wdCap = wd.charAt(0).toUpperCase() + wd.slice(1);
@@ -405,20 +405,20 @@ const activeWeekend = activeTab === "w1" ? data.weekend1 : data.weekend2;
                 {currentRouteData && (
                     <div className="flex gap-4 text-right">
                         <div className="flex flex-col items-center justify-center text-center">
-                            <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#000000" }}>ДИСТАНЦИЯ</span>
+                            <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#404823" }}>ДИСТАНЦИЯ</span>
                             <span className="text-lg font-bold text-slate-900">{currentRouteData.distanceKm.toFixed(0)} <span className="text-sm font-normal">км</span></span>
                         </div>
                         <div className="flex flex-col items-center justify-center text-center">
-                            <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#000000" }}>НАБОР</span>
+                            <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#404823" }}>НАБОР</span>
                             <span className="text-lg font-bold text-slate-900">{Math.round(currentRouteData.elevationM)} <span className="text-sm font-normal">м</span></span>
                         </div>
                         <div className="flex flex-col items-center justify-center text-center">
-                                <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#000000" }}>ТЕМП</span>
+                                <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#404823" }}>ТЕМП</span>
                                 <span className="text-lg font-bold text-slate-900">30 <span className="text-sm font-normal">км/ч</span></span>
                         </div>
                         {activeStats?.rideDuration && (
                         <div className="flex flex-col items-center justify-center text-center">
-                                <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#000000" }}>В СЕДЛЕ</span>
+                                <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#404823" }}>В СЕДЛЕ</span>
                                 <span className="text-lg font-bold text-slate-900">
                                     {activeStats.rideDuration}
                                 </span>
