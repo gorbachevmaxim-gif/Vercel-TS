@@ -126,25 +126,27 @@ const App: React.FC = () => {
                 />
                 
                 {/* City Picker */}
-                <div className="pt-4">
-                   <h3 className="text-lg font-bold text-slate-800 mb-3">Детальный прогноз</h3>
-                   {data.length > 0 ? (
-                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                           {data.map(city => (
-                               <button 
-                                 key={city.cityName}
-                                 onClick={() => handleCitySelect(city.cityName, 'w1', 'saturday')} // Updated call, default to saturday
-                                 className="px-3 py-2 bg-white border rounded-lg text-sm font-medium transition-colors text-left text-black border-[#d1cdc4] hover:border-[#4f6814] hover:bg-[#4a5427] hover:text-white"
-                               >
-                                   {city.cityName}
-                               </button>
-                           ))}
-                       </div>
-                   ) : (
-                       <div className="p-4 text-center italic bg-white rounded-lg border border-slate-200 text-[#404823]">
-                               Не удалось загрузить данные городов. Попробуйте обновить страницу.
-                       </div>
-                   )}
+                <div className="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
+                   <h3 className="sticky-header text-lg font-bold text-slate-800 border-b pb-2">Детальный прогноз</h3>
+                   <div className="pt-4">
+                       {data.length > 0 ? (
+                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                               {data.map(city => (
+                                   <button 
+                                     key={city.cityName}
+                                     onClick={() => handleCitySelect(city.cityName, 'w1', 'saturday')} // Updated call, default to saturday
+                                     className="px-3 py-2 bg-white border rounded-lg text-sm font-medium transition-colors text-left text-black border-[#d1cdc4] hover:border-[#4f6814] hover:bg-[#4a5427] hover:text-white"
+                                   >
+                                       {city.cityName}
+                                   </button>
+                               ))}
+                           </div>
+                       ) : (
+                           <div className="p-4 text-center italic bg-white rounded-lg border border-slate-200 text-[#404823]">
+                                   Не удалось загрузить данные городов. Попробуйте обновить страницу.
+                           </div>
+                       )}
+                   </div>
                 </div>
             </>
         ) : (
@@ -159,7 +161,7 @@ const App: React.FC = () => {
         )}
       </div>
       {/* 
-        @software{Zippenfenig_Open-Meteo,
+        @software{Zippenfenfenig_Open-Meteo,
           author = {Zippenfenig, Patrick},
           doi = {10.5281/zenodo.7970649},
           licence = {CC-BY-4.0},

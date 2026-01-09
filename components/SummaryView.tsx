@@ -74,7 +74,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
 
   return (
     <div className="space-y-6 rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
-      <h3 className="text-lg font-bold text-slate-800 border-b pb-2">
+      <h3 className="sticky-header text-lg font-bold text-slate-800 border-b pb-2">
         {title}, <span className="font-normal text-sm text-[#404823]">{dateLabel}</span>
       </h3>
       
