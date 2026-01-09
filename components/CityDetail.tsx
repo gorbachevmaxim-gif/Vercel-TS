@@ -43,14 +43,14 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
                     </span>
                 )}
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x" style={{ borderColor: "#d1cdc4" }}>
+            <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x" style={{ borderColor: "transparent" }}>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#000000" }}>Температура</span>
+                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#404823" }}>Температура</span>
                     <span className="text-lg font-bold text-slate-900">{stats.tempRange}°</span>
                     <span className="text-xs" style={{ color: "#404823" }}>Ощущ: {stats.feelsRange}°</span>
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#000000" }}>Ветер</span>
+                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#404823" }}>Ветер</span>
                     <span className="text-lg font-bold text-slate-900">{stats.windRange} <span className="text-sm font-normal">км/ч</span></span>
                     <div className="flex items-center justify-center mt-1 gap-1.5" style={{ color: "#404823" }}>
                         <span className="text-xs font-medium">{stats.windDir}</span>
@@ -59,14 +59,14 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
                     </div>
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#000000" }}>Осадки</span>
+                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#404823" }}>Осадки</span>
                     <span className={`text-lg font-bold ${precipColor}`}> {/* CORRECTED: from class to className */}
                         {stats.isDry ? "0 мм" : `${stats.precipSum.toFixed(1)} мм`}
                     </span>
                     <span className="text-xs" style={{ color: "#404823" }}>{stats.isDry ? "Без осадков" : (stats.rainHours || "Весь день")}</span>
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#000000" }}>Солнце</span>
+                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#404823" }}>Солнце</span>
                     <span className="text-lg font-bold text-slate-900">
                         {stats.sunStr.includes("ч") ? (
                             <>
