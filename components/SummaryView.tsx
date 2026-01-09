@@ -107,7 +107,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
         </div>
 
         <div className="rounded-lg p-3 bg-[#edebe5]">
-          <div className="text-xs font-semibold uppercase tracking-wider mb-2 text-black">Здесь без осадков только в субботу</div>
+          <div className="text-xs font-semibold uppercase tracking-wider mb-2 text-black">Здесь без осадков только в&nbsp;субботу</div>
           {onlySat.length > 0 ? (
              <div className="flex flex-wrap gap-2">
                  {onlySat.map(c => (
@@ -133,7 +133,7 @@ const SummaryView: React.FC<SummaryViewProps> = ({ data, title, dateLabel, isSec
         </div>
 
         <div className="rounded-lg p-3 bg-[#edebe5]">
-          <div className="text-xs font-semibold uppercase tracking-wider mb-2 text-black">Здесь без осадков только в воскресенье</div>
+          <div className="text-xs font-semibold uppercase tracking-wider mb-2 text-black">Здесь без осадков только в&nbsp;воскресенье</div>
           {onlySun.length > 0 ? (
              <div className="flex flex-wrap gap-2">
                  {onlySun.map(c => (
