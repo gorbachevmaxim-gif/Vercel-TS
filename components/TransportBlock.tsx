@@ -196,7 +196,7 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
                     rel="noopener noreferrer"
                     className="flex items-center justify-between px-4 py-3 bg-white border border-2 border-[#edebe5] rounded-lg hover-border-3px hover:border-[#4f6814] transition-all group"
                 >
-                    <div className="flex flex-col">
+                    <div className="flex flex-col pr-6">
                         <span className="text-xs font-medium uppercase mb-1" style={{ color: '#404823' }}>Туда</span>
                         <span className="font-bold text-slate-800 group-hover:text-[#4f6814] transition-colors">Москва → {startConfig.displayName}</span>
                     </div>
@@ -211,7 +211,7 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
                     rel="noopener noreferrer"
                     className="flex items-center justify-between px-4 py-3 bg-white border border-2 border-[#edebe5] rounded-lg hover-border-3px hover:border-[#4f6814] transition-all group"
                 >
-                    <div className="flex flex-col">
+                    <div className="flex flex-col pr-6">
                         <span className="text-xs font-medium uppercase mb-1" style={{ color: '#404823' }}>Обратно</span>
                         <span className="font-bold text-slate-800 group-hover:text-[#4f6814] transition-colors">{endConfig.displayName} → Москва</span>
                     </div>
