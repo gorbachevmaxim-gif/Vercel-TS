@@ -6,7 +6,7 @@ interface LogoProps {
 }
 
 const GastrodinamikaLogo: React.FC<LogoProps> = ({ percent = 0, className = "" }) => {
-  const startAngle = 288;
+  const startAngle = 286;
 
   // Inline SVG markup from gastrodinamika_ronde_novo.svg
   const svgMarkup = `

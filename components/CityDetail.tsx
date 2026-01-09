@@ -45,13 +45,13 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x" style={{ borderColor: '#d1cdc4' }}>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#8b8680' }}>Температура</span>
-                    <span className="text-lg font-bold text-slate-700">{stats.tempRange}°</span>
+                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#000000' }}>Температура</span>
+                    <span className="text-lg font-bold text-slate-900">{stats.tempRange}°</span>
                     <span className="text-xs" style={{ color: '#404823' }}>Ощущ: {stats.feelsRange}°</span>
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#8b8680' }}>Ветер</span>
-                    <span className="text-lg font-bold text-slate-700">{stats.windRange} <span className="text-sm font-normal">км/ч</span></span>
+                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#000000' }}>Ветер</span>
+                    <span className="text-lg font-bold text-slate-900">{stats.windRange} <span className="text-sm font-normal">км/ч</span></span>
                     <div className="flex items-center justify-center mt-1 gap-1.5" style={{ color: '#404823' }}>
                         <span className="text-xs font-medium">{stats.windDir}</span>
                         <svg style={{ transform: `rotate(${windRotation}deg)` }} className="transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
@@ -59,14 +59,14 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
                     </div>
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#8b8680' }}>Осадки</span>
+                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#000000' }}>Осадки</span>
                     <span className={`text-lg font-bold ${precipColor}`}> {/* CORRECTED: from class to className */}
                         {stats.isDry ? '0 мм' : `${stats.precipSum.toFixed(1)} мм`}
                     </span>
                     <span className="text-xs" style={{ color: '#404823' }}>{stats.isDry ? 'Без осадков' : (stats.rainHours || 'Весь день')}</span>
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#8b8680' }}>Солнце</span>
+                    <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#000000' }}>Солнце</span>
                     <span className="text-lg font-bold text-slate-900">
                         {stats.sunStr.includes('ч') ? (
                             <>
@@ -401,21 +401,21 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
                 {currentRouteData && (
                     <div className="flex gap-4 text-right">
                         <div className="flex flex-col items-center justify-center text-center">
-                            <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>ДИСТАНЦИЯ</span>
-                            <span className="text-lg font-bold text-slate-700">{currentRouteData.distanceKm.toFixed(0)} <span className="text-sm font-normal">км</span></span>
+                            <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#000000' }}>ДИСТАНЦИЯ</span>
+                            <span className="text-lg font-bold text-slate-900">{currentRouteData.distanceKm.toFixed(0)} <span className="text-sm font-normal">км</span></span>
                         </div>
                         <div className="flex flex-col items-center justify-center text-center">
-                            <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>НАБОР</span>
-                            <span className="text-lg font-bold text-slate-700">{Math.round(currentRouteData.elevationM)} <span className="text-sm font-normal">м</span></span>
+                            <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#000000' }}>НАБОР</span>
+                            <span className="text-lg font-bold text-slate-900">{Math.round(currentRouteData.elevationM)} <span className="text-sm font-normal">м</span></span>
                         </div>
                         <div className="flex flex-col items-center justify-center text-center">
-                                <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>ТЕМП</span>
-                                <span className="text-lg font-bold text-slate-700">30 <span className="text-sm font-normal">км/ч</span></span>
+                                <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#000000' }}>ТЕМП</span>
+                                <span className="text-lg font-bold text-slate-900">30 <span className="text-sm font-normal">км/ч</span></span>
                         </div>
                         {activeStats?.rideDuration && (
                         <div className="flex flex-col items-center justify-center text-center">
-                                <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#b5b0a6' }}>В СЕДЛЕ</span>
-                                <span className="text-lg font-bold text-slate-700">
+                                <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#000000' }}>В СЕДЛЕ</span>
+                                <span className="text-lg font-bold text-slate-900">
                                     {activeStats.rideDuration}
                                 </span>
                         </div>
