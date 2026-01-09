@@ -169,7 +169,7 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
     if (!mapInstanceRef.current) {
         const map = L.map(mapContainerRef.current, {
             scrollWheelZoom: false,
-            dragging: false,
+            dragging: !L.Browser.mobile,
             touchZoom: true,
             doubleClickZoom: false,
         });
