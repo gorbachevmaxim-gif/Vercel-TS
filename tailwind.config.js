@@ -7,7 +7,11 @@ export default {
     "./services/**/*.{js,ts,jsx,tsx}"
   ],
   theme: {
-    extend: {},
+    extend: {
+      borderColor: {
+        DEFAULT: "#edebe5"
+      }
+    },
   },
   plugins: [],
 }
