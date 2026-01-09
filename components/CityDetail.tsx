@@ -91,6 +91,7 @@ interface FoundRoute {
 }
 
 const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', initialDay, onClose }) => {
+  const [canShare, setCanShare] = useState(false);
   const [activeTab, setActiveTab] = useState<'w1' | 'w2'>(initialTab);
   const [routeDay, setRouteDay] = useState<'saturday' | 'sunday' | null>(null);
   const [routeStatus, setRouteStatus] = useState<string>('');
@@ -101,7 +102,16 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', initia
   const polylineRef = useRef<L.Polyline | null>(null);
   const decorativeMarkersRef = useRef<L.Marker[]>([]);
 
-  const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
+const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
+
+  useEffect(() => {
+    if (navigator.share) {
+        const testFile = new File([], 'test.gpx', {type: 'application/gpx+xml'});
+        if (navigator.canShare({ files: [testFile] })) {
+            setCanShare(true);
+        }
+    }
+  }, []);
 
   useEffect(() => {
       // Prioritize initialDay if provided
@@ -296,6 +306,32 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', initia
     URL.revokeObjectURL(url);
   };
 
+  const handleShareGpx = async () => {
+    const selectedRoute = foundRoutes[selectedRouteIdx];
+    if (!selectedRoute || !activeStats) return;
+
+    const fileCityName = CITY_FILENAMES[data.cityName] || data.cityName;
+    const windDirCode = getCardinal(activeStats.windDeg);
+    const filename = `${fileCityName}_${windDirCode}${foundRoutes.length > 1 ? `_${selectedRouteIdx + 1}` : ''}.gpx`;
+
+    const blob = new Blob([selectedRoute.gpxString], { type: 'application/gpx+xml' });
+    const file = new File([blob], filename, { type: 'application/gpx+xml' });
+
+    if (navigator.share && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: 'GPX Route',
+          text: `GPX route for ${data.cityName}`,
+        });
+      } catch (error) {
+        console.error('Error sharing', error);
+      }
+    } else {
+      alert('Web Share API is not supported for files in your browser.');
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -402,7 +438,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', initia
                 )}
             </div>
             {currentRouteData && (
-              <div className="pt-3">
+              <div className="pt-3 flex gap-2">
                 <button
                   onClick={handleDownloadGpx}
                   className="flex items-center justify-center w-full p-3 bg-[rgb(223,219,207)] text-slate-800 rounded-lg font-bold hover:bg-[rgb(209,205,193)] transition-colors shadow-sm gap-2 text-center"
@@ -414,6 +450,15 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', initia
                   </svg>
                   <span>Скачать GPX</span>
                 </button>
+                {canShare && (
+                  <button
+                    onClick={handleShareGpx}
+                    className="flex items-center justify-center w-full p-3 bg-[rgb(223,219,207)] text-slate-800 rounded-lg font-bold hover:bg-[rgb(209,205,193)] transition-colors shadow-sm gap-2 text-center"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                    <span>Передать GPX</span>
+                  </button>
+                )}
               </div>
             )}
           </div>
