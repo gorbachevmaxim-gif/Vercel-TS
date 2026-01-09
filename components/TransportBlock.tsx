@@ -194,7 +194,7 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
                     href={toUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between px-4 py-3 bg-white border border-[#edebe5] rounded-lg transition-all group"
+                    className="flex items-center justify-between px-4 py-3 bg-white border border-2 border-[#edebe5] rounded-lg hover-border-3px hover:border-[#4f6814] transition-all group"
                 >
                     <div className="flex flex-col">
                         <span className="text-xs font-medium uppercase mb-1" style={{ color: '#404823' }}>Туда</span>
@@ -219,7 +219,7 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
                     href={fromUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between px-4 py-3 bg-white border border-[#edebe5] rounded-lg transition-all group"
+                    className="flex items-center justify-between px-4 py-3 bg-white border border-2 border-[#edebe5] rounded-lg hover-border-3px hover:border-[#4f6814] transition-all group"
                 >
                     <div className="flex flex-col">
                         <span className="text-xs font-medium uppercase mb-1" style={{ color: '#404823' }}>Обратно</span>
