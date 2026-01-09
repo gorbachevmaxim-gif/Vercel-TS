@@ -179,7 +179,7 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
             scrollWheelZoom: false,
             dragging: !L.Browser.mobile,
             touchZoom: true,
-            doubleClickZoom: false,
+            doubleClickZoom: true,
         });
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
