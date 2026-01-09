@@ -438,7 +438,7 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
                 )}
             </div>
             {currentRouteData && (
-              <div className="pt-3 flex gap-2">
+              <div className="pt-3 flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={handleDownloadGpx}
                   className="flex items-center justify-center w-full p-3 bg-[rgb(223,219,207)] text-slate-800 rounded-lg font-bold hover:bg-[rgb(209,205,193)] transition-colors shadow-sm gap-2 text-center"
