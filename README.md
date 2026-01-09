@@ -42,4 +42,17 @@
 - TypeScript
 - Vite
 - Tailwind CSS (через CDN)
-- Open-Meteo API (погодные данные)
+- Open-Meteo API (погодные данные). 
+
+
+## Open Meteo API 
+
+Для каждого города запрашиваются следующие данные из Open Meteo API:
+- `precipitation`: осадки (rain + showers + snow)
+- `temperature_2m`: температура на высоте 2 метров
+- `wind_speed_10m`: скорость ветра на высоте 10 метров
+- `wind_gusts_10m`: порывы ветра на высоте 10 метров
+- `apparent_temperature`: ощущаемая температура
+- `wind_direction_10m`: направление ветра на высоте 10 метров
+- `sunshine_duration`: продолжительность солнечного сияния
+- `precipitation probability`: вероятность осадков
