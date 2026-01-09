@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.open-meteo-link-hover:hover {
+  color: #4f6814;
+}

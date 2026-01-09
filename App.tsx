@@ -170,7 +170,7 @@ const App: React.FC = () => {
         }
       */}
       <div className="text-center mt-4">
-        <a href="https://open-meteo.com/" className="text-xs text-slate-500 hover:text-slate-700">Weather data by Open-Meteo.com</a>
+         <a href="https://open-meteo.com/" className="text-xs open-meteo-link-hover" style={{ color: '#b5b0a6' }}>Weather data by Open-Meteo.com</a>
       </div>
     </div>
   );
