@@ -9,6 +9,7 @@ import * as L from 'leaflet';
 interface CityDetailProps {
   data: CityAnalysisResult;
   initialTab?: 'w1' | 'w2';
+  initialDay?: 'saturday' | 'sunday'; // NEW PROP
   onClose: () => void;
 }
 
@@ -59,7 +60,9 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
                     <span className="text-xs uppercase font-semibold mb-1" style={{ color: '#8b8680' }}>Осадки</span>
-                    <span className={`text-lg font-bold ${precipColor}`}>{stats.isDry ? '0 мм' : `${stats.precipSum.toFixed(1)} мм`}</span>
+                    <span className={`text-lg font-bold ${precipColor}`}> {/* CORRECTED: from class to className */}
+                        {stats.isDry ? '0 мм' : `${stats.precipSum.toFixed(1)} мм`}
+                    </span>
                     <span className="text-xs" style={{ color: '#404823' }}>{stats.isDry ? 'Без осадков' : (stats.rainHours || 'Весь день')}</span>
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
@@ -87,7 +90,7 @@ interface FoundRoute {
   gpxString: string;
 }
 
-const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClose }) => {
+const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', initialDay, onClose }) => {
   const [activeTab, setActiveTab] = useState<'w1' | 'w2'>(initialTab);
   const [routeDay, setRouteDay] = useState<'saturday' | 'sunday' | null>(null);
   const [routeStatus, setRouteStatus] = useState<string>('');
@@ -101,10 +104,17 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = 'w1', onClos
   const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
 
   useEffect(() => {
-      if (activeWeekend.saturday?.isDry) setRouteDay('saturday');
-      else if (activeWeekend.sunday?.isDry) setRouteDay('sunday');
-      else setRouteDay('saturday');
-  }, [activeTab, activeWeekend]);
+      // Prioritize initialDay if provided
+      if (initialDay) {
+          setRouteDay(initialDay);
+      } else if (activeWeekend.saturday?.isDry) {
+          setRouteDay('saturday');
+      } else if (activeWeekend.sunday?.isDry) {
+          setRouteDay('sunday');
+      } else {
+          setRouteDay('saturday'); // Default to 'saturday' if neither is dry and no initialDay
+      }
+  }, [activeTab, activeWeekend, initialDay]);
 
   const activeStats = routeDay === 'saturday' ? activeWeekend.saturday : activeWeekend.sunday;
   const cityCoords = CITIES[data.cityName];

@@ -14,6 +14,7 @@ const App: React.FC = () => {
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [initialTab, setInitialTab] = useState<'w1' | 'w2'>('w1');
+  const [initialDay, setInitialDay] = useState<'saturday' | 'sunday'>('saturday'); // New state for initial day
   
   // Date Logic
   const dates = useMemo(() => getWeekendDates(), []);
@@ -73,9 +74,10 @@ const App: React.FC = () => {
       return data.find(c => c.cityName === selectedCity) || null;
   }, [data, selectedCity]);
 
-  const handleCitySelect = (city: string, tab: 'w1' | 'w2') => {
+  const handleCitySelect = (city: string, tab: 'w1' | 'w2', day: 'saturday' | 'sunday') => { // Updated signature
       setInitialTab(tab);
       setSelectedCity(city);
+      setInitialDay(day); // Set initialDay state
   };
 
     // Handle Main View
@@ -112,14 +114,14 @@ const App: React.FC = () => {
                     data={data} 
                     title="Ближайшие выходные"
                     dateLabel={w1Label} 
-                    onCityClick={(city) => handleCitySelect(city, 'w1')} 
+                    onCityClick={(city, day) => handleCitySelect(city, 'w1', day)} // Updated call
                 />
                 <SummaryView 
                     data={data} 
                     title="Через неделю"
                     dateLabel={w2Label} 
                     isSecondWeekend={true} 
-                    onCityClick={(city) => handleCitySelect(city, 'w2')} 
+                    onCityClick={(city, day) => handleCitySelect(city, 'w2', day)} // Updated call
                 />
                 
                 {/* City Picker */}
@@ -130,7 +132,7 @@ const App: React.FC = () => {
                            {data.map(city => (
                                <button 
                                  key={city.cityName}
-                                 onClick={() => handleCitySelect(city.cityName, 'w1')}
+                                 onClick={() => handleCitySelect(city.cityName, 'w1', 'saturday')} // Updated call, default to saturday
                                  className="px-3 py-2 bg-white border rounded-lg text-sm font-medium transition-colors text-left text-black border-[#d1cdc4] hover:border-[#4f6814] hover:bg-[#4a5427] hover:text-white"
                                >
                                    {city.cityName}
@@ -149,6 +151,7 @@ const App: React.FC = () => {
                 <CityDetail 
                     data={selectedData} 
                     initialTab={initialTab}
+                    initialDay={initialDay} // Pass initialDay to CityDetail
                     onClose={() => setSelectedCity(null)} 
                 />
             )
