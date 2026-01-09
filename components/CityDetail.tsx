@@ -167,7 +167,12 @@ const activeWeekend = activeTab === 'w1' ? data.weekend1 : data.weekend2;
   useEffect(() => {
     if (!mapContainerRef.current || !cityCoords) return;
     if (!mapInstanceRef.current) {
-        const map = L.map(mapContainerRef.current);
+        const map = L.map(mapContainerRef.current, {
+            scrollWheelZoom: false,
+            dragging: false,
+            touchZoom: true,
+            doubleClickZoom: false,
+        });
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
