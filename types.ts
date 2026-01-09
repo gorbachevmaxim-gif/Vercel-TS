@@ -58,3 +58,5 @@ export interface LoadingState {
   current: number;
   status: string;
 }
+
+export type FlightCities = string[];
