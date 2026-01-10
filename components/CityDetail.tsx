@@ -30,6 +30,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick, c
     const windRotation = (stats.windDeg + 180) % 360;
 
     const isMountainCity = MOUNTAIN_CITIES.includes(cityName);
+    const isKemerNoRoute = cityName === "Кемер" && !stats.hasRoute;
 
     return (
         <div onClick={onClick} className={`rounded-xl transition-all cursor-pointer bg-white overflow-hidden ${isSelected ? "ring-4 ring-[#d1cdc4] shadow-md" : "hover:ring-4 hover:ring-[#d1cdc4] hover:shadow-md"}`}>
@@ -49,7 +50,9 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick, c
                     <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#404823" }}>Температура</span>
                     <span className="text-lg font-bold text-slate-900">{stats.tempRange}°</span>
                     <span className="text-xs" style={{ color: "#404823" }}>
-                        {cityName === 'Кемер'
+                        {isKemerNoRoute
+                            ? `На высоте 1000 м: ${stats.temperature900hPa}°`
+                            : cityName === "Кемер"
                             ? `Высота 1000 м: ${stats.startTemperature900hPa}°..${stats.endTemperature900hPa}°`
                             : `Ощущ: ${stats.feelsRange}°`}
                     </span>
