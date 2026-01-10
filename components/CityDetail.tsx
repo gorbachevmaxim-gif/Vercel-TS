@@ -65,7 +65,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
                         {stats.isDry ? "0" : stats.precipSum.toFixed(1)} <span className="text-sm font-normal">мм</span>
                         <span className="text-sm font-normal"> / {stats.precipitationProbability}%</span>
                     </span>
-                    <span className="text-xs" style={{ color: "#404823" }}>{stats.isDry ? "Без осадков" : (stats.rainHours || "Весь день")}</span>
+                    <span className="text-xs" style={{ color: "#404823" }}>{stats.isDry ? `Вероятность ${stats.precipitationProbability}%` : (stats.rainHours || "Весь день")}</span>
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
                     <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#404823" }}>Солнце</span>
