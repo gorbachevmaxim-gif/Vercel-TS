@@ -34,7 +34,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick, c
 
     return (
         <div onClick={onClick} className={`rounded-xl transition-all cursor-pointer bg-white overflow-hidden ${isSelected ? "ring-4 ring-[#d1cdc4] shadow-md" : "hover:ring-4 hover:ring-[#d1cdc4] hover:shadow-md"}`}>
-            <div className={`px-4 py-3 border-b flex justify-between items-center ${isSelected ? "bg-[#4f6814] border-[#4f6814]" : "bg-[#e0dbce] border-[#e0dbce]"}`}>
+            <div className={`px-4 py-3 border-b flex justify-between items-center ${isSelected ? "bg-[#4f6814] border-[#4f6814]" : "bg-[#d1cdc4] border-[#d1cdc4]"}`}>
                 <div>
                     <span className={`font-bold text-lg mr-2 ${isSelected ? "text-[#e0dbce]" : "text-slate-800"}`}>{stats.dayName}</span>
                     <span className="text-sm" style={{ color: isSelected ? "#e0dbce" : "#404823" }}>{stats.dateObj.toLocaleDateString("ru-RU", { day: "numeric", month: "long" })}</span>
@@ -88,7 +88,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick, c
                 </div>
             </div>
             {stats.clothingHints.length > 0 && (
-                <div className="border-t p-4" style={{ backgroundColor: isSelected ? "#f5f3f0" : "#e0dbce" }}>
+                <div className="border-t p-4" style={{ backgroundColor: isSelected ? "#f5f3f0" : "#d1cdc4" }}>
                     <div className="text-xs uppercase font-semibold mb-2" style={{ color: isSelected ? "#8b8680" : "#404823" }}>Что надеть</div>
                     <div className="flex flex-wrap gap-2">
                         {stats.clothingHints.map((hint, idx) => (
