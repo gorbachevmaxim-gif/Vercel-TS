@@ -49,7 +49,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick, c
                     <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#404823" }}>Температура</span>
                     <span className="text-lg font-bold text-slate-900">{stats.tempRange}°</span>
                     <span className="text-xs" style={{ color: "#404823" }}>
-                        {isMountainCity && stats.temperature900hPa !== undefined
+                        {cityName === 'Кемер'
                             ? `На высоте 1000 м: ${stats.temperature900hPa}°`
                             : `Ощущ: ${stats.feelsRange}°`}
                     </span>
