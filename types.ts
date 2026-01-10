@@ -1,4 +1,3 @@
-
 export interface CityCoordinates {
   lat: number;
   lon: number;
@@ -41,6 +40,7 @@ export interface WeatherDayStats {
   rideDuration?: string;
   startTemperature?: number;
   endTemperature?: number;
+  temperature900hPa?: number;
 }
 
 export interface CityAnalysisResult {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { CityAnalysisResult, WeatherDayStats } from "../types";
 import { CITIES, CITY_FILENAMES, FLIGHT_CITIES } from "../constants";
-import { getCardinal } from "../services/weatherService";
+import { getCardinal, MOUNTAIN_CITIES } from "../services/weatherService";
 import { parseGpx, getDistanceFromLatLonInKm, getBearing, RouteData } from "../services/gpxUtils";
 import TransportBlock from "./TransportBlock";
 import * as L from "leaflet";
@@ -9,7 +9,7 @@ import * as L from "leaflet";
 interface CityDetailProps {
   data: CityAnalysisResult;
   initialTab?: "w1" | "w2";
-  initialDay?: "saturday" | "sunday"; // NEW PROP
+  initialDay?: "saturday" | "sunday";
   onClose: () => void;
 }
 
@@ -17,18 +17,19 @@ interface WeatherCardProps {
     stats: WeatherDayStats | null;
     isSelected?: boolean;
     onClick?: () => void;
+    cityName: string;
 }
 
-const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick }) => {
+const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick, cityName }) => {
     if (!stats) return <div className="p-4 text-center text-slate-400">Нет данных</div>;
 
-    // Logic: Black if isDry (displayed as 0mm) OR precipSum < 0.5mm. Orange (#ee6b17) otherwise.
-    // This fixes the issue where night rain causes precipSum > 0.5 (Orange) but isDry=true displays "0 mm".
     const precipColor = (stats.isDry || stats.precipSum < 0.5) ? "text-slate-900" : "text-[#ee6b17]";
 
-    const minTemp = parseInt(stats.tempRange.split("..")[0]);
+    const minTemp = parseInt(stats.tempRange.split("..",)[0]);
     const isTooCold = stats.clothingHints.length === 0 && minTemp < 5;
     const windRotation = (stats.windDeg + 180) % 360;
+
+    const isMountainCity = MOUNTAIN_CITIES.includes(cityName);
 
     return (
         <div onClick={onClick} className={`rounded-xl transition-all cursor-pointer bg-white overflow-hidden ${isSelected ? "ring-4 ring-[#d1cdc4] shadow-md" : "hover:ring-4 hover:ring-[#d1cdc4] hover:shadow-md"}`}>
@@ -47,7 +48,11 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
                 <div className="p-3 flex flex-col items-center justify-center text-center">
                     <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#404823" }}>Температура</span>
                     <span className="text-lg font-bold text-slate-900">{stats.tempRange}°</span>
-                    <span className="text-xs" style={{ color: "#404823" }}>Ощущ: {stats.feelsRange}°</span>
+                    <span className="text-xs" style={{ color: "#404823" }}>
+                        {isMountainCity && stats.temperature900hPa !== undefined
+                            ? `На высоте 1000 м: ${stats.temperature900hPa}°`
+                            : `Ощущ: ${stats.feelsRange}°`}
+                    </span>
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
                     <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#404823" }}>Ветер</span>
@@ -122,7 +127,6 @@ const activeWeekend = activeTab === "w1" ? data.weekend1 : data.weekend2;
   }, []);
 
   useEffect(() => {
-      // Prioritize initialDay if provided
       if (initialDay) {
           setRouteDay(initialDay);
       } else if (activeWeekend.saturday?.isDry) {
@@ -130,7 +134,7 @@ const activeWeekend = activeTab === "w1" ? data.weekend1 : data.weekend2;
       } else if (activeWeekend.sunday?.isDry) {
           setRouteDay("sunday");
       } else {
-          setRouteDay("saturday"); // Default to "saturday" if neither is dry and no initialDay
+          setRouteDay("saturday");
       }
   }, [activeTab, activeWeekend, initialDay]);
 
@@ -175,7 +179,7 @@ const activeWeekend = activeTab === "w1" ? data.weekend1 : data.weekend2;
   useEffect(() => {
     if (!mapContainerRef.current || !cityCoords) return;
     if (!mapInstanceRef.current) {
-        const map = L.map(mapContainerRef.current, { 
+        const map = L.map(mapContainerRef.current, {
             scrollWheelZoom: false,
             dragging: !L.Browser.mobile,
             touchZoom: true,
@@ -255,13 +259,12 @@ const activeWeekend = activeTab === "w1" ? data.weekend1 : data.weekend2;
         decorativeMarkersRef.current.push(startMarker, endMarker);
 
 
-        // Add temperature markers
         if (activeStats?.startTemperature !== undefined) {
             const startTempIcon = L.divIcon({
                 html: `<div style="background-color: #4f6814; color: white; padding: 5px 8px; border-radius: 4px; font-weight: bold; border: 0px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); white-space: nowrap;">${activeStats.startTemperature}°C</div>`,
                 className: "",
-                iconSize: [50, 0], // Size will be determined by content
-                iconAnchor: [24, -25] // Adjust to position relative to marker
+                iconSize: [50, 0],
+                iconAnchor: [24, -25]
             });
             const startTempMarker = L.marker(currentRouteData.points[0], { icon: startTempIcon }).addTo(map);
             decorativeMarkersRef.current.push(startTempMarker);
@@ -270,8 +273,8 @@ const activeWeekend = activeTab === "w1" ? data.weekend1 : data.weekend2;
             const endTempIcon = L.divIcon({
                 html: `<div style="background-color: #ee6b17; color: white; padding: 5px 8px; border-radius: 4px; font-weight: bold; border: 0px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); white-space: nowrap;">${activeStats.endTemperature}°C</div>`,
                 className: "",
-                iconSize: [50, 0], // Size will be determined by content
-                iconAnchor: [24, 55] // Adjust to position relative to marker
+                iconSize: [50, 0],
+                iconAnchor: [24, 55]
             });
             const endTempMarker = L.marker(currentRouteData.points[currentRouteData.points.length - 1], { icon: endTempIcon }).addTo(map);
             decorativeMarkersRef.current.push(endTempMarker);
@@ -285,8 +288,6 @@ const activeWeekend = activeTab === "w1" ? data.weekend1 : data.weekend2;
             }
         }, 100);
     } else if (routeStatus !== "Поиск...") {
-        // Only focus on the city if a route is not found, and we"re not actively searching for one.
-        // This prevents the map from re-centering on the city when switching days.
         map.setView([cityCoords.lat, cityCoords.lon], 11);
     }
   }, [activeStats, cityCoords, currentRouteData, routeStatus]);
@@ -366,8 +367,8 @@ const activeWeekend = activeTab === "w1" ? data.weekend1 : data.weekend2;
           <button className={`flex-1 py-2 text-sm font-medium transition-all ${activeTab === "w2" ? "bg-[#4f6814] text-white shadow" : "text-black"}`} style={{ borderRadius: 16 }} onClick={() => setActiveTab("w2")}>Через неделю</button>
       </div>
       <div className="space-y-6">
-          <WeatherCard stats={activeWeekend.saturday} isSelected={routeDay === "saturday"} onClick={() => setRouteDay("saturday")} />
-          <WeatherCard stats={activeWeekend.sunday} isSelected={routeDay === "sunday"} onClick={() => setRouteDay("sunday")} />
+          <WeatherCard stats={activeWeekend.saturday} isSelected={routeDay === "saturday"} onClick={() => setRouteDay("saturday")} cityName={data.cityName} />
+          <WeatherCard stats={activeWeekend.sunday} isSelected={routeDay === "sunday"} onClick={() => setRouteDay("sunday")} cityName={data.cityName} />
           <div className="bg-white rounded-xl p-4">
             <div className="flex flex-wrap gap-4 justify-between items-end mb-4">
                 <div>

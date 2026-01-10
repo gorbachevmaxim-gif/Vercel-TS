@@ -1,4 +1,3 @@
-
 async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise<T | null> {
       for (let i = 0; i < retries; i++) {
           try {
@@ -19,17 +18,17 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
   import { parseGpx, RouteData } from './gpxUtils';
   import { CityCoordinates, CityAnalysisResult, WeatherDayStats } from '../types';
 
-  const MOUNTAIN_CITIES: string[] = [];
+  export const MOUNTAIN_CITIES: string[] = ["Kemer"];
 
   function toLocalISODate(d: Date): string {
       const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
       return `${year}-${month}-${day}`;
   }
 
   export const getCardinal = (angle: number): string => {
-    const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+    const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
     const index = Math.round(((angle %= 360) < 0 ? angle + 360 : angle) / 45) % 8;
     return directions[index];
   };
@@ -75,8 +74,8 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
       const parts = groups.map(g => {
           const start = g[0];
           const end = g[g.length - 1];
-          if (start === end) return `${start.toString().padStart(2, '0')}:00`;
-          return `${start.toString().padStart(2, '0')}:00–${(end + 1).toString().padStart(2, '0')}:00`;
+          if (start === end) return `${start.toString().padStart(2, "0")}:00`;
+          return `${start.toString().padStart(2, "0")}:00–${(end + 1).toString().padStart(2, "0")}:00`;
       });
       return parts.join(", ");
   }
@@ -167,7 +166,7 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
           const routePromises = candidates.map(async (url) => {
               try {
                   const cacheBustedUrl = `${url}?t=${Date.now()}`;
-                  const res = await fetch(cacheBustedUrl, { method: 'GET' });
+                  const res = await fetch(cacheBustedUrl, { method: "GET" });
                   if (res.ok) {
                       const gpxText = await res.text();
                       return parseGpx(gpxText);
@@ -198,7 +197,7 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
           longitude: coords.lon.toString(),
           start_date: startStr,
           end_date: endStr,
-          hourly: "precipitation,precipitation_probability,temperature_2m,wind_speed_10m,wind_gusts_10m,apparent_temperature,wind_direction_10m,sunshine_duration",
+          hourly: "precipitation,precipitation_probability,temperature_2m,wind_speed_10m,wind_gusts_10m,apparent_temperature,wind_direction_10m,sunshine_duration,temperature_900hPa",
           timezone: "Europe/Moscow"
       });
 
@@ -241,6 +240,7 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
               const windSlice = hourly.wind_speed_10m.slice(actStart, actEnd) as number[];
               const windGustSlice = hourly.wind_gusts_10m.slice(actStart, actEnd) as number[];
               const windDirSlice = hourly.wind_direction_10m.slice(actStart, actEnd) as number[];
+              const temp900hPaSlice = hourly.temperature_900hPa.slice(actStart, actEnd) as number[];
 
               const pActiveSlice = hourly.precipitation.slice(actStart, actEnd) as number[];
               const activeRainSum = pActiveSlice.reduce((a: number, b: number) => a + (b || 0), 0);
@@ -256,6 +256,7 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
               const wMin = windSlice.length ? Math.min(...windSlice) : 0;
               const wMax = windSlice.length ? Math.max(...windSlice) : 0;
               const gMax = windGustSlice.length ? Math.max(...windGustSlice) : 0;
+              const temp900hPaAvg = temp900hPaSlice.length ? (temp900hPaSlice.reduce((a, b) => a + b, 0) / temp900hPaSlice.length) : 0;
 
               let windDirStr = "";
               let windDirFullStr = "";
@@ -286,14 +287,12 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
                         let startTemperature: number | undefined = undefined;
                         let endTemperature: number | undefined = undefined;
             
-                        // Check route availability defensively and get RouteData
                         if (isDry) {
                             if (FLIGHT_CITIES.includes(cityName)) {
                                 hasRoute = true;
-                                // For flight cities, assume a default ride of 3 hours (90km at 30km/h) for temperature calculation
                                 const estimatedRideHours = 3;
                                 const estimatedRideMinutes = 0;
-                                rideDuration = `${String(estimatedRideHours).padStart(2, '0')}:${String(estimatedRideMinutes).padStart(2, '0')}`;
+                                rideDuration = `${String(estimatedRideHours).padStart(2, "0")}:${String(estimatedRideMinutes).padStart(2, "0")}`;
             
                                 startTemperature = hourly.temperature_2m[sIdx + 10] !== undefined ? Math.round(hourly.temperature_2m[sIdx + 10]) : undefined;
                                 endTemperature = hourly.temperature_2m[sIdx + 10 + estimatedRideHours] !== undefined ? Math.round(hourly.temperature_2m[sIdx + 10 + estimatedRideHours]) : undefined;
@@ -301,16 +300,13 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
                                 const routeData = await checkRouteAvailability(cityName, windDeg);
                                 if (routeData) {
                                     hasRoute = true;
-                                    const estimatedRideHours = Math.floor(routeData.distanceKm / 30); // 30 km/h average speed
+                                    const estimatedRideHours = Math.floor(routeData.distanceKm / 30);
                                     const estimatedRideMinutes = Math.round((routeData.distanceKm / 30 - estimatedRideHours) * 60);
-                                    rideDuration = `${String(estimatedRideHours).padStart(2, '0')}:${String(estimatedRideMinutes).padStart(2, '0')}`;
+                                    rideDuration = `${String(estimatedRideHours).padStart(2, "0")}:${String(estimatedRideMinutes).padStart(2, "0")}`;
             
-                                    // Default ride start time is 10:00 AM local time (sIdx + 10)
                                     startTemperature = hourly.temperature_2m[sIdx + 10] !== undefined ? Math.round(hourly.temperature_2m[sIdx + 10]) : undefined;
-                                    // Ride end time based on dynamic duration
-                                    // Convert estimatedRideHours and estimatedRideMinutes to total hours for index calculation
                                     const totalRideHoursForIndex = estimatedRideHours + Math.floor(estimatedRideMinutes / 60);
-                                    const finalHourIndex = sIdx + 10 + totalRideHoursForIndex; // Start at 10 AM, add ride duration
+                                    const finalHourIndex = sIdx + 10 + totalRideHoursForIndex;
                                     endTemperature = hourly.temperature_2m[finalHourIndex] !== undefined ? Math.round(hourly.temperature_2m[finalHourIndex]) : undefined;
                                 }
                             }
@@ -334,11 +330,12 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
                   windDeg: windDeg,
                   sunSeconds: sunVal,
                   sunStr: formatSunTime(sunVal),
-                  accuracy: 'High',
+                  accuracy: "High",
                   clothingHints,
                   rideDuration: rideDuration,
                   startTemperature: startTemperature,
-                  endTemperature: endTemperature
+                  endTemperature: endTemperature,
+                  temperature900hPa: Math.round(temp900hPaAvg)
               };
 
               if (index === 0) result.weekend1.saturday = dayStats;
