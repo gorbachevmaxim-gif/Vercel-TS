@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { CityAnalysisResult, WeatherDayStats } from "../types";
 import { CITIES, CITY_FILENAMES, FLIGHT_CITIES } from "../constants";
@@ -62,6 +63,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick })
                     <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#404823" }}>Осадки</span>
                     <span className={`text-lg font-bold ${precipColor}`}>
                         {stats.isDry ? "0" : stats.precipSum.toFixed(1)} <span className="text-sm font-normal">мм</span>
+                        <span className="text-sm font-normal"> / {stats.precipitationProbability}%</span>
                     </span>
                     <span className="text-xs" style={{ color: "#404823" }}>{stats.isDry ? "Без осадков" : (stats.rainHours || "Весь день")}</span>
                 </div>

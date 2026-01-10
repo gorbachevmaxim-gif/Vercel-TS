@@ -1,3 +1,4 @@
+
 export interface CityCoordinates {
   lat: number;
   lon: number;
@@ -23,6 +24,7 @@ export interface WeatherDayStats {
   isMorningRideSuitable: boolean;
   hasRoute: boolean; // New field to indicate if a GPX file exists
   precipSum: number;
+  precipitationProbability: number;
   rainHours: string | null;
   tempRange: string;
   feelsRange: string;

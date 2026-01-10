@@ -1,3 +1,4 @@
+
 async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise<T | null> {
       for (let i = 0; i < retries; i++) {
           try {
@@ -197,7 +198,7 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
           longitude: coords.lon.toString(),
           start_date: startStr,
           end_date: endStr,
-          hourly: "precipitation,temperature_2m,wind_speed_10m,wind_gusts_10m,apparent_temperature,wind_direction_10m,sunshine_duration",
+          hourly: "precipitation,precipitation_probability,temperature_2m,wind_speed_10m,wind_gusts_10m,apparent_temperature,wind_direction_10m,sunshine_duration",
           timezone: "Europe/Moscow"
       });
 
@@ -226,6 +227,9 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
               const pSlice = hourly.precipitation.slice(sIdx + 4, eIdx) as number[];
               const totalRain = pSlice.reduce((a: number, b: number) => a + (b || 0), 0);
               const wetHours = pSlice.map((val: number, i: number) => (val > 0.1 ? i + 4 : -1)).filter((h: number) => h !== -1);
+              const precipitationProbabilitySlice = hourly.precipitation_probability.slice(sIdx + 4, eIdx) as number[];
+              const precipitationProbability = Math.max(...precipitationProbabilitySlice);
+
 
               const actStart = sIdx + 9;
               const actEnd = sIdx + 19;
@@ -319,6 +323,7 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
                   isMorningRideSuitable: isMorningRideSuitable,
                   hasRoute: hasRoute,
                   precipSum: totalRain,
+                  precipitationProbability: precipitationProbability,
                   rainHours: formatRainHours(wetHours),
                   tempRange: `${Math.round(tMin)}..${Math.round(tMax)}`,
                   feelsRange: `${Math.round(fMin)}..${Math.round(fMax)}`,
