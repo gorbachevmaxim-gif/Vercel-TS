@@ -88,11 +88,11 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick, c
                 </div>
             </div>
             {stats.clothingHints.length > 0 && (
-                <div className="border-t p-4" style={{ backgroundColor: "#f5f3f0" }}>
-                    <div className="text-xs uppercase font-semibold mb-2" style={{ color: "#8b8680" }}>Что надеть</div>
+                <div className="border-t p-4" style={{ backgroundColor: isSelected ? "#f5f3f0" : "#e0dbce" }}>
+                    <div className="text-xs uppercase font-semibold mb-2" style={{ color: isSelected ? "#8b8680" : "#404823" }}>Что надеть</div>
                     <div className="flex flex-wrap gap-2">
                         {stats.clothingHints.map((hint, idx) => (
-                            <span key={idx} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: "rgb(224, 219, 206)", color: "#404823" }}>{hint}</span>
+                            <span key={idx} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: isSelected ? "rgb(224, 219, 206)" : "#f5f3f0", color: "#404823" }}>{hint}</span>
                         ))}
                     </div>
                 </div>
