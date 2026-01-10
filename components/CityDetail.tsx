@@ -50,11 +50,15 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ stats, isSelected, onClick, c
                     <span className="text-xs uppercase font-semibold mb-1" style={{ color: "#404823" }}>Температура</span>
                     <span className="text-lg font-bold text-slate-900">{stats.tempRange}°</span>
                     <span className="text-xs" style={{ color: "#404823" }}>
-                        {isKemerNoRoute
-                            ? `Высота 1000 м: ${stats.temperature900hPa}°`
-                            : cityName === "Кемер"
-                            ? `Высота 1000 м: ${stats.startTemperature900hPa}°..${stats.endTemperature900hPa}°`
-                            : `Ощущ: ${stats.feelsRange}°`}
+                        {isMountainCity ? (
+                            <>
+                                {stats.temperature900hPa !== undefined && `1000 м: ${stats.temperature900hPa}°`}
+                                {stats.temperature900hPa !== undefined && stats.temperature850hPa !== undefined && <br />}
+                                {stats.temperature850hPa !== undefined && `1500 м: ${stats.temperature850hPa}°`}
+                            </>
+                        ) : (
+                            `Ощущ: ${stats.feelsRange}°`
+                        )}
                     </span>
                 </div>
                 <div className="p-3 flex flex-col items-center justify-center text-center">
@@ -136,8 +140,6 @@ const activeWeekend = activeTab === "w1" ? data.weekend1 : data.weekend2;
           setRouteDay("saturday");
       } else if (activeWeekend.sunday?.isDry) {
           setRouteDay("sunday");
-      } else {
-          setRouteDay("saturday");
       }
   }, [activeTab, activeWeekend, initialDay]);
 
@@ -182,7 +184,7 @@ const activeWeekend = activeTab === "w1" ? data.weekend1 : data.weekend2;
   useEffect(() => {
     if (!mapContainerRef.current || !cityCoords) return;
     if (!mapInstanceRef.current) {
-        const map = L.map(mapContainerRef.current, {
+        const map = L.map(mapContainerRef.current, { 
             scrollWheelZoom: false,
             dragging: !L.Browser.mobile,
             touchZoom: true,

@@ -197,7 +197,7 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
           longitude: coords.lon.toString(),
           start_date: startStr,
           end_date: endStr,
-          hourly: "precipitation,precipitation_probability,temperature_2m,wind_speed_10m,wind_gusts_10m,apparent_temperature,wind_direction_10m,sunshine_duration,temperature_900hPa",
+          hourly: "precipitation,precipitation_probability,temperature_2m,wind_speed_10m,wind_gusts_10m,apparent_temperature,wind_direction_10m,sunshine_duration,temperature_900hPa,temperature_850hPa",
           timezone: "Europe/Moscow"
       });
 
@@ -241,6 +241,7 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
               const windGustSlice = hourly.wind_gusts_10m.slice(actStart, actEnd) as number[];
               const windDirSlice = hourly.wind_direction_10m.slice(actStart, actEnd) as number[];
               const temp900hPaSlice = hourly.temperature_900hPa.slice(actStart, actEnd) as number[];
+              const temp850hPaSlice = hourly.temperature_850hPa.slice(actStart, actEnd) as number[];
 
               const pActiveSlice = hourly.precipitation.slice(actStart, actEnd) as number[];
               const activeRainSum = pActiveSlice.reduce((a: number, b: number) => a + (b || 0), 0);
@@ -257,6 +258,7 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
               const wMax = windSlice.length ? Math.max(...windSlice) : 0;
               const gMax = windGustSlice.length ? Math.max(...windGustSlice) : 0;
               const temp900hPaAvg = temp900hPaSlice.length ? (temp900hPaSlice.reduce((a, b) => a + b, 0) / temp900hPaSlice.length) : 0;
+              const temp850hPaAvg = temp850hPaSlice.length ? (temp850hPaSlice.reduce((a, b) => a + b, 0) / temp850hPaSlice.length) : 0;
 
               let windDirStr = "";
               let windDirFullStr = "";
@@ -288,6 +290,8 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
                         let endTemperature: number | undefined = undefined;
                         let startTemperature900hPa: number | undefined = undefined;
                         let endTemperature900hPa: number | undefined = undefined;
+                        let startTemperature850hPa: number | undefined = undefined;
+                        let endTemperature850hPa: number | undefined = undefined;
             
                         if (isDry) {
                             if (FLIGHT_CITIES.includes(cityName)) {
@@ -300,6 +304,8 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
                                 endTemperature = hourly.temperature_2m[sIdx + 10 + estimatedRideHours] !== undefined ? Math.round(hourly.temperature_2m[sIdx + 10 + estimatedRideHours]) : undefined;
                                 startTemperature900hPa = hourly.temperature_900hPa[sIdx + 10] !== undefined ? Math.round(hourly.temperature_900hPa[sIdx + 10]) : undefined;
                                 endTemperature900hPa = hourly.temperature_900hPa[sIdx + 10 + estimatedRideHours] !== undefined ? Math.round(hourly.temperature_900hPa[sIdx + 10 + estimatedRideHours]) : undefined;
+                                startTemperature850hPa = hourly.temperature_850hPa[sIdx + 10] !== undefined ? Math.round(hourly.temperature_850hPa[sIdx + 10]) : undefined;
+                                endTemperature850hPa = hourly.temperature_850hPa[sIdx + 10 + estimatedRideHours] !== undefined ? Math.round(hourly.temperature_850hPa[sIdx + 10 + estimatedRideHours]) : undefined;
                             } else {
                                 const routeData = await checkRouteAvailability(cityName, windDeg);
                                 if (routeData) {
@@ -314,6 +320,8 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
                                     endTemperature = hourly.temperature_2m[finalHourIndex] !== undefined ? Math.round(hourly.temperature_2m[finalHourIndex]) : undefined;
                                     startTemperature900hPa = hourly.temperature_900hPa[sIdx + 10] !== undefined ? Math.round(hourly.temperature_900hPa[sIdx + 10]) : undefined;
                                     endTemperature900hPa = hourly.temperature_900hPa[finalHourIndex] !== undefined ? Math.round(hourly.temperature_900hPa[finalHourIndex]) : undefined;
+                                    startTemperature850hPa = hourly.temperature_850hPa[sIdx + 10] !== undefined ? Math.round(hourly.temperature_850hPa[sIdx + 10]) : undefined;
+                                    endTemperature850hPa = hourly.temperature_850hPa[finalHourIndex] !== undefined ? Math.round(hourly.temperature_850hPa[finalHourIndex]) : undefined;
                                 }
                             }
                         }
@@ -343,7 +351,10 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
                   endTemperature: endTemperature,
                   temperature900hPa: Math.round(temp900hPaAvg),
                   startTemperature900hPa: startTemperature900hPa,
-                  endTemperature900hPa: endTemperature900hPa
+                  endTemperature900hPa: endTemperature900hPa,
+                  temperature850hPa: Math.round(temp850hPaAvg),
+                  startTemperature850hPa: startTemperature850hPa,
+                  endTemperature850hPa: endTemperature850hPa
               };
 
               if (index === 0) result.weekend1.saturday = dayStats;
