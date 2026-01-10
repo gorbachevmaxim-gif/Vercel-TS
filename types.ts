@@ -41,6 +41,8 @@ export interface WeatherDayStats {
   startTemperature?: number;
   endTemperature?: number;
   temperature900hPa?: number;
+  startTemperature900hPa?: number;
+  endTemperature900hPa?: number;
 }
 
 export interface CityAnalysisResult {

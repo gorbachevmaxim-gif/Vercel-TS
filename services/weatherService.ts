@@ -286,6 +286,8 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
                         let rideDuration: string | undefined = undefined;
                         let startTemperature: number | undefined = undefined;
                         let endTemperature: number | undefined = undefined;
+                        let startTemperature900hPa: number | undefined = undefined;
+                        let endTemperature900hPa: number | undefined = undefined;
             
                         if (isDry) {
                             if (FLIGHT_CITIES.includes(cityName)) {
@@ -296,6 +298,8 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
             
                                 startTemperature = hourly.temperature_2m[sIdx + 10] !== undefined ? Math.round(hourly.temperature_2m[sIdx + 10]) : undefined;
                                 endTemperature = hourly.temperature_2m[sIdx + 10 + estimatedRideHours] !== undefined ? Math.round(hourly.temperature_2m[sIdx + 10 + estimatedRideHours]) : undefined;
+                                startTemperature900hPa = hourly.temperature_900hPa[sIdx + 10] !== undefined ? Math.round(hourly.temperature_900hPa[sIdx + 10]) : undefined;
+                                endTemperature900hPa = hourly.temperature_900hPa[sIdx + 10 + estimatedRideHours] !== undefined ? Math.round(hourly.temperature_900hPa[sIdx + 10 + estimatedRideHours]) : undefined;
                             } else {
                                 const routeData = await checkRouteAvailability(cityName, windDeg);
                                 if (routeData) {
@@ -308,6 +312,8 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
                                     const totalRideHoursForIndex = estimatedRideHours + Math.floor(estimatedRideMinutes / 60);
                                     const finalHourIndex = sIdx + 10 + totalRideHoursForIndex;
                                     endTemperature = hourly.temperature_2m[finalHourIndex] !== undefined ? Math.round(hourly.temperature_2m[finalHourIndex]) : undefined;
+                                    startTemperature900hPa = hourly.temperature_900hPa[sIdx + 10] !== undefined ? Math.round(hourly.temperature_900hPa[sIdx + 10]) : undefined;
+                                    endTemperature900hPa = hourly.temperature_900hPa[finalHourIndex] !== undefined ? Math.round(hourly.temperature_900hPa[finalHourIndex]) : undefined;
                                 }
                             }
                         }
@@ -335,7 +341,9 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
                   rideDuration: rideDuration,
                   startTemperature: startTemperature,
                   endTemperature: endTemperature,
-                  temperature900hPa: Math.round(temp900hPaAvg)
+                  temperature900hPa: Math.round(temp900hPaAvg),
+                  startTemperature900hPa: startTemperature900hPa,
+                  endTemperature900hPa: endTemperature900hPa
               };
 
               if (index === 0) result.weekend1.saturday = dayStats;
