@@ -29,7 +29,7 @@ export interface WeatherDayStats {
   feelsRange: string;
   windRange: string;
   windGusts: number;
-  windDir: string;
+  windDirection: string;
   windDirFull: string;
   windDeg: number;
   sunSeconds: number;

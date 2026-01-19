@@ -1,28 +1,22 @@
-import * as React from 'react';
-import { useState, useEffect, useMemo } from 'react';
-import { CITIES } from './constants';
-import { CityAnalysisResult, LoadingState } from './types';
-import { analyzeCity, getWeekendDates } from './services/weatherService';
-import LoadingScreen from './components/LoadingScreen';
-import SummaryView from './components/SummaryView';
-import CityDetail from './components/CityDetail';
+import * as React from "react";
+import { useState, useEffect, useMemo } from "react";
+import { CITIES } from "./constants";
+import { CityAnalysisResult, LoadingState } from "./types";
+import { analyzeCity, getWeekendDates } from "./services/weatherService";
+import LoadingScreen from "./components/LoadingScreen";
+import NewSummaryView from "./components/NewSummaryView";
+import CityDetail from "./components/CityDetail";
 
 const App: React.FC = () => {
   const [data, setData] = useState<CityAnalysisResult[]>([]);
-  const [loading, setLoading] = useState<LoadingState>({ total: 0, current: 0, status: 'Starting...' });
+  const [loading, setLoading] = useState<LoadingState>({ total: 0, current: 0, status: "Starting..." });
   const [showLoading, setShowLoading] = useState(true);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [initialTab, setInitialTab] = useState<'w1' | 'w2'>('w1');
-  const [initialDay, setInitialDay] = useState<'saturday' | 'sunday'>('saturday'); // New state for initial day
-  
-  // Date Logic
+  const [initialTab, setInitialTab] = useState<"w1" | "w2">("w1");
+  const [initialDay, setInitialDay] = useState<"saturday" | "sunday">("saturday");
+
   const dates = useMemo(() => getWeekendDates(), []);
-  
-  // Format: "14 окт"
-  const formatDate = (d: Date) => d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
-  const w1Label = `${formatDate(dates[0])} - ${formatDate(dates[1])}`;
-  const w2Label = `${formatDate(dates[2])} - ${formatDate(dates[3])}`;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,13 +24,11 @@ const App: React.FC = () => {
       const results: CityAnalysisResult[] = [];
       const total = cityNames.length;
 
-      setLoading({ total, current: 0, status: 'Загрузка списка...' });
+      setLoading({ total, current: 0, status: "Загрузка списка..." });
 
-      // Reduced batch size to 3 to prevent API rate limiting
       const BATCH_SIZE = 3;
       
       for (let i = 0; i < total; i += BATCH_SIZE) {
-         // Add a small delay between batches
          if (i > 0) await new Promise(resolve => setTimeout(resolve, 300));
 
          const batch = cityNames.slice(i, i + BATCH_SIZE);
@@ -54,8 +46,7 @@ const App: React.FC = () => {
       }
 
       setData(results);
-      // Ensure we hit 100% state for the animation logic
-      setLoading(prev => ({ ...prev, current: total, status: 'Готово' }));
+      setLoading(prev => ({ ...prev, current: total, status: "Готово" }));
     };
 
     const fetchDataAndHandleErrors = async () => {
@@ -63,7 +54,7 @@ const App: React.FC = () => {
         await fetchData();
       } catch (err: any) {
         console.error("Error fetching data:", err);
-        setError(err.message || 'An unknown error occurred while fetching data.');
+        setError(err.message || "An unknown error occurred while fetching data.");
         setShowLoading(false);
       }
     };
@@ -75,19 +66,18 @@ const App: React.FC = () => {
       return data.find(c => c.cityName === selectedCity) || null;
   }, [data, selectedCity]);
 
-  const handleCitySelect = (city: string, tab: 'w1' | 'w2', day: 'saturday' | 'sunday') => { // Updated signature
+  const handleCitySelect = (city: string, tab: "w1" | "w2", day: "saturday" | "sunday") => {
       setInitialTab(tab);
       setSelectedCity(city);
-      setInitialDay(day); // Set initialDay state
+      setInitialDay(day);
   };
 
-    // Handle Main View
     if (showLoading) {
             return <LoadingScreen state={loading} onComplete={() => setShowLoading(false)} />;
     }
 
     return (
-        <div className="min-h-screen text-slate-900 pb-10 bg-[#edebe5]">
+        <div className="min-h-screen text-slate-900 pb-10 bg-[#F5F5F5]">
       
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mx-auto max-w-2xl mt-4" role="alert">
@@ -95,85 +85,25 @@ const App: React.FC = () => {
           <span className="block sm:inline">{error}</span>
         </div>
       )}
-      {/* Header */}
-      <div className="bg-white sticky top-0 z-10 px-4 py-3 header-shadow">
-        <h1 
-            onClick={() => setSelectedCity(null)}
-            className="text-lg font-bold cursor-pointer text-center text-[rgb(64,72,35)]"
-        >
-            ПОДБОР МЕСТА ДЛЯ РАЙДА
-        </h1>
-        <p className="text-xs text-center text-[#404823]">поиск идеальной погоды на выходные</p>
-      </div>
 
       <div className="max-w-2xl mx-auto p-4 space-y-6">
         
         {!selectedCity ? (
-            <>
-                {/* Summaries */}
-                <SummaryView 
-                    data={data} 
-                    title="Ближайшие сб-вс"
-                    dateLabel={w1Label} 
-                    onCityClick={(city, day) => handleCitySelect(city, 'w1', day)}
-                    overrideSundayClick={(city) => handleCitySelect(city, 'w2', 'sunday')}
-                />
-                <SummaryView 
-                    data={data} 
-                    title="Через неделю"
-                    dateLabel={w2Label} 
-                    isSecondWeekend={true} 
-                    onCityClick={(city, day) => handleCitySelect(city, 'w2', day)} // Updated call
-                />
-                
-                {/* City Picker */}
-                <div className="rounded-2xl bg-white p-5">
-                   <h3 className="sticky-header text-lg font-bold text-slate-800 border-b border-[#edebe5] pb-2">Детальный прогноз</h3>
-                   <div className="pt-4">
-                       {data.length > 0 ? (
-                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                               {data.map(city => (
-                                   <button 
-                                     key={city.cityName}
-                                     onClick={() => handleCitySelect(city.cityName, 'w1', 'saturday')} // Updated call, default to saturday
-                                     className="px-3 py-2 bg-white border rounded-lg text-sm font-medium transition-colors text-left text-black border-[#d1cdc4] hover:border-[#4f6814] hover:bg-[#4a5427] hover:text-white"
-                                   >
-                                       {city.cityName}
-                                   </button>
-                               ))}
-                           </div>
-                       ) : (
-                           <div className="p-4 text-center italic bg-white rounded-lg border border-slate-200 text-[#404823]">
-                                   Не удалось загрузить данные городов. Попробуйте обновить страницу.
-                           </div>
-                       )}
-                   </div>
-                </div>
-            </>
+            <NewSummaryView 
+                data={data} 
+                onCityClick={(city, day) => handleCitySelect(city, "w1", day)}
+                onCityClickW2={(city, day) => handleCitySelect(city, "w2", day)}
+            />
         ) : (
             selectedData && (
                 <CityDetail 
                     data={selectedData} 
                     initialTab={initialTab}
-                    initialDay={initialDay} // Pass initialDay to CityDetail
+                    initialDay={initialDay}
                     onClose={() => setSelectedCity(null)} 
                 />
             )
         )}
-      </div>
-      {/* 
-        @software{Zippenfenfenig_Open-Meteo,
-          author = {Zippenfenig, Patrick},
-          doi = {H10.5281/zenodo.7970649},
-          licence = {CC-BY-4.0},
-          title = {Open-Meteo.com Weather API},
-          year = {2023},
-          copyright = {Creative Commons Attribution 4.0 International},
-          url = {https://open-meteo.com/}
-        }
-      */}
-      <div className="text-center mt-4">
-         <a href="https://open-meteo.com/" className="text-xs open-meteo-link-hover" style={{ color: '#b5b0a6' }}>Weather data by Open-Meteo.com</a>
       </div>
     </div>
   );

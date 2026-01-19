@@ -201,11 +201,13 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
 
   // Logic: "From" means EndCity -> Moscow
   const fromUrl = getUrl(endConfig, moscowConfig);
+  const toStationName = `${moscowConfig.displayName} → ${startConfig.displayName}`;
+  const fromStationName = `${endConfig.displayName} → ${moscowConfig.displayName}`;
 
   if (!showTo && !showFrom) return null;
 
   return (
-    <div className="bg-white rounded-xl p-5 space-y-4">
+    <div className="bg-white rounded-full p-5 space-y-4">
       <div className="space-y-3">
         {/* Buttons */}
         <div className={`grid gap-3 ${showTo && showFrom ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
@@ -214,11 +216,11 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
                     href={toUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between px-4 py-3 bg-white border border-2 border-[#edebe5] rounded-lg hover-border-3px hover:border-[#4f6814] transition-all group"
+                    className="flex items-center justify-between px-4 py-3 bg-white border border-2 border-[#edebe5] rounded-full hover-border-3px hover:border-[#4f6814] transition-all group"
                 >
                     <div className="flex flex-col pr-6">
                         <span className="text-xs font-medium uppercase mb-1" style={{ color: '#404823' }}>Туда</span>
-                        <span className="font-bold text-slate-800 group-hover:text-[#4f6814] transition-colors">Москва → {startConfig.displayName}</span>
+                        <span className="font-nunito text-[15px]">{toStationName}</span>
                     </div>
                     <YandexIcon idSuffix="to" />
                 </a>
@@ -229,11 +231,11 @@ const TransportBlock: React.FC<TransportBlockProps> = ({
                     href={fromUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between px-4 py-3 bg-white border border-2 border-[#edebe5] rounded-lg hover-border-3px hover:border-[#4f6814] transition-all group"
+                    className="flex items-center justify-between px-4 py-3 bg-white border border-2 border-[#edebe5] rounded-full hover-border-3px hover:border-[#4f6814] transition-all group"
                 >
                     <div className="flex flex-col pr-6">
                         <span className="text-xs font-medium uppercase mb-1" style={{ color: '#404823' }}>Обратно</span>
-                        <span className="font-bold text-slate-800 group-hover:text-[#4f6814] transition-colors">{endConfig.displayName} → Москва</span>
+                        <span className="font-nunito text-[15px]">{fromStationName}</span>
                     </div>
                     <YandexIcon idSuffix="from" />
                 </a>

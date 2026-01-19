@@ -24,7 +24,7 @@ const PlacesBlock: React.FC<PlacesBlockProps> = ({ startCity, endCity }) => {
           href={place.url ? place.url : `https://yandex.ru/maps/?text=${encodeURIComponent(place.name + ' ' + (place.address || ''))}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex flex-col p-3 bg-white border border-amber-200 rounded-lg shadow-sm hover:shadow-md transition-all group bg-amber-50/30"
+          className="flex flex-col p-3 bg-white border border-amber-200 rounded-full shadow-sm hover:shadow-md transition-all group bg-amber-50/30"
       >
           <div className="flex justify-between items-start mb-1">
               <span className="font-bold text-sm text-amber-900 group-hover:text-amber-700 transition-colors line-clamp-1">
@@ -40,13 +40,18 @@ const PlacesBlock: React.FC<PlacesBlockProps> = ({ startCity, endCity }) => {
   );
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
-      <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+    <div className="bg-white rounded-full border border-slate-200 shadow-sm p-5 space-y-4">
+      <a 
+        href={`https://yandex.ru/maps/?text=Ресто%20${encodeURIComponent(endCity)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center justify-between border-b border-slate-100 pb-3"
+      >
          <div className="flex items-center gap-2">
             <span className="text-xl">🍔</span>
             <h3 className="font-bold text-slate-800">Где поесть</h3>
          </div>
-      </div>
+      </a>
 
       <div className="space-y-6">
         {hasPlaces && (
@@ -84,7 +89,7 @@ const PlacesBlock: React.FC<PlacesBlockProps> = ({ startCity, endCity }) => {
                 href="https://yandex.ru/maps?bookmarks%5BpublicId%5D=OfCmg0o9&utm_source=share&utm_campaign=bookmarks"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center w-full p-4 bg-yellow-400 text-slate-900 rounded-lg font-bold hover:bg-yellow-300 transition-colors shadow-sm gap-2"
+                className="flex items-center justify-center w-full p-4 bg-yellow-400 text-slate-900 rounded-full font-bold hover:bg-yellow-300 transition-colors shadow-sm gap-2"
              >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>

@@ -50,11 +50,11 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
   }
 
   function formatSunTime(seconds: number): string {
-      if (seconds <= 0) return "0 мин";
-      const hours = Math.floor(seconds / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-      if (hours > 0) return `${hours} ч ${minutes} мин`;
-      return `${minutes} мин`;
+      if (seconds <= 0) return "0 ч 0 мин";
+      let cappedSeconds = Math.min(seconds, 9 * 3600);
+      const hours = Math.floor(cappedSeconds / 3600);
+      const minutes = Math.floor((cappedSeconds % 3600) / 60);
+      return `${hours} ч ${minutes} мин`;
   }
 
   function formatRainHours(hours: number[]): string | null {
@@ -231,7 +231,7 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
 
 
               const actStart = sIdx + 9;
-              const actEnd = sIdx + 19;
+              const actEnd = sIdx + 18;
               const sunSlice = hourly.sunshine_duration.slice(actStart, actEnd) as number[];
               const sunVal = sunSlice.reduce((a: number, b: number) => a + (b || 0), 0);
 
@@ -339,7 +339,7 @@ async function retry<T>(fn: () => Promise<T>, retries = 3, delay = 100): Promise
                   feelsRange: `${Math.round(fMin)}..${Math.round(fMax)}`,
                   windRange: `${Math.round(wMin)}..${Math.round(wMax)}`,
                   windGusts: Math.round(gMax),
-                  windDir: windDirStr,
+                  windDirection: windDirStr,
                   windDirFull: windDirFullStr,
                   windDeg: windDeg,
                   sunSeconds: sunVal,

@@ -1,4 +1,4 @@
-/** @type {import('tailwindcss').Config} */
+/** @type {import("tailwindcss").Config} */
 export default {
   content: [
     "./index.html",
@@ -7,9 +7,32 @@ export default {
     "./services/**/*.{js,ts,jsx,tsx}"
   ],
   theme: {
+    colors: {
+      "black": "#1E1E1E",
+      "white": "#FFFFFF",
+      "transparent": "transparent",
+      "custom-gray": "#777777",
+    },
     extend: {
+      fontFamily: {
+        unbounded: ["Unbounded", "sans-serif"],
+        nunito: ["Nunito", "sans-serif"],
+        "sf-pro-semibold": ["Inter", "sans-serif"],
+      },
+      colors: {
+        "pill-hover": "#E7E7E7",
+        "neutral-400": "#777777",
+      },
+      fontSize: {
+        "15": "15px",
+        "11": "11px",
+        "xs": "11px",
+      },
+      letterSpacing: {
+        tighter: "-0.01em",
+      },
       borderColor: {
-        DEFAULT: "#edebe5"
+        DEFAULT: "#F5F5F5"
       }
     },
   },
