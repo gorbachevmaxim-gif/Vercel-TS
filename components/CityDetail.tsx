@@ -391,7 +391,9 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = "w1", initia
                     <span className="flex items-center">Обратно<RoutesIcon /></span>
                 </a>
                 <a
-                    href="#"
+                    href={`https://yandex.ru/maps/?ll=${cityCoords.lon},${cityCoords.lat}&z=12`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className={`flex items-center w-full text-[26px] font-unbounded font-bold text-left px-4 py-px ${
                     openSection !== null ? 'text-[#B2B2B2] hover:text-[#777777]' : 'text-[#1E1E1E]'
                     } hover:text-[#777777]`}
