@@ -12,8 +12,8 @@ const ArrowDown: React.FC<ArrowDownProps> = ({ isOpen, ...props }) => (
             transform: isOpen ? 'rotate(-180deg)' : 'rotate(0deg)',
             transition: 'transform 0.3s ease-in-out',
         }} 
-        width="24" 
-        height="24" 
+        width="25" 
+        height="25" 
         viewBox="0 0 30 30" 
         fill="none" 
         xmlns="http://www.w3.org/2000/svg" 

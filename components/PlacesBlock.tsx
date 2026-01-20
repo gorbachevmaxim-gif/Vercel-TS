@@ -94,7 +94,7 @@ const PlacesBlock: React.FC<PlacesBlockProps> = ({ startCity, endCity }) => {
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
                 </svg>
-                <span>Коллекция Gastrodinamica на Яндекс.Картах</span>
+                <span>Вкусные места</span>
              </a>
              <p className="text-xs text-slate-500 text-center mt-2">
                  Полный список проверенных мест доступен в нашей подборке

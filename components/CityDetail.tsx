@@ -230,7 +230,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = "w1", initia
 
     const renderWeatherBlock = (title: string, value: string, unit: string, subValue: string) => (
         <div className="flex flex-col flex-1">
-            <p className="font-sf-pro-semibold text-xs text-neutral-400 tracking-widest">{title}</p>
+            <p className="font-sans text-xs text-neutral-400">{title}</p>
             {title === "ОСАДКИ" ? (
                 <p className="text-base font-unbounded font-bold text-black">
                     {value}
@@ -247,13 +247,13 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = "w1", initia
         <div className="mx-auto text-black" style={{ backgroundColor: "#F5F5F5" }}>
             <div className="flex">
                 <button
-                    className={`flex-1 text-center py-2 font-nunito text-lg font-bold tracking-tighter ${activeTab === "w1" ? "text-black border-b-2 border-black" : "text-[#B2B2B2] border-b-2 border-[#B2B2B2]"}`}
+                    className={`flex-1 text-center py-2 font-sans text-lg font-semibold tracking-tighter ${activeTab === "w1" ? "text-black border-b-2 border-black" : "text-[#B2B2B2] border-b-2 border-[#B2B2B2]"}`}
                     onClick={() => setActiveTab("w1")}
                 >
                     Эти выходные
                 </button>
                 <button
-                    className={`flex-1 text-center py-2 font-nunito text-lg font-bold tracking-tighter ${activeTab === "w2" ? "text-black border-b-2 border-black" : "text-[#B2B2B2] border-b-2 border-[#B2B2B2]"}`}
+                    className={`flex-1 text-center py-2 font-sans text-lg font-semibold tracking-tighter ${activeTab === "w2" ? "text-black border-b-2 border-black" : "text-[#B2B2B2] border-b-2 border-[#B2B2B2]"}`}
                     onClick={() => setActiveTab("w2")}
                 >
                     Через неделю
@@ -299,11 +299,11 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = "w1", initia
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {renderWeatherBlock("ТЕМПЕРАТУРА", activeStats.tempRange.split("..")[0] + "°", `..${activeStats.tempRange.split("..")[1]}°`, `Ощущ: ${activeStats.feelsRange.split("..")[0]}°..${activeStats.feelsRange.split("..")[1]}°`)}
                         <div className="flex flex-col flex-1">
-                            <p className="font-sf-pro-semibold text-xs text-neutral-400 tracking-widest">ВЕТЕР</p>
+                            <p className="font-sans text-xs text-neutral-400">ВЕТЕР</p>
                             {renderWeatherValue(activeStats.windRange, " км/ч")}
                             <p className="text-xs text-neutral-400 flex items-center">
                                 {activeStats.windDirection}
-                                <ArrowUp style={{ transform: `rotate(${activeStats.windDeg + 180}deg)`, marginLeft: '4px', marginRight: '4px' }} />
+                                <ArrowUp width="14" height="14" style={{ transform: `rotate(${activeStats.windDeg + 180}deg)`, marginLeft: '4px', marginRight: '4px' }} />
                                 Порывы {activeStats.windGusts}
                             </p>
                         </div>
@@ -312,29 +312,29 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = "w1", initia
                     </div>
                 </div>
             )}
-            <div className="p-4 mt-4 border-t border-[#D9D9D9]">
+            <div className="p-4 mt-0 border-t border-[#D9D9D9]">
                 <h2 className="font-unbounded font-bold text-base">
                     Маршрут на {activeStats?.dateObj.toLocaleDateString("ru-RU", { weekday: "short" })}, {activeStats?.dateObj.toLocaleDateString("ru-RU", { day: "numeric", month: "long" })}
                 </h2>
                 <p className="text-neutral-400">{routeStartCity} – {routeEndCity}</p>
             </div>
             {currentRouteData && (
-                <div className="grid grid-cols-4 gap-4 px-4 pb-4 border-b border-neutral-200">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4 pb-4 border-b border-neutral-200">
                     <div className="flex flex-col">
-                        <p className="font-sf-pro-semibold text-xs text-neutral-400 tracking-widest">ДИСТАНЦИЯ</p>
+                        <p className="font-sans text-xs text-neutral-400">ДИСТАНЦИЯ</p>
                         {renderWeatherValue(currentRouteData.distanceKm.toFixed(0), " км")}
                     </div>
                     <div className="flex flex-col">
-                        <p className="font-sf-pro-semibold text-xs text-neutral-400 tracking-widest">НАБОР</p>
+                        <p className="font-sans text-xs text-neutral-400">НАБОР</p>
                         {renderWeatherValue(Math.round(currentRouteData.elevationM).toString(), " м")}
                     </div>
                     <div className="flex flex-col">
-                        <p className="font-sf-pro-semibold text-xs text-neutral-400 tracking-widest">ТЕМП</p>
+                        <p className="font-sans text-xs text-neutral-400">ТЕМП</p>
                         {renderWeatherValue("30", " км/ч")}
                     </div>
                     {activeStats?.rideDuration && (
                         <div className="flex flex-col">
-                            <p className="font-sf-pro-semibold text-xs text-neutral-400 tracking-widest">В СЕДЛЕ</p>
+                            <p className="font-sans text-xs text-neutral-400">В СЕДЛЕ</p>
                             <p className="text-base font-unbounded font-bold text-[#1E1E1E]">
                                 {activeStats.rideDuration}
                             </p>
@@ -351,7 +351,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = "w1", initia
                 </div>
             </div>
 
-            <div className="flex p-4 space-x-2">
+            <div className="flex flex-col sm:flex-row p-4 space-y-2 sm:space-y-0 sm:space-x-2">
                 <button
                     onClick={handleDownloadGpx}
                     className="flex-1 py-3 px-4 bg-white text-black rounded-full font-bold flex items-center justify-center space-x-2 hover:bg-[#E1E1E2]"
@@ -376,7 +376,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = "w1", initia
             <div className="mt-6 space-y-2 p-4">
                 <a
                     href="#"
-                    className={`flex items-center w-full text-3xl font-unbounded font-bold text-left px-4 py-px ${
+                    className={`flex items-center w-full text-[26px] font-unbounded font-bold text-left px-4 py-px ${
                     openSection !== null ? 'text-[#B2B2B2] hover:text-[#777777]' : 'text-[#1E1E1E]'
                     } hover:text-[#777777]`}
                 >
@@ -384,7 +384,7 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = "w1", initia
                 </a>
                 <a
                     href="#"
-                    className={`flex items-center w-full text-3xl font-unbounded font-bold text-left px-4 py-px ${
+                    className={`flex items-center w-full text-[26px] font-unbounded font-bold text-left px-4 py-px ${
                     openSection !== null ? 'text-[#B2B2B2] hover:text-[#777777]' : 'text-[#1E1E1E]'
                     } hover:text-[#777777]`}
                 >
@@ -392,14 +392,14 @@ const CityDetail: React.FC<CityDetailProps> = ({ data, initialTab = "w1", initia
                 </a>
                 <a
                     href="#"
-                    className={`flex items-center w-full text-3xl font-unbounded font-bold text-left px-4 py-px ${
+                    className={`flex items-center w-full text-[26px] font-unbounded font-bold text-left px-4 py-px ${
                     openSection !== null ? 'text-[#B2B2B2] hover:text-[#777777]' : 'text-[#1E1E1E]'
                     } hover:text-[#777777]`}
                 >
                     <span className="flex items-center">Вкусные места<RoutesIcon /></span>
                 </a>
                 <button
-                    className={`w-full text-3xl font-unbounded font-bold text-left px-4 py-px ${
+                    className={`w-full text-[26px] font-unbounded font-bold text-left px-4 py-px ${
                     openSection === "одежда"
                         ? "text-[#1E1E1E] hover:text-[#777777]"
                         : openSection === null

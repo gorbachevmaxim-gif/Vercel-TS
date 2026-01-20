@@ -93,7 +93,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ state, onComplete }) => {
             </span>
             
             {/* Status Text */}
-            <p className="text-xs font-medium h-4" style={{ color: '#404823' }}>
+            <p className="text-xs font-medium h-4" style={{ color: '#777777' }}>
                 {state.status}
             </p>
         </div>

@@ -35,13 +35,13 @@ const NewSummaryView: React.FC<NewSummaryViewProps> = ({ data, onCityClick, onCi
     <div className="font-unbounded">
       <div className="flex mt-16">
         <button
-          className={`flex-1 text-center py-2 font-nunito text-lg font-bold tracking-tighter ${activeTab === "w1" ? "text-black border-b-2 border-black" : "text-[#B2B2B2] border-b-2 border-[#B2B2B2]"}`}
+          className={`flex-1 text-center py-2 font-nunito text-lg font-semibold tracking-tighter ${activeTab === "w1" ? "text-black border-b-2 border-black" : "text-[#B2B2B2] border-b-2 border-[#B2B2B2]"}`}
           onClick={() => setActiveTab("w1")}
         >
           Эти выходные
         </button>
         <button
-          className={`flex-1 text-center py-2 font-nunito text-lg font-bold tracking-tighter ${activeTab === "w2" ? "text-black border-b-2 border-black" : "text-[#B2B2B2] border-b-2 border-[#B2B2B2]"}`}
+          className={`flex-1 text-center py-2 font-nunito text-lg font-semibold tracking-tighter ${activeTab === "w2" ? "text-black border-b-2 border-black" : "text-[#B2B2B2] border-b-2 border-[#B2B2B2]"}`}
           onClick={() => setActiveTab("w2")}
         >
           Через неделю

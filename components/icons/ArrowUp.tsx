@@ -2,8 +2,8 @@ import * as React from "react";
 
 const ArrowUp: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     <svg
-        width="24"
-        height="24"
+        width="27"
+        height="27"
         viewBox="0 0 30 30"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"

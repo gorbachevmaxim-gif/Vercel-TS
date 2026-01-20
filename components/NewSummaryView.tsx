@@ -35,13 +35,13 @@ const NewSummaryView: React.FC<NewSummaryViewProps> = ({ data, onCityClick, onCi
     <div className="font-unbounded">
       <div className="flex">
         <button
-          className={`flex-1 text-center py-2 font-nunito text-lg font-bold tracking-tighter ${activeTab === "w1" ? "text-black border-b-2 border-black" : "text-[#B2B2B2] border-b-2 border-[#B2B2B2]"}`}
+          className={`flex-1 text-center py-2 font-sans text-lg font-semibold tracking-tighter ${activeTab === "w1" ? "text-black border-b-2 border-black" : "text-[#B2B2B2] border-b-2 border-[#B2B2B2]"}`}
           onClick={() => setActiveTab("w1")}
         >
           Эти выходные
         </button>
         <button
-          className={`flex-1 text-center py-2 font-nunito text-lg font-bold tracking-tighter ${activeTab === "w2" ? "text-black border-b-2 border-black" : "text-[#B2B2B2] border-b-2 border-[#B2B2B2]"}`}
+          className={`flex-1 text-center py-2 font-sans text-lg font-semibold tracking-tighter ${activeTab === "w2" ? "text-black border-b-2 border-black" : "text-[#B2B2B2] border-b-2 border-[#B2B2B2]"}`}
           onClick={() => setActiveTab("w2")}
         >
           Через неделю
@@ -66,7 +66,7 @@ const NewSummaryView: React.FC<NewSummaryViewProps> = ({ data, onCityClick, onCi
               {sunnyCities.saturday.map((city: CityAnalysisResult) => (
                 <button
                   key={city.cityName}
-                  className="bg-white text-black font-nunito text-15 tracking-tighter rounded-full px-4 py-2 hover:bg-pill-hover"
+                  className="bg-white text-black font-sans text-15 tracking-tighter rounded-full px-4 py-2 hover:bg-pill-hover"
                   onClick={() => handleCityClick(city.cityName, "saturday")}
                 >
                   {city.cityName}
@@ -93,7 +93,7 @@ const NewSummaryView: React.FC<NewSummaryViewProps> = ({ data, onCityClick, onCi
               {sunnyCities.sunday.map((city: CityAnalysisResult) => (
                 <button
                   key={city.cityName}
-                  className="bg-white text-black font-nunito text-15 tracking-tighter rounded-full px-4 py-2 hover:bg-pill-hover"
+                  className="bg-white text-black font-sans text-15 tracking-tighter rounded-full px-4 py-2 hover:bg-pill-hover"
                   onClick={() => handleCityClick(city.cityName, "sunday")}
                 >
                   {city.cityName}
@@ -119,11 +119,11 @@ const NewSummaryView: React.FC<NewSummaryViewProps> = ({ data, onCityClick, onCi
             <div className="mt-4 space-y-4">
               <div>
                 <div className="flex flex-wrap items-center gap-0">
-                  <span className="font-nunito font-normal text-15 bg-[#1E1E1E] text-[#F3F3F3] rounded-full px-4 py-2">СБ</span>
+                  <span className="font-sans font-normal text-15 bg-[#1E1E1E] text-[#F3F3F3] rounded-full px-4 py-2">СБ</span>
                   {sunnyCities.saturday.map((city: CityAnalysisResult) => (
                     <button
                       key={city.cityName}
-                      className="bg-white text-black font-nunito text-15 tracking-tighter rounded-full px-4 py-2 hover:bg-pill-hover"
+                      className="bg-white text-black font-sans text-15 tracking-tighter rounded-full px-4 py-2 hover:bg-pill-hover"
                       onClick={() => handleCityClick(city.cityName, "saturday")}
                     >
                       {city.cityName}
@@ -133,11 +133,11 @@ const NewSummaryView: React.FC<NewSummaryViewProps> = ({ data, onCityClick, onCi
               </div>
               <div>
                 <div className="flex flex-wrap items-center gap-0">
-                  <span className="font-nunito font-normal text-15 bg-[#1E1E1E] text-[#F3F3F3] rounded-full px-4 py-2">ВС</span>
+                  <span className="font-sans font-normal text-15 bg-[#1E1E1E] text-[#F3F3F3] rounded-full px-4 py-2">ВС</span>
                   {sunnyCities.sunday.map((city: CityAnalysisResult) => (
                     <button
                       key={city.cityName}
-                      className="bg-white text-black font-nunito text-15 tracking-tighter rounded-full px-4 py-2 hover:bg-pill-hover"
+                      className="bg-white text-black font-sans text-15 tracking-tighter rounded-full px-4 py-2 hover:bg-pill-hover"
                       onClick={() => handleCityClick(city.cityName, "sunday")}
                     >
                       {city.cityName}
@@ -166,7 +166,7 @@ const NewSummaryView: React.FC<NewSummaryViewProps> = ({ data, onCityClick, onCi
               {allCities.map((city: string) => (
                 <button
                   key={city}
-                  className="bg-white text-black font-nunito text-15 tracking-tighter rounded-full px-4 py-2 hover:bg-pill-hover"
+                  className="bg-white text-black font-sans text-15 tracking-tighter rounded-full px-4 py-2 hover:bg-pill-hover"
                   onClick={() => handleCityClick(city, "saturday")}
                 >
                   {city}

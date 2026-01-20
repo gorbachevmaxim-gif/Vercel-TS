@@ -16,8 +16,6 @@ export default {
     extend: {
       fontFamily: {
         unbounded: ["Unbounded", "sans-serif"],
-        nunito: ["Nunito", "sans-serif"],
-        "sf-pro-semibold": ["Inter", "sans-serif"],
       },
       colors: {
         "pill-hover": "#E7E7E7",
